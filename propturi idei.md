@@ -1,3 +1,5 @@
 # propturi idei
 
-SNGN ROMGAZ S.A. notifică ANRMPSG trecerea în exploatare definitivă a sondei 202 Cristur Nord, în conformitate cu art. 3.16 din Ordinul nr. 1/2006, și transmite documentația aferentă, întocmită pe baza datelor disponibile la această dată. Sonda va fi inclusă în actualizarea studiului tehnico-economic de fezabilitate a zăcământului comercial din care face parte, al cărui termen de elaborare va fi stabilit în cadrul ședinței PAEP.
+La punctul 6 si 7 din Raport de producție zilnic — export - SITUATIA REACTIVĂRII SONDELOR daa avem sonde (T) si (C) la acaesi sonde elimina (T) si (C) si consideri o singira sonda dor la pucntele 6 si 7 nu sila resul cum este 1 si 2 unde pastreizi (T) si (C) si le numeri separta
+"Probe executate in anul 2026 = " din Raport de producție zilnic — export - SITUAȚIE RECAPITULATIVĂ sa poat fi deasemnea edita din "Sonde prestabilite"
+in Raport de producție zilnic, SITUATIA REACTIVĂRII SONDELOR dar si SITUAȚIE RECAPITULATIVĂ au domensiuni si fonturi difeerite da sa fie aceasi font si simensiune.
