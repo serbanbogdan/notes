@@ -22,4 +22,5 @@ Cum calculezi:
     - SP_min_dif vreau sa fie un log cu o valoare unica pe toat lungimea cu valoare vazim optinuela din  (SP_max din care scazi SP_min_temp)
     - si SP_min sa fie SP_max din scare scazi SP_min_dif
 
-  O date ce ai SP_min si SP_max ai avelopa, si considero procetula pt intervalul respectiv SP_min ca 0 iar SP_max ca 100 (ce este su SP_min sa treaca 0 si paote sa aiba calaore negativa dar similar si ce trece de SP_max sa poate tre ce de 100)
+  O date ce ai SP_min si SP_max ai avelopa, si considero procetula pt intervalul respectiv SP_min ca 0 iar SP_max ca 100 (ce este su SP_min sa treaca 0 si paote sa aiba calaore negativa dar similar si ce trece de SP_max sa poate tre ce de 100) rezultatul este logul SP in gaura libera normatlizat
+  inaitne sa cosntrueest fa un artefac cu apsii sa vad ca am intelex ce am cerut pas cu pas si dupa tre cem mai departe 
