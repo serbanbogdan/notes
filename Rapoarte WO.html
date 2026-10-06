@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rapoarte WO — Serviciul Geologic</title>
+<style>
+/* ===== paletă ROMGAZ ===== */
+:root{
+  --blue:#203d88; --green:#00bc70; --cyan:#54c8e8; --orange:#ee7623; --grey:#808080;
+  --ink:#1b2436; --ink-2:#5a6478; --ink-3:#8a93a5;
+  --bg:#eef1f6; --surface:#ffffff; --rule:#d7dde9; --rule-soft:#e8ecf3;
+  --focus:#54c8e8;
+  --c-RK:#203d88; --c-PP:#00bc70; --c-TF:#ee7623; --c-ALT:#808080;
+  --c-RE:#6a3d9a; --c-IN:#b07d00; --c-EMZ:#1a7f9c; --c-FI:#a3294f; --c-NaN:#9aa0a6;
+  --pad:14px; --radius:3px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font:14px/1.45 "Trebuchet MS","Segoe UI",Tahoma,Verdana,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus); outline-offset:1px}
+
+/* ===== schelet ===== */
+.app{display:flex; flex-direction:column; height:100vh; height:100dvh}
+.bar{
+  display:flex; align-items:center; gap:16px; flex:0 0 auto;
+  padding:0 16px; height:54px; background:var(--blue); color:#fff; position:relative; z-index:40;
+}
+.brand{display:flex; align-items:baseline; gap:9px; white-space:nowrap}
+.brand b{font-size:19px; letter-spacing:.12em; font-weight:700}
+.brand span{font-size:12px; color:#b9c6e8}
+.finder{position:relative; flex:1 1 auto; max-width:760px; min-width:230px}
+.finder input{
+  width:100%; height:34px; padding:0 34px 0 11px; border:1px solid #4a63a5;
+  background:#17306e; color:#fff; border-radius:var(--radius);
+}
+.finder input::placeholder{color:#8fa1cf}
+.finder input:focus{background:#fff; color:var(--ink); border-color:var(--cyan)}
+.finder input:focus::placeholder{color:var(--ink-3)}
+.finder .clear{
+  position:absolute; right:4px; top:4px; width:26px; height:26px; border:0; border-radius:var(--radius);
+  background:transparent; color:#8fa1cf; font-size:17px; line-height:1; display:none;
+}
+.finder input:focus + .clear{color:var(--ink-2)}
+.finder.has .clear{display:block}
+.modes{display:flex; flex:0 0 auto; gap:2px}
+.mode{
+  border:0; background:transparent; color:#c6d2ee; height:32px; padding:0 12px;
+  border-radius:var(--radius); font-size:13.5px;
+}
+.mode:hover:not([disabled]){background:#2b4a98; color:#fff}
+.mode[aria-pressed="true"]{background:#fff; color:var(--blue); font-weight:600}
+.mode[disabled]{opacity:.45; cursor:default}
+
+/* ===== calendar ===== */
+.cal{padding:12px 14px 18px}
+.cal h2{margin:0 0 10px; padding:0; font-size:16.5px}
+.cal .nav{display:flex; align-items:center; gap:5px; margin:0 0 8px}
+.cal .nav select{height:28px; border:1px solid var(--rule); border-radius:var(--radius); background:var(--surface); padding:0 4px; font-size:13px}
+.cal .nav .mo{flex:1 1 auto; min-width:0}
+.cal .arrow{width:28px; height:28px; border:1px solid var(--rule); border-radius:var(--radius); background:var(--surface); font-size:15px; line-height:1; color:var(--ink-2)}
+.cal .arrow:hover{border-color:var(--blue); color:var(--blue)}
+.cal table{width:100%; border-collapse:separate; border-spacing:3px; table-layout:fixed}
+.cal th{font-size:11px; font-weight:600; color:var(--ink-3); padding:2px 0; text-align:center}
+.cal td{padding:0}
+.cal .d{
+  width:100%; aspect-ratio:1/1; min-height:30px; border:1px solid transparent; border-radius:var(--radius);
+  background:#f4f6fa; color:var(--ink-3); font-size:12.5px; padding:0; position:relative; line-height:1.1;
+}
+.cal .d b{display:block; font-weight:600}
+.cal .d small{display:block; font-size:10px; opacity:.85}
+.cal .d.l1{background:#dfe7f6; color:var(--ink)}
+.cal .d.l2{background:#a9bde6; color:var(--ink)}
+.cal .d.l3{background:var(--blue); color:#fff}
+.cal .d.today{border-color:var(--ink-3)}
+.cal .d.sel{box-shadow:0 0 0 2px var(--orange); border-color:var(--orange)}
+.cal .d:hover{border-color:var(--blue)}
+.cal .d.out{visibility:hidden}
+.cal .jump{display:flex; gap:6px; margin:10px 0 0}
+.cal .jump button{flex:1 1 0; height:28px; border:1px solid var(--rule); background:var(--surface); border-radius:var(--radius); font-size:12px; color:var(--ink-2)}
+.cal .jump button:hover:not([disabled]){border-color:var(--blue); color:var(--blue)}
+.cal .jump button[disabled]{opacity:.45; cursor:default}
+.cal .go{display:flex; align-items:center; gap:7px; margin:12px 0 0; font-size:12.5px; color:var(--ink-2)}
+.cal .go input{flex:1 1 auto; height:28px; border:1px solid var(--rule); border-radius:var(--radius); padding:0 6px; background:var(--surface)}
+.cal .scale{display:flex; align-items:center; gap:5px; margin:12px 0 0; font-size:11px; color:var(--ink-3)}
+.cal .scale i{display:inline-block; width:14px; height:14px; border-radius:2px}
+.cal .stats{margin:14px 0 0; padding-top:10px; border-top:1px solid var(--rule-soft); font-size:12.5px; color:var(--ink-2)}
+.cal .stats b{color:var(--ink); font-weight:600}
+.cal .keys{margin:8px 0 0; font-size:11px; color:var(--ink-3)}
+.calcard > h4 .ctag{color:#fff; font-size:10.5px; font-weight:700; padding:1px 6px; border-radius:2px}
+.day > h4 .dcat{color:#fff; font-size:10.5px; font-weight:700; padding:1px 6px; border-radius:2px; letter-spacing:.02em}
+.calcard > h4 .fold{color:var(--grey); font-size:10.5px}
+.calcard > h4 .wn{font-size:14px}
+.calcard .open{border:1px solid var(--rule); background:var(--surface); border-radius:var(--radius); height:24px; padding:0 9px; font-size:12px; color:var(--blue); font-weight:400}
+.calcard .open:hover{border-color:var(--blue)}
+.day.flash{box-shadow:0 0 0 3px var(--orange); transition:box-shadow .2s}
+
+.scopes{display:flex; gap:0; flex:0 0 auto}
+.scope{
+  border:1px solid #4a63a5; border-right-width:0; background:transparent; color:#c6d2ee;
+  height:30px; padding:0 11px; font-size:12.5px;
+}
+.scopes > .scope:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.scopes > .scope:last-child{border-right-width:1px; border-radius:0 var(--radius) var(--radius) 0}
+.scope[aria-pressed="true"]{background:#fff; color:var(--blue); border-color:#fff; font-weight:600}
+/* grupul folderului RK: RK ▸ + subcategoriile RK, RE, IN, FI */
+.rkgrp{display:flex; background:rgba(255,255,255,.10); border-bottom:2px solid #8fa3d6}
+.rkgrp .scope.grk{font-weight:600}
+.rkgrp .scope.sub{padding:0 8px; font-size:12px}
+.bar .state{margin-left:auto; font-size:12px; line-height:1.35; color:#b9c6e8; flex:0 1 430px; min-width:0; max-height:50px; overflow:hidden}
+.bar .state b{color:#fff; font-weight:600}
+.linklike{background:none; border:0; color:var(--cyan); text-decoration:underline; padding:0 0 0 10px; font-size:12px}
+
+/* ===== rezultate căutare ===== */
+.results{
+  position:absolute; top:38px; left:0; width:max(100%, 560px); max-width:calc(100vw - 32px); max-height:62vh; overflow:auto;
+  background:var(--surface); color:var(--ink);
+  border:1px solid var(--rule); border-radius:var(--radius);
+  box-shadow:0 14px 34px rgba(20,32,64,.22); display:none;
+}
+.results.open{display:block}
+.results .note{padding:11px 13px; color:var(--ink-2); font-size:12.5px}
+.hit{display:grid; grid-template-columns:34px 1fr auto; gap:11px; align-items:center;
+  width:100%; text-align:left; background:none; color:var(--ink);
+  border:0; border-bottom:1px solid var(--rule-soft); padding:8px 13px}
+.hit:last-child{border-bottom:0}
+.hit:hover,.hit.on{background:#eaf1fb}
+.hit .tag{font-size:10.5px; font-weight:700; color:#fff; text-align:center; padding:2px 0; border-radius:2px}
+.hit .nm{font-size:14px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.hit .nm i{font-style:normal; color:var(--ink-3); font-size:12px; padding-left:7px}
+.hit .mt{font-size:11.5px; color:var(--ink-2); text-align:right; white-space:nowrap; line-height:1.3}
+.hit .mt em{display:block; font-style:normal; color:var(--ink-3)}
+
+/* ===== corp ===== */
+.body{flex:1 1 auto; display:flex; min-height:0}
+.rail{
+  flex:0 0 274px; background:var(--surface); border-right:1px solid var(--rule);
+  overflow:auto; padding:0 0 26px;
+}
+.rail.hide{display:none}
+.main{
+  flex:1 1 auto; overflow:auto; min-width:0; position:relative;
+  --fs-base:13px; --fs-delta:0px; --day-lh:1.52; --col:23rem;
+  --day-fs:calc(var(--fs-base) + var(--fs-delta));
+}
+
+/* ===== ecran gol ===== */
+.empty{max-width:660px; margin:0 auto; padding:56px 24px}
+.empty h1{font-size:25px; margin:0 0 6px; font-weight:600; letter-spacing:-.01em}
+.empty p{color:var(--ink-2); margin:0 0 20px; max-width:56ch}
+.drop{
+  border:2px dashed var(--rule); border-radius:5px; background:var(--surface);
+  padding:30px 26px; text-align:center;
+}
+.drop.over{border-color:var(--cyan); background:#f2fbfe}
+.pick{
+  background:var(--blue); color:#fff; border:0; border-radius:var(--radius);
+  height:38px; padding:0 20px; font-size:14px; font-weight:600;
+}
+.pick.ghost{background:#fff; color:var(--blue); border:1px solid var(--blue)}
+.drop .hint{margin:13px 0 0; font-size:12.5px; color:var(--ink-3)}
+.legend{margin:26px 0 0; border-top:1px solid var(--rule); padding-top:16px}
+.legend dl{display:grid; grid-template-columns:44px 1fr; gap:7px 12px; margin:0; font-size:13px}
+.legend dt{font-weight:700; color:#fff; text-align:center; border-radius:2px; padding:1px 0; height:20px}
+.legend dd{margin:0; color:var(--ink-2)}
+.legend dt.lsub{margin-left:14px; width:30px; justify-self:end; font-size:11.5px}
+.legend dt.lsub + dd{padding-left:0}
+.legend .lnote{margin:12px 0 0; font-size:12px; color:var(--ink-3); line-height:1.45}
+.resume{margin:20px 0 0; font-size:13px; color:var(--ink-2)}
+.readonly{
+  margin:18px 0 0; padding:9px 12px; font-size:12.5px; color:var(--ink-2);
+  background:#f2f7f4; border-left:3px solid var(--green); border-radius:var(--radius);
+}
+.readonly b{color:var(--ink); font-weight:600}
+.bars{height:5px; background:var(--rule-soft); border-radius:3px; overflow:hidden; margin:14px 0 0}
+.bars i{display:block; height:100%; background:var(--blue); width:0; transition:width .12s linear}
+.loading{padding-top:70px}
+/* fișiere de verificat */
+.warnlink{background:none; border:0; color:#ffd2b0; text-decoration:underline; padding:0 0 0 10px; font-size:12px}
+.issues{margin:20px 0 0; border:1px solid #f0d2b0; border-left:3px solid var(--orange); border-radius:var(--radius); background:#fffaf4}
+.issues h3{margin:0; padding:9px 12px 6px; font-size:14px; font-weight:600}
+.issues p.help{margin:0; padding:0 12px 8px; font-size:12px; color:var(--ink-2)}
+.issues ul{list-style:none; margin:0; padding:0 0 4px; max-height:46vh; overflow:auto}
+.issues li{border-top:1px solid #f3e1cc}
+.issues li button{display:grid; grid-template-columns:34px minmax(0,1fr); gap:3px 10px; width:100%; text-align:left; background:none; border:0; padding:7px 12px; color:var(--ink)}
+.issues li button:hover{background:#fff1e2}
+.issues .tag{grid-row:span 2; align-self:start; font-size:10.5px; font-weight:700; color:#fff; text-align:center; padding:2px 0; border-radius:2px}
+.issues .fn{font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.issues .why{font-size:12px; color:#8a4b12}
+.docwarn{margin:0 0 9px; padding:7px 11px; font-size:12.5px; background:#fffaf4; border:1px solid #f0d2b0; border-left:3px solid var(--orange); border-radius:var(--radius); color:#6d3b0e}
+.docwarn b{font-weight:600}
+.undated > h3 .k{background:var(--grey) !important}
+/* marcaje din raportul Word (rânduri MARCAJ) */
+.mcj{margin:0 0 6px; font-size:.86em; font-weight:600; color:var(--blue); letter-spacing:.2px}
+.mcj::before{content:'▸ '; color:var(--ink-3)}
+.mcj.after{margin:6px 0 0}
+.info{margin:18px 0 0; padding:10px 14px; background:var(--surface); border:1px solid var(--rule); border-left:3px solid var(--grey)}
+.info h3{margin:0 0 6px; font-size:14px}
+.info ul{margin:0; padding:0; list-style:none; font-size:13px}
+.info li{display:flex; gap:10px; align-items:baseline; padding:3px 0}
+.info .tag{color:#fff; font-size:11px; font-weight:700; padding:1px 6px; border-radius:2px}
+.info .fn{font-weight:600}
+.info .why{color:var(--ink-2)}
+.reload{margin:10px 0 0; font-size:12.5px; color:var(--ink-2)}
+.auto{margin:12px 0 0; padding:9px 12px; background:#eaf0fb; border-left:3px solid var(--blue); font-size:13px; color:var(--ink)}
+.srvdown{position:fixed; left:50%; bottom:14px; transform:translateX(-50%); z-index:60; background:#fff4e8;
+  border:1px solid var(--orange); color:var(--ink); padding:8px 14px; border-radius:var(--radius); font-size:13px; box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.loading .phase{margin:2px 0 0; color:var(--ink-2); min-height:1.45em}
+.loading .bars{height:10px; border-radius:5px; margin-top:18px}
+.loading .bars.wait i{width:28%; animation:woslide 1.1s ease-in-out infinite}
+@keyframes woslide{0%{transform:translateX(-110%)} 100%{transform:translateX(370%)}}
+.lrow{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin:8px 0 0; font-size:13px; color:var(--ink-2)}
+.lrow b{color:var(--blue); font-size:17px; font-variant-numeric:tabular-nums}
+.lnow{margin:8px 0 0; font-size:12.5px; color:var(--ink-3); min-height:1.4em; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.lstats{display:flex; flex-wrap:wrap; gap:8px 20px; margin:16px 0 0; padding-top:12px; border-top:1px solid var(--rule-soft); font-size:12.5px; color:var(--ink-2); min-height:2.6em}
+.lstats i{display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:5px; vertical-align:-1px}
+.lstats b{color:var(--ink); font-variant-numeric:tabular-nums}
+@media (prefers-reduced-motion:reduce){.loading .bars.wait i{animation:none; width:100%; opacity:.35}}
+
+/* ===== cuprins ===== */
+.rail h2{
+  margin:0; padding:13px 15px 4px; font-size:16.5px; font-weight:600; line-height:1.25;
+}
+.rail .sub{padding:0 15px 12px; font-size:12px; color:var(--ink-2)}
+.rail .sub b{font-weight:600; color:var(--ink)}
+.axis{padding:4px 15px 15px; border-bottom:1px solid var(--rule-soft)}
+.axis .track{position:relative; height:26px; background:var(--rule-soft); border-radius:2px}
+.axis .seg{position:absolute; top:0; bottom:0; min-width:3px; border-radius:2px; border:0; padding:0}
+.axis .seg:hover{filter:brightness(1.15)}
+.axis .seg.on{box-shadow:0 0 0 2px var(--ink)}
+.axis .yr{display:flex; justify-content:space-between; font-size:11px; color:var(--ink-3); padding-top:3px}
+.toc{list-style:none; margin:0; padding:7px 0 0}
+.toc li{margin:0}
+.toc button{
+  display:block; width:100%; text-align:left; background:none; border:0;
+  border-left:3px solid transparent; padding:8px 15px 8px 12px;
+}
+.toc button:hover{background:#f2f5fa}
+.toc button[aria-current="true"]{background:#eaf1fb; border-left-color:var(--blue); font-weight:600}
+.toc .lbl{font-size:13.5px}
+.toc .rng{display:block; font-size:12px; color:var(--ink-2); padding-top:2px; font-weight:400}
+.toc .all{border-bottom:1px solid var(--rule-soft); margin-bottom:5px; padding-bottom:9px}
+.also{padding:14px 15px 0; border-top:1px solid var(--rule-soft); margin-top:12px}
+.also p{margin:0 0 6px; font-size:12px; color:var(--ink-3)}
+.also button{display:block; background:none; border:0; padding:3px 0; color:var(--blue); text-decoration:underline; font-size:13px; text-align:left}
+
+/* ===== antet document ===== */
+.head{
+  position:sticky; top:0; z-index:20; background:var(--surface);
+  border-bottom:1px solid var(--rule); padding:11px 18px 0;
+}
+.head .row1{display:flex; align-items:baseline; gap:11px; flex-wrap:wrap}
+.head h1{margin:0; font-size:21px; font-weight:600; letter-spacing:-.01em}
+.head .tag{font-size:11px; font-weight:700; color:#fff; padding:2px 7px; border-radius:2px}
+.head .file{font-size:12px; color:var(--ink-3)}
+.tools{display:flex; align-items:center; gap:7px; flex-wrap:wrap; padding:10px 0 9px}
+.tools .grp{display:flex}
+.tools .grp button{
+  border:1px solid var(--rule); border-right-width:0; background:var(--surface);
+  height:27px; padding:0 10px; font-size:12.5px; color:var(--ink-2);
+}
+.tools .grp button:first-child{border-radius:var(--radius) 0 0 var(--radius)}
+.tools .grp button:last-child{border-right-width:1px; border-radius:0 var(--radius) var(--radius) 0}
+.tools .grp button[aria-pressed="true"]{background:var(--blue); border-color:var(--blue); color:#fff}
+.tools .sep{flex:1 1 auto}
+.tools .find{position:relative}
+.tools .find input{height:27px; width:180px; padding:0 9px; border:1px solid var(--rule); border-radius:var(--radius); background:var(--surface)}
+.tools .cnt{font-size:12px; color:var(--ink-2); white-space:nowrap}
+.tools .plain{border:1px solid var(--rule); background:var(--surface); height:27px; padding:0 10px; border-radius:var(--radius); font-size:12.5px; color:var(--ink-2)}
+
+/* ===== zile ===== */
+.sheet{padding:16px 18px 60px}
+.period{margin:0 0 26px}
+.period > h3{
+  margin:0 0 11px; padding:0 0 7px; border-bottom:2px solid var(--rule);
+  display:flex; align-items:baseline; gap:11px; flex-wrap:wrap; font-size:15px; font-weight:600;
+}
+.period > h3 .k{color:#fff; padding:2px 9px; border-radius:2px; font-size:13px}
+.period > h3 .r{font-weight:400; color:var(--ink-2); font-size:13px}
+.grid{columns:var(--col) auto; column-gap:16px}
+.list .grid{columns:1}
+.day{
+  break-inside:avoid; page-break-inside:avoid; -webkit-column-break-inside:avoid;
+  background:var(--surface); border:1px solid var(--rule-soft); border-left:3px solid var(--grey);
+  border-radius:var(--radius); padding:8px 11px 10px; margin:0 0 12px;
+}
+.day > h4{
+  margin:0 0 5px; padding:0 0 4px; border-bottom:1px solid var(--rule-soft);
+  display:flex; align-items:baseline; gap:8px; font-size:13px; font-weight:600;
+}
+.day > h4 .dw{color:var(--ink-3); font-weight:400; font-size:12px}
+.day > h4 .zi{margin-left:auto; color:var(--ink-3); font-weight:400; font-size:11.5px}
+.day p{
+  margin:0; white-space:pre-wrap; overflow-wrap:anywhere;
+  font-size:var(--day-fs); line-height:var(--day-lh); color:#28324a;
+}
+.mono .day p{font-family:"Consolas","DejaVu Sans Mono",monospace; font-size:calc(var(--day-fs) - .5px)}
+.day mark{background:#ffe9a8; color:inherit; border-radius:2px}
+.day b.mk{font-weight:700}
+.day .pills{display:flex; gap:4px; flex-wrap:wrap}
+.day .pill{font-size:10px; font-weight:600; color:#fff; background:var(--mc); padding:1px 5px; border-radius:2px}
+.day.pf{background:#fff5ea; border-color:#f0d2b0; border-left-color:var(--orange) !important}
+.day.pf > h4{border-bottom-color:#f0d2b0}
+.day.abd{background:#fff3f4; border-color:#efc3ca}
+.day.abd > h4{border-bottom-color:#efc3ca}
+.day .pill.abdp{letter-spacing:.04em}
+.day.dim{opacity:.42}
+.nodate{border-left-color:var(--grey)}
+.none{padding:30px 4px; color:var(--ink-2)}
+
+
+/* ===== lista de cuvinte marcate ===== */
+.mkpanel{position:absolute; right:18px; top:100%; z-index:25; width:268px;
+  background:var(--surface); border:1px solid var(--rule); border-radius:var(--radius);
+  box-shadow:0 12px 28px rgba(20,32,64,.18); padding:10px 12px}
+.mkpanel h5{margin:0 0 7px; font-size:12px; color:var(--ink-2); font-weight:600}
+.mkrow{display:flex; align-items:center; gap:8px; padding:3px 0; font-size:13px}
+.mkrow input[type=color]{width:26px; height:20px; padding:0; border:1px solid var(--rule); background:none}
+.mkrow .w{flex:1 1 auto}
+.mkrow .del{border:0; background:none; color:var(--ink-3); font-size:15px; line-height:1; padding:0 2px}
+.mkadd{display:flex; gap:6px; margin-top:9px; border-top:1px solid var(--rule-soft); padding-top:9px}
+.mkadd input{flex:1 1 auto; height:26px; border:1px solid var(--rule); border-radius:var(--radius); padding:0 7px}
+.mkadd button{height:26px; padding:0 9px; border:1px solid var(--blue); background:var(--blue);
+  color:#fff; border-radius:var(--radius); font-size:12.5px}
+.mkpanel .reset{margin-top:8px; background:none; border:0; color:var(--blue);
+  text-decoration:underline; font-size:12px; padding:0}
+
+/* ===== axa temporală a sondei ===== */
+.axis .seg:not(.own){opacity:.5}
+.axis .leg{display:flex; gap:11px; flex-wrap:wrap; font-size:11px; color:var(--ink-2); padding-top:6px}
+.axis .leg i{display:inline-block; width:8px; height:8px; border-radius:2px; margin-right:4px}
+.toc .pm{color:var(--orange)}
+.toc .abdm{color:#b00020; font-weight:700}
+.mkrow .note{display:block; font-size:11px; color:var(--ink-3); line-height:1.3}
+
+/* ===== densitate ===== */
+.main.compact{--fs-base:12px; --day-lh:1.42; --col:19rem}
+.compact .day{padding:6px 9px 8px; margin-bottom:9px}
+.compact .grid{column-gap:12px}
+.tools .zoom button{min-width:30px; font-size:14px; line-height:1}
+.tools .zoom button[disabled]{opacity:.45; cursor:default}
+.tools .fs{font-size:12px; color:var(--ink-3); white-space:nowrap; padding-left:2px}
+
+@media (max-width:900px){
+  .rail{position:absolute; z-index:30; height:100%; box-shadow:0 0 24px rgba(20,32,64,.2)}
+  .bar{flex-wrap:wrap; height:auto; padding:8px 12px; gap:9px}
+  .finder{order:3; flex-basis:100%; max-width:none}
+  .bar .state{order:2}
+}
+@media print{
+  .bar,.rail,.tools,.results{display:none !important}
+  .app,.body,.main{display:block; height:auto; overflow:visible}
+  .head{position:static; border:0; padding:0 0 8px}
+  .sheet{padding:0}
+  .grid{columns:2 auto}
+  .day{border-color:#bbb; break-inside:avoid}
+  body{background:#fff; font-size:10pt}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header class="bar">
+    <div class="brand"><b>ROMGAZ</b><span>Serviciul Geologic</span></div>
+
+    <div class="modes" role="group" aria-label="Pagina">
+      <button class="mode" data-mode="wells" aria-pressed="true" disabled>Sonde</button>
+      <button class="mode" data-mode="cal" aria-pressed="false" disabled title="Ce sonde s-au lucrat într-o zi">Calendar</button>
+    </div>
+
+    <div class="finder" id="finder">
+      <input id="q" type="search" autocomplete="off" spellcheck="false"
+             placeholder="Caută o sondă sau un text din rapoarte" aria-label="Caută în rapoarte" disabled>
+      <button class="clear" id="qclear" title="Șterge căutarea" aria-label="Șterge căutarea">&times;</button>
+      <div class="results" id="results" role="listbox" aria-label="Rezultate"></div>
+    </div>
+
+    <div class="scopes" role="group" aria-label="Filtrează după categorie">
+      <button class="scope" data-cat="ALL" aria-pressed="true">Toate</button>
+      <button class="scope" data-cat="PP" aria-pressed="false" title="PP — Probe de producție">PP</button>
+      <span class="rkgrp" role="group" aria-label="Folderul RK și subcategoriile lui">
+        <button class="scope grk" data-cat="GRK" aria-pressed="false" title="Tot folderul RK: RK, RE, IN, FI">RK&nbsp;▸</button>
+        <button class="scope sub" data-cat="RK" aria-pressed="false" title="RK — Reparații capitalizabile">RK</button>
+        <button class="scope sub" data-cat="RE" aria-pressed="false" title="RE — Reechipare">RE</button>
+        <button class="scope sub" data-cat="IN" aria-pressed="false" title="IN — Intervenții">IN</button>
+        <button class="scope sub" data-cat="FI" aria-pressed="false" title="FI — Fără instalație">FI</button>
+      </span>
+      <button class="scope" data-cat="TF" aria-pressed="false" title="TF — Tub flexibil">TF</button>
+      <button class="scope" data-cat="EMZ" aria-pressed="false" title="EMZ — Măsurători de zăcământ">EMZ</button>
+      <button class="scope" data-cat="NaN" aria-pressed="false" title="NaN — Nu se aplică nicio activitate">NaN</button>
+    </div>
+
+    <div class="state" id="state">Niciun folder încărcat</div>
+  </header>
+
+  <div class="body">
+    <nav class="rail hide" id="rail" aria-label="Cuprins intervenții"></nav>
+    <main class="main" id="main"></main>
+  </div>
+</div>
+
+<input type="file" id="dirpick" webkitdirectory directory multiple hidden>
+<input type="file" id="filepick" accept=".csv,text/csv" multiple hidden>
+
+<script>
+/* ==========================================================================
+   WO Viewer — nucleu logic
+   Parser CSV (RFC 4180), interpretare date românești, împărțire pe perioade,
+   index de căutare. Fără dependențe externe, ES5-compatibil pe cât posibil.
+   ========================================================================== */
+(function (root) {
+  'use strict';
+
+  /* ---------- 1. Parser CSV ---------- */
+  /* Excel pe un Windows cu setări românești salvează CSV cu „;”. Separatorul
+     se deduce din rândul de antet („Data,…” / „Data;…”); dacă lipsește, din
+     primele rânduri, numărând doar în afara ghilimelelor. */
+  function detectDelimiter(text) {
+    if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+    var head = text.slice(0, 4000);
+    var m = head.match(/^[ \t]*"?Data"?[ \t]*([,;\t])/mi);
+    if (m) return m[1];
+    var cnt = { ',': 0, ';': 0, '\t': 0 }, inQ = false, lines = 0;
+    for (var i = 0; i < head.length && lines < 8; i++) {
+      var c = head.charAt(i);
+      if (c === '"') inQ = !inQ;
+      else if (!inQ && (c === ',' || c === ';' || c === '\t')) cnt[c]++;
+      else if (!inQ && c === '\n') lines++;
+    }
+    if (cnt[';'] > cnt[','] && cnt[';'] >= cnt['\t']) return ';';
+    if (cnt['\t'] > cnt[','] && cnt['\t'] > cnt[';']) return '\t';
+    return ',';
+  }
+
+  /* Acceptă: BOM, CRLF/LF/CR, câmpuri ghilimetate cu virgule, ghilimele
+     escapate ("") și newline-uri în interior. Întoarce matrice de rânduri. */
+  function parseCSV(text, delim) {
+    if (text.charCodeAt(0) === 0xfeff) text = text.slice(1);
+    var D = delim || ',';
+    var rows = [], row = [], field = '', i = 0, n = text.length, inQ = false;
+    while (i < n) {
+      var c = text.charAt(i);
+      if (inQ) {
+        if (c === '"') {
+          if (text.charAt(i + 1) === '"') { field += '"'; i += 2; continue; }
+          inQ = false; i++; continue;
+        }
+        field += c; i++; continue;
+      }
+      if (c === '"') { inQ = true; i++; continue; }
+      if (c === D) { row.push(field); field = ''; i++; continue; }
+      if (c === '\r') {
+        if (text.charAt(i + 1) === '\n') i++;
+        row.push(field); rows.push(row); row = []; field = ''; i++; continue;
+      }
+      if (c === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+      field += c; i++;
+    }
+    if (field !== '' || row.length) { row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  /* ---------- 2. Date ---------- */
+  var MONTH_MAX = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+
+  /* Acceptă 19.05.2013, 1.5.2013, 28.09.017 (an trunchiat), 19-05-2013, 19/05/2013.
+     Dacă textul conține un interval (19-20.05.2013) se reține prima dată validă. */
+  function parseRoDate(raw) {
+    if (!raw) return null;
+    var s = String(raw).trim();
+    var d, mo, y, m;
+    // an-lună-zi (2013-05-19), cum îl poate rescrie Excel; altfel ar fi citit „13-05-19”
+    var iso = s.match(/^(\d{4})\s*[.\-\/]\s*(\d{1,2})\s*[.\-\/]\s*(\d{1,2})(?!\d)/);
+    if (iso) { y = +iso[1]; mo = +iso[2]; d = +iso[3]; }
+    else {
+      m = s.match(/(\d{1,2})\s*[.\-\/]\s*(\d{1,2})\s*[.\-\/]\s*(\d{2,4})/);
+      if (!m) return null;
+      d = parseInt(m[1], 10); mo = parseInt(m[2], 10); y = parseInt(m[3], 10);
+    }
+    if (!(mo >= 1 && mo <= 12)) return null;
+    if (!(d >= 1 && d <= MONTH_MAX[mo - 1])) return null;
+    if (y < 100) y += (y <= 60 ? 2000 : 1900);      // 07 -> 2007, 98 -> 1998
+    else if (y < 1000) y += 2000;                    // 017 -> 2017
+    if (y < 1900 || y > 2200) return null;
+    var dt = new Date(y, mo - 1, d, 12, 0, 0);       // ora 12 => imun la DST
+    if (dt.getFullYear() !== y || dt.getMonth() !== mo - 1 || dt.getDate() !== d) return null;
+    return dt;
+  }
+
+  function pad2(v) { return v < 10 ? '0' + v : '' + v; }
+  function fmtDate(dt) {
+    return pad2(dt.getDate()) + '.' + pad2(dt.getMonth() + 1) + '.' + dt.getFullYear();
+  }
+  var DOW = ['Du', 'Lu', 'Ma', 'Mi', 'Jo', 'Vi', 'Sâ'];
+  function dowRo(dt) { return DOW[dt.getDay()]; }
+
+  /* Adaugă n luni, cu limitarea zilei la ultima zi a lunii țintă. */
+  function addMonths(dt, n) {
+    var y = dt.getFullYear(), m = dt.getMonth() + n, d = dt.getDate();
+    var target = new Date(y, m, 1, 12, 0, 0);
+    var last = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+    target.setDate(Math.min(d, last));
+    return target;
+  }
+  function daysBetween(a, b) {
+    return Math.round((b.getTime() - a.getTime()) / 86400000);
+  }
+
+  /* ---------- 3. Interpretarea unui fișier ---------- */
+  /* Structura surselor: 4 linii de antet (companie, sucursală, serviciu, sondă),
+     apoi "Data,Operatiunile efectuate la sonda" și rândurile de date. */
+  function looksLikeDateCell(first) {
+    return /^\s*\d{1,2}\s*[.\-\/]/.test(first) || /^\s*\d{4}\s*[.\-\/]\s*\d{1,2}\s*[.\-\/]/.test(first);
+  }
+
+  function parseWoFile(fileName, category, text) {
+    var delim = detectDelimiter(text);
+    var rows = parseCSV(text, delim);
+    var entries = [], undated = [], meta = [], issues = [];
+    var headerIdx = -1, r, first, rest, dt;
+
+    for (r = 0; r < rows.length; r++) {
+      if (/^data$/i.test((rows[r][0] || '').trim())) { headerIdx = r; break; }
+    }
+
+    /* Coloana 3 „Categorie” (PP, RK, RE, IN, TF, EMZ, FI, NaN) nu face parte din text. */
+    var catIdx = -1;
+    if (headerIdx >= 0) for (var ci = 2; ci < rows[headerIdx].length; ci++)
+      if (/^categori/i.test((rows[headerIdx][ci] || '').trim())) { catIdx = ci; break; }
+    var cats = {};
+    var badDates = [];
+    var pendingMarks = [], nMarks = 0;
+    for (r = 0; r < rows.length; r++) {
+      if (r === headerIdx) continue;
+      first = (rows[r][0] || '').trim();
+      if (/^antet$/i.test(first)) continue;          // rând „Antet” (descrierea sursei), se ignoră
+      rest = (catIdx > 0 ? rows[r].slice(1, catIdx).concat(rows[r].slice(catIdx + 1)) : rows[r].slice(1))
+        .join(delim).replace(/\s+$/, '');
+      if (!first && !rest) continue;
+      // rând „MARCAJ”: titlul de secțiune din raportul Word (ex. „Sd. 172 DAIA ȚELINA”, „R.K. 12”, „P.P.”);
+      // nu e o eroare: se atașează zilei care urmează și se arată deasupra ei
+      if (/^marcaj$/i.test(first)) { if (rest.trim()) pendingMarks.push(rest.trim()); continue; }
+      dt = looksLikeDateCell(first) ? parseRoDate(first) : null;
+      if (dt) {
+        var ec = catIdx > 0 ? (rows[r][catIdx] || '').trim() || null : null;
+        if (ec) cats[ec] = (cats[ec] || 0) + 1;
+        var en = { date: dt, dateRaw: first, text: rest, cat: ec };
+        if (pendingMarks.length) { en.marks = pendingMarks; nMarks += pendingMarks.length; pendingMarks = []; }
+        entries.push(en); continue;
+      }
+      var isMeta = headerIdx >= 0 ? r < headerIdx : meta.length < 4 && !rest;
+      if (isMeta) { meta.push(first); continue; }
+      // după antet: un rând fără dată validă nu se pierde, se arată separat
+      undated.push({ date: null, dateRaw: first, text: rest });
+      if (first) badDates.push(first);
+    }
+
+    // marcaje rămase după ultima zi: se arată sub ultima zi din fișier
+    if (pendingMarks.length && entries.length) { entries[entries.length - 1].marksAfter = pendingMarks; nMarks += pendingMarks.length; }
+
+    var headerWell = '';
+    for (var k = meta.length - 1; k >= 0; k--) {
+      if (meta[k] && !/romgaz|sucursala|serviciul/i.test(meta[k])) { headerWell = meta[k]; break; }
+    }
+
+    entries.sort(function (x, y) { return x.date - y.date; });
+    markAbd(entries);
+
+    if (delim !== ',') issues.push({ code: 'sep', text: 'separator „' + (delim === '\t' ? 'Tab' : delim) + '” în loc de „,” (salvat probabil din Excel)' });
+    if (headerIdx < 0) issues.push({ code: 'header', text: 'lipsește rândul de antet „Data, Operatiunile efectuate la sonda”' });
+    if (badDates.length) issues.push({ code: 'date', text: badDates.length + (badDates.length === 1 ? ' rând' : ' rânduri') +
+      ' cu dată nerecunoscută (ex. „' + badDates[0].slice(0, 20) + '”)', n: badDates.length });
+    if (!entries.length) issues.push({ code: 'empty', text: 'nicio zi cu dată validă' });
+    var repl = text.split('\uFFFD').length - 1;
+    if (repl) issues.push({ code: 'chars', text: repl + ' caractere ilizibile (codificare greșită)' });
+
+    var baseName = fileName.replace(/\.csv$/i, '').replace(/\s+/g, ' ').trim();
+    return {
+      file: fileName,
+      name: baseName,
+      well: headerWell || baseName,
+      category: category,
+      cats: cats,
+      entries: entries,
+      undated: undated,
+      nMarks: nMarks,
+      delim: delim,
+      issues: issues,
+      first: entries.length ? entries[0].date : null,
+      last: entries.length ? entries[entries.length - 1].date : null
+    };
+  }
+
+  /* ---------- 3b. ABD (abandonare) ----------
+     Regulă cerută în 09.2026: dacă într-o intervenție apare cuvântul „abandonare” (orice formă:
+     abandonat, abandonării, abandonabilă…) sau „expert” (expert ANRM), sonda a intrat în procesul de abandonare; din ziua
+     respectivă până la finalul intervenției toate zilele sunt marcate ABD. Se marchează doar zilele
+     de la 01.09.2026 încolo (trecutul rămâne nemarcat). Intervenția = pauză de peste o lună. */
+  var ABD_FROM = new Date(2026, 8, 1, 0, 0, 0);
+  /* „abandonare” în orice formă sau „expert” de sine stătător („în prezența expert ANRM”); nu „expertiză”
+     (verificarea instalației) și nici „premium expert” (tip de țevi). Textul e deja fără diacritice, cu litere mici. */
+  var ABD_RE = { test: function (t) { return /aba?ndon/.test(t) || /(^|[^a-z])expert(?![a-z])/.test(String(t).replace(/premium\s+expert/g, ' ')); } };
+  function markAbd(entries) {
+    var per = splitPeriods(entries, '', 1);
+    for (var p = 0; p < per.length; p++) {
+      var on = false, first = true;
+      for (var i = 0; i < per[p].entries.length; i++) {
+        var e = per[p].entries[i];
+        if (!on && ABD_RE.test(fold(e.text))) on = true;
+        if (on && e.date >= ABD_FROM) { e.abd = true; if (first) { e.abdStart = true; first = false; } }
+      }
+    }
+  }
+
+  /* ---------- 4. Perioade ---------- */
+  /* Regulă cerută: dacă între două zile consecutive trece mai mult de o lună,
+     începe o intervenție nouă. Pragul este configurabil (în luni). */
+  function splitPeriods(entries, prefix, gapMonths) {
+    if (gapMonths == null) gapMonths = 1;
+    var out = [], cur = null;
+    for (var i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      if (cur && e.date > addMonths(cur.end, gapMonths)) cur = null;
+      if (!cur) {
+        cur = { index: out.length + 1, label: '', start: e.date, end: e.date, entries: [] };
+        out.push(cur);
+      }
+      cur.entries.push(e);
+      cur.end = e.date;
+    }
+    for (var j = 0; j < out.length; j++) {
+      // categoria stabilită (coloana 3) în ultima zi a intervenției; eticheta o poartă pe ea, nu folderul
+      out[j].cat = periodCat(out[j].entries, prefix);
+      out[j].label = (out[j].cat || prefix) + (j + 1);
+      out[j].id = prefix + '-' + (j + 1);
+      out[j].days = daysBetween(out[j].start, out[j].end) + 1;
+    }
+    return out;
+  }
+
+  /* Categoria stabilită a unei intervenții = categoria din coloana 3 a ultimei zile (cerință 30.09.2026:
+     o sondă aflată în RE în ultima zi apare RE, nu RK după folder). O zi NaN sau fără categorie ia
+     categoria zilei anterioare din aceeași intervenție; dacă toate zilele sunt NaN rămâne NaN;
+     fără coloana 3 rămâne folderul. */
+  var REAL_CAT = { RK: 1, RE: 1, IN: 1, FI: 1, PP: 1, TF: 1, EMZ: 1 };
+  function periodCat(entries, folder) {
+    var nan = false;
+    for (var i = entries.length - 1; i >= 0; i--) {
+      var c = entries[i].cat;
+      if (c && REAL_CAT[c]) return c;
+      if (c === 'NaN') nan = true;
+    }
+    return nan ? 'NaN' : (folder || null);
+  }
+  /* Categoria stabilită a sondei (a fișierului) = cea a ultimei intervenții. */
+  function docCat(doc, gapMonths) {
+    if (!doc) return null;
+    if (doc._catGap !== gapMonths || !doc._cat) {
+      var per = splitPeriods(doc.entries, doc.category, gapMonths);
+      doc._cat = per.length ? per[per.length - 1].cat : doc.category;
+      doc._catGap = gapMonths;
+    }
+    return doc._cat;
+  }
+
+  /* ---------- 5. Căutare ---------- */
+  /* Normalizare 1 caracter -> 1 caracter: lungimea textului rămâne neschimbată,
+     deci pozițiile găsite se pot folosi direct pe textul original (evidențiere). */
+  var FOLD = {
+    'ă': 'a', 'â': 'a', 'à': 'a', 'á': 'a', 'ä': 'a', 'å': 'a', 'ã': 'a',
+    'î': 'i', 'í': 'i', 'ì': 'i', 'ï': 'i',
+    'ș': 's', 'ş': 's', 'š': 's', 'ț': 't', 'ţ': 't', 'ť': 't',
+    'é': 'e', 'è': 'e', 'ê': 'e', 'ë': 'e', 'ě': 'e',
+    'ó': 'o', 'ò': 'o', 'ô': 'o', 'ö': 'o', 'õ': 'o', 'ø': 'o',
+    'ú': 'u', 'ù': 'u', 'û': 'u', 'ü': 'u', 'ů': 'u',
+    'ñ': 'n', 'ç': 'c', 'ć': 'c', 'č': 'c', 'ý': 'y', 'ž': 'z', 'ź': 'z', 'ł': 'l'
+  };
+  var FOLD_RE = new RegExp('[' + Object.keys(FOLD).join('') + ']', 'g');
+  function foldChar(c) { return FOLD[c]; }
+  function fold(s) {
+    return String(s == null ? '' : s).toLowerCase().replace(FOLD_RE, foldChar);
+  }
+
+  function buildIndex(docs) {
+    for (var i = 0; i < docs.length; i++) {
+      var d = docs[i];
+      d._name = fold(d.name + ' ' + d.well + ' ' + d.category);
+      var buf = [];
+      for (var j = 0; j < d.entries.length; j++) buf.push(d.entries[j].text);
+      d._body = fold(buf.join('\n'));
+    }
+    return docs;
+  }
+
+  /* Întoarce documentele potrivite, cele cu potrivire în denumire primele.
+     Ordinea (corectată 30.09.2026 — „7 Filitelnic” nu apărea, fiindcă „7” se găsea și în 17, 70, 107… FILITELNIC,
+     sortate alfabetic înaintea lui 7 și tăiate de limita listei):
+       6  denumirea sondei este exact textul căutat („7 filitelnic” → 7 FILITELNIC, 7 FILITELNIC EMZ, 7 FILITELNIC TF)
+       5  fiecare termen este un cuvânt întreg din denumire
+       4  fiecare termen este un cuvânt întreg sau începutul unui cuvânt (numerele doar întregi: „7” nu prinde „70”)
+       3  fiecare termen apare în denumire ca subșir (vechea regulă)
+       1  termenii apar în textul rapoartelor
+     La scor egal: ordinea numerică a denumirii (7 < 17 < 70), apoi folderul RK, PP, TF, EMZ. */
+  var FOLDER_ORDER = { RK: 0, PP: 1, TF: 2, EMZ: 3 };
+  function nameTokens(s) { return fold(s).split(/[^a-z0-9]+/).filter(Boolean); }
+  function baseWell(d) {           // denumirea fără sufixul de folder din numele fișierului („7 FILITELNIC EMZ” → „7 filitelnic”)
+    return nameTokens(d.name).join(' ').replace(/ (pp|rk|tf|emz)$/, '');
+  }
+  function search(docs, query, category, limit) {
+    var q = fold(query).trim();
+    var terms = q ? q.split(' ').filter(Boolean) : [];
+    var qTok = nameTokens(query).join(' ');
+    var res = [];
+    for (var i = 0; i < docs.length; i++) {
+      var d = docs[i];
+      if (category === 'GRK' && d.category !== 'RK') continue;
+      if (category && category !== 'ALL' && category !== 'GRK' && d.category !== category && !(d.cats && d.cats[category])) continue;
+      if (!terms.length) { res.push({ doc: d, score: 0, where: '' }); continue; }
+      var inName = true, inBody = true;
+      for (var t = 0; t < terms.length; t++) {
+        if (d._name.indexOf(terms[t]) < 0) inName = false;
+        if (d._body.indexOf(terms[t]) < 0) inBody = false;
+      }
+      if (inName) {
+        var tok = d._tok || (d._tok = nameTokens(d.name + ' ' + d.well + ' ' + d.category));
+        var whole = true, pref = true;
+        for (var u = 0; u < terms.length; u++) {
+          var tt = nameTokens(terms[u]);
+          if (!tt.length) continue;
+          for (var v = 0; v < tt.length; v++) {
+            var w = tt[v], isNum = /^\d+$/.test(w), hasW = false, hasP = false;
+            for (var z = 0; z < tok.length; z++) {
+              if (tok[z] === w) { hasW = true; hasP = true; break; }
+              if (!isNum && tok[z].indexOf(w) === 0) hasP = true;
+            }
+            if (!hasW) whole = false;
+            if (!hasP) pref = false;
+          }
+        }
+        var exact = qTok && (baseWell(d) === qTok || nameTokens(d.well).join(' ') === qTok);
+        res.push({ doc: d, score: exact ? 6 : whole ? 5 : pref ? 4 : 3, where: 'nume' });
+      }
+      else if (inBody) res.push({ doc: d, score: 1, where: 'conținut' });
+    }
+    res.sort(function (a, b) {
+      if (b.score !== a.score) return b.score - a.score;
+      return a.doc.name.localeCompare(b.doc.name, 'ro', { numeric: true, sensitivity: 'base' }) ||
+             (FOLDER_ORDER[a.doc.category] != null ? FOLDER_ORDER[a.doc.category] : 9) - (FOLDER_ORDER[b.doc.category] != null ? FOLDER_ORDER[b.doc.category] : 9);
+    });
+    return limit ? res.slice(0, limit) : res;
+  }
+
+  /* Zilele dintr-un document care conțin termenii căutați. */
+  function matchingEntries(doc, query) {
+    var terms = fold(query).trim().split(' ').filter(Boolean);
+    if (!terms.length) return [];
+    var hits = [];
+    for (var i = 0; i < doc.entries.length; i++) {
+      var f = fold(doc.entries[i].text), ok = true;
+      for (var t = 0; t < terms.length; t++) if (f.indexOf(terms[t]) < 0) { ok = false; break; }
+      if (ok) hits.push(doc.entries[i]);
+    }
+    return hits;
+  }
+
+  /* ---------- 6. Cuvinte marcate ---------- */
+  /* `stem`   — rădăcină, fără diacritice și fără majuscule; se îngroașă cuvântul întreg
+                (perforare, perforat, perforării, reperforat).
+     `acronym`— acronim scris cu majuscule, comparat exact, ca să nu prindă cuvinte
+                obișnuite care se scriu la fel cu litere mici (RAS, MIT, PNN). */
+  var DEFAULT_MARKERS = [
+    { id: 'perfor',  word: 'perforare', stem: 'perfor',  mode: 'stem',    color: '#a8480a', tint: true, on: true },
+    { id: 'ras',     word: 'RAS',                        mode: 'acronym', color: '#203d88', on: true },
+    { id: 'mit',     word: 'MIT',                        mode: 'acronym', color: '#067a4a', on: true },
+    { id: 'pnn',     word: 'PNN',                        mode: 'acronym', color: '#1a7f9c', on: true },
+    { id: 'acustic', word: 'acustic',  stem: 'acustic',  mode: 'stem',    color: '#4a5468', on: true },
+    { id: 'abd',     word: 'ABD',      stem: 'abandon',  mode: 'abd',     color: '#b00020', on: true }
+  ];
+
+  function markerRe(m) {
+    if (!m._re) {
+      m._re = m.mode === 'acronym'
+        ? new RegExp('(^|[^A-Za-z0-9ĂÂÎȘȚăâîșț])(' + m.word + ')(?![A-Za-z0-9ĂÂÎȘȚăâîșț])', 'g')
+        : new RegExp('[a-z]*' + (m.stem || fold(m.word)) + '[a-z]*', 'g');
+    }
+    m._re.lastIndex = 0;
+    return m._re;
+  }
+
+  /* Zonele de text acoperite de cuvintele marcate, ca [început, sfârșit, marcaj]. */
+  function markSpans(text, markers) {
+    var out = [], f = fold(text), i, m, re, hit;
+    for (i = 0; i < markers.length; i++) {
+      m = markers[i];
+      if (m.on === false || m.mode === 'abd') continue;   // ABD se marchează pe zile (e.abd), nu pe cuvinte
+      re = markerRe(m);
+      if (m.mode === 'acronym') {
+        while ((hit = re.exec(text))) {
+          out.push([hit.index + hit[1].length, hit.index + hit[1].length + hit[2].length, m]);
+          if (re.lastIndex === hit.index) re.lastIndex++;
+        }
+      } else {
+        while ((hit = re.exec(f))) {
+          if (hit[0]) out.push([hit.index, hit.index + hit[0].length, m]);
+          if (re.lastIndex === hit.index) re.lastIndex++;
+        }
+      }
+    }
+    return out;
+  }
+
+  /* Marcajele prezente într-un text, în ordinea din listă. */
+  function markersIn(text, markers) {
+    var spans = markSpans(text, markers), seen = {}, out = [];
+    for (var i = 0; i < spans.length; i++) seen[spans[i][2].id] = true;
+    for (var j = 0; j < markers.length; j++) if (seen[markers[j].id]) out.push(markers[j]);
+    return out;
+  }
+
+  /* ---------- 7. Intervale perforate ---------- */
+  /* Tipare din rapoarte: „1656----1652=4 m”, „732 - 730 = 2 metri”, „1612-1608= 4 m”.
+     Se păstrează doar perechile la care diferența dintre cote confirmă grosimea
+     declarată (toleranță de 1 m), ca să nu intre în listă alte perechi de numere. */
+  var RE_INTERVAL = /(\d{3,5})\s*[-–—]+\s*(\d{3,5})\s*=\s*(\d{1,3})\s*m(?:etri)?(?![a-z])/gi;
+
+  function extractIntervals(text) {
+    var out = [], hit;
+    RE_INTERVAL.lastIndex = 0;
+    while ((hit = RE_INTERVAL.exec(text))) {
+      var a = parseInt(hit[1], 10), b = parseInt(hit[2], 10), gros = parseInt(hit[3], 10);
+      if (!gros) continue;
+      if (Math.abs(Math.abs(a - b) - gros) > 1) continue;
+      out.push({ from: a, to: b, m: gros });
+    }
+    return out;
+  }
+
+  /* Intervalele perforate dintr-o intervenție: numai din zilele care vorbesc
+     despre perforare, ca să nu fie confundate cu alte cote din raport. */
+  function periodIntervals(entries, markers) {
+    var perf = null, i;
+    for (i = 0; i < markers.length; i++) if (markers[i].id === 'perfor') perf = markers[i];
+    var rows = [], total = 0;
+    for (i = 0; i < entries.length; i++) {
+      var e = entries[i];
+      if (perf && !markSpans(e.text, [perf]).length) continue;
+      var iv = extractIntervals(e.text);
+      for (var j = 0; j < iv.length; j++) {
+        rows.push({ date: e.date, index: i, from: iv[j].from, to: iv[j].to, m: iv[j].m });
+        total += iv[j].m;
+      }
+    }
+    return { rows: rows, total: total };
+  }
+
+  /* ---------- 8. Index pe zile calendaristice ---------- */
+  function dayKey(dt) {
+    return dt.getFullYear() + '-' + pad2(dt.getMonth() + 1) + '-' + pad2(dt.getDate());
+  }
+
+  /* Pentru fiecare zi: ce sonde au raport în ziua aceea, în ce intervenție
+     și a câta zi din intervenție este. */
+  function buildDayIndex(docs, gapMonths) {
+    var byDay = {}, keys = [], first = null, last = null;
+    for (var i = 0; i < docs.length; i++) {
+      var d = docs[i], per = splitPeriods(d.entries, d.category, gapMonths);
+      for (var p = 0; p < per.length; p++) {
+        for (var k = 0; k < per[p].entries.length; k++) {
+          var e = per[p].entries[k], key = dayKey(e.date);
+          if (!byDay[key]) { byDay[key] = []; keys.push(key); }
+          byDay[key].push({ doc: d, entry: e, period: per[p], idx: k + 1, n: per[p].entries.length });
+          if (!first || e.date < first) first = e.date;
+          if (!last || e.date > last) last = e.date;
+        }
+      }
+    }
+    keys.sort();
+    for (var q = 0; q < keys.length; q++) {
+      byDay[keys[q]].sort(function (a, b) {
+        return a.doc.category.localeCompare(b.doc.category) ||
+               a.doc.well.localeCompare(b.doc.well, 'ro', { numeric: true });
+      });
+    }
+    return { byDay: byDay, keys: keys, first: first, last: last };
+  }
+
+  /* Filtrul de categorie: 'ALL' = tot; 'GRK' = tot folderul RK (subcategoriile
+     RK, RE, IN, FI și zilele fără categorie din el); altfel categoria zilei (coloana 3). */
+  var RK_SUB = ['RK', 'RE', 'IN', 'FI'];
+  function catMatch(filter, dayCategory, folder) {
+    if (!filter || filter === 'ALL') return true;
+    if (filter === 'GRK') return folder === 'RK';
+    return (dayCategory || folder) === filter;
+  }
+
+  /* Înregistrările unei zile, filtrate după categorie ('ALL' = toate). */
+  function dayRecords(index, key, category) {
+    var list = index.byDay[key] || [];
+    if (!category || category === 'ALL') return list;
+    return list.filter(function (r) { return catMatch(category, r.entry.cat, r.doc.category); });
+  }
+
+  /* Cea mai apropiată zi cu lucrări înainte (dir=-1) sau după (dir=1) cheia dată. */
+  function nearestDay(index, key, dir, category) {
+    var ks = index.keys, i;
+    if (dir > 0) { for (i = 0; i < ks.length; i++) if (ks[i] > key && dayRecords(index, ks[i], category).length) return ks[i]; }
+    else { for (i = ks.length - 1; i >= 0; i--) if (ks[i] < key && dayRecords(index, ks[i], category).length) return ks[i]; }
+    return null;
+  }
+
+  function keyToDate(key) {
+    var p = key.split('-');
+    return new Date(+p[0], +p[1] - 1, +p[2], 12, 0, 0);
+  }
+
+  /* Categoria dedusă din calea relativă a fișierului. */
+  function categoryFromPath(path) {
+    var parts = String(path).split(/[\\\/]/);
+    for (var i = parts.length - 2; i >= 0; i--) {
+      var p = parts[i].trim().toUpperCase();
+      if (p === 'PP' || p === 'RK' || p === 'TF' || p === 'EMZ') return p;
+    }
+    return null;
+  }
+
+  /* Când fișierele sunt alese unul câte unul, calea lipsește; atunci se ia
+     sufixul din denumire ("4 BAIA PP.csv", "86 NADES TF.csv"). */
+  function categoryFor(path, fileName) {
+    var c = categoryFromPath(path);
+    if (c) return c;
+    var n = String(fileName || '').replace(/\.csv$/i, '').trim().toUpperCase();
+    if (/(^|[\s\-_])PP$/.test(n)) return 'PP';
+    if (/(^|[\s\-_])TF$/.test(n)) return 'TF';
+    if (/(^|[\s\-_])RK$/.test(n)) return 'RK';
+    if (/(^|[\s\-_])EMZ$/.test(n)) return 'EMZ';
+    return 'ALT';
+  }
+
+  var api = {
+    parseCSV: parseCSV, detectDelimiter: detectDelimiter, parseRoDate: parseRoDate, fmtDate: fmtDate, dowRo: dowRo,
+    addMonths: addMonths, daysBetween: daysBetween, parseWoFile: parseWoFile,
+    splitPeriods: splitPeriods, periodCat: periodCat, docCat: docCat, fold: fold, buildIndex: buildIndex,
+    search: search, matchingEntries: matchingEntries,
+    DEFAULT_MARKERS: DEFAULT_MARKERS, markSpans: markSpans, markersIn: markersIn, markAbd: markAbd, ABD_FROM: ABD_FROM,
+    extractIntervals: extractIntervals, periodIntervals: periodIntervals,
+    categoryFromPath: categoryFromPath, categoryFor: categoryFor,
+    dayKey: dayKey, keyToDate: keyToDate, buildDayIndex: buildDayIndex,
+    dayRecords: dayRecords, nearestDay: nearestDay, catMatch: catMatch, RK_SUB: RK_SUB,
+    CATEGORY_LABEL: { PP: 'Probe de producție', RK: 'Reparații capitalizabile',
+      RE: 'Reechipare', IN: 'Intervenții', FI: 'Fără instalație',
+      TF: 'Tub flexibil', EMZ: 'Măsurători de zăcământ', NaN: 'Nu se aplică nicio activitate',
+      ALT: 'Fără folder recunoscut', GRK: 'Folder RK (RK, RE, IN, FI)' },
+    FOLDER_LABEL: { PP: 'Probe de producție', RK: 'Folder RK — Reparații capitalizabile, Reechipare, Intervenții, Fără instalație',
+      TF: 'Tub flexibil', EMZ: 'Măsurători de zăcământ', ALT: 'Fără folder recunoscut' }
+  };
+
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  root.WOCore = api;
+})(typeof self !== 'undefined' ? self : this);
+
+</script>
+<script>
+(function(){
+'use strict';
+var W = window.WOCore;
+var $ = function(s){ return document.querySelector(s); };
+var CATS = ['PP','RK','RE','IN','TF','EMZ','FI','NaN','ALT'];
+function dayCat(e, doc){ return (e && e.cat) || (doc && doc.category) || 'ALT'; }
+function catPass(e, doc){ return W.catMatch(S.cat, e && e.cat, doc && doc.category); }
+function catName(c){ return c === 'GRK' ? 'folderul RK' : 'categoria ' + c; }
+/* Explicația etichetei: categoria stabilită în ultima zi (coloana 3) și folderul fișierului. */
+function catTitle(c, folder){
+  return (W.CATEGORY_LABEL[c] || c) + ' — categoria stabilită în ultima zi a intervenției' + (folder && folder !== c ? ' · fișier din folderul ' + folder : '');
+}
+
+var S = {
+  docs:[], folder:'', query:'', cat:'ALL', hi:-1,
+  doc:null, periods:[], sel:'all',
+  view:'list', density:'confort', mono:false, fsDelta:0, inQuery:'', gap:1,
+  mode:'wells', dix:null, calKey:null, calMonth:null,
+  markers: W.DEFAULT_MARKERS.map(function(m){ return copyMarker(m); })
+};
+
+/* ---------------- utilitare ---------------- */
+function esc(s){
+  return String(s).replace(/[&<>"]/g, function(c){
+    return c==='&'?'&amp;':c==='<'?'&lt;':c==='>'?'&gt;':'&quot;';
+  });
+}
+function colorOf(c){ return getComputedStyle(document.documentElement).getPropertyValue('--c-'+(c||'ALT')).trim() || '#808080'; }
+function plural(n, one, few, many){
+  if(n===1) return one;
+  if(n%100>=20 || (n%100===0 && n!==0)) return many;   // 20 de, 100 de, dar 0 fișiere
+  return few;
+}
+function terms(q){ return W.fold(q).trim().split(/\s+/).filter(Boolean); }
+
+/* Marcajele se păstrează fără regula compilată, ca să poată fi salvate. */
+function copyMarker(m){
+  return { id:m.id, word:m.word, stem:m.stem, mode:m.mode, color:m.color, tint:!!m.tint, on:m.on !== false };
+}
+function markersToSave(){ return S.markers.map(copyMarker); }
+
+/* Evidențiază termenii căutați și cuvintele marcate. `fold` păstrează lungimea
+   textului, deci pozițiile găsite se aplică direct pe textul original. */
+function abdMarker(){
+  for(var i=0;i<S.markers.length;i++) if(S.markers[i].id === 'abd') return S.markers[i].on !== false ? S.markers[i] : null;
+  return null;
+}
+var ABD_WORD = /[a-z]*aba?ndon[a-z]*|\bexpert\b/g;
+function markup(text, tl, abd){
+  var f = W.fold(text), spans = [], i, t, p, k;
+  var am = abd ? abdMarker() : null;
+  if(am){ ABD_WORD.lastIndex = 0; var hw; while((hw = ABD_WORD.exec(f))){
+    if(hw[0] === 'expert' && f.slice(Math.max(0, hw.index - 8), hw.index) === 'premium ') continue;
+    spans.push([hw.index, hw.index + hw[0].length, am]); } }
+  for(i=0;i<tl.length;i++){
+    t = tl[i]; p = 0;
+    while(true){ k = f.indexOf(t,p); if(k<0) break; spans.push([k, k+t.length, null]); p = k+t.length; }
+  }
+  var ms = W.markSpans(text, S.markers);
+  for(i=0;i<ms.length;i++) spans.push(ms[i]);
+  if(!spans.length) return esc(text);
+
+  spans.sort(function(a,b){ return a[0]-b[0] || b[1]-a[1]; });
+  var merged = [];
+  for(i=0;i<spans.length;i++){
+    var last = merged[merged.length-1];
+    if(last && spans[i][0] <= last[1]){
+      if(spans[i][1] > last[1]) last[1] = spans[i][1];
+      if(spans[i][2] === null) last[2] = null;   /* termenul căutat are prioritate */
+    } else merged.push([spans[i][0], spans[i][1], spans[i][2]]);
+  }
+
+  var out = '', cur = 0;
+  for(i=0;i<merged.length;i++){
+    var inner = esc(text.slice(merged[i][0], merged[i][1])), mk = merged[i][2];
+    out += esc(text.slice(cur, merged[i][0])) +
+      (mk === null ? '<mark>' + inner + '</mark>'
+                   : '<b class="mk" style="color:' + mk.color + '">' + inner + '</b>');
+    cur = merged[i][1];
+  }
+  return out + esc(text.slice(cur));
+}
+
+/* ---------------- memorie locală: doar lista de cuvinte marcate ----------------
+   Datele citite din folder NU se mai păstrează în browser: la fiecare pornire
+   programul citește din nou toate fișierele .csv. */
+var DB='wo-viewer', ST='kv';
+function openDb(){
+  return new Promise(function(res,rej){
+    var r; try{ r = indexedDB.open(DB,1); }catch(e){ return rej(e); }
+    r.onupgradeneeded=function(){ r.result.createObjectStore(ST); };
+    r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error); };
+  });
+}
+function kvSet(k,v){
+  return openDb().then(function(db){
+    return new Promise(function(res,rej){
+      var tx=db.transaction(ST,'readwrite'); tx.objectStore(ST).put(v,k);
+      tx.oncomplete=res; tx.onerror=function(){rej(tx.error);};
+    });
+  })['catch'](function(){});
+}
+function kvDel(k){
+  return openDb().then(function(db){
+    return new Promise(function(res){
+      var tx=db.transaction(ST,'readwrite'); tx.objectStore(ST)['delete'](k);
+      tx.oncomplete=res; tx.onerror=res;
+    });
+  })['catch'](function(){});
+}
+function kvGet(k){
+  return openDb().then(function(db){
+    return new Promise(function(res,rej){
+      var tx=db.transaction(ST,'readonly'), rq=tx.objectStore(ST).get(k);
+      rq.onsuccess=function(){res(rq.result);}; rq.onerror=function(){rej(rq.error);};
+    });
+  })['catch'](function(){ return undefined; });
+}
+
+/* ---------------- citirea fișierelor ---------------- */
+/* Întoarce textul și codificarea în care a putut fi citit. Un singur caracter
+   invalid în UTF-8 e suficient ca să se încerce și codificările vechi Windows. */
+function decode(buf){
+  var t, enc = 'utf-8';
+  try{ t = new TextDecoder('utf-8').decode(buf); }
+  catch(e){ return { text: String.fromCharCode.apply(null, new Uint8Array(buf)), enc: 'latin1' }; }
+  var bad = t.split('\uFFFD').length - 1;
+  if(bad > 0){
+    var tries = ['windows-1250', 'windows-1252'];
+    for(var i = 0; i < tries.length; i++){
+      var alt = null;
+      try{ alt = new TextDecoder(tries[i]).decode(buf); }catch(e2){}
+      if(alt != null && (alt.split('\uFFFD').length - 1) < bad){ t = alt; enc = tries[i]; break; }
+    }
+  }
+  return { text: t, enc: enc };
+}
+
+/* Blob.arrayBuffer lipsește în browsere mai vechi; atunci se citește cu FileReader. */
+function readBuffer(blob){
+  if(!blob) return Promise.reject(new Error('fără conținut'));
+  if(blob.arrayBuffer) return blob.arrayBuffer();
+  return new Promise(function(res, rej){
+    var fr = new FileReader();
+    fr.onload = function(){ res(fr.result); };
+    fr.onerror = function(){ rej(fr.error); };
+    fr.readAsArrayBuffer(blob);
+  });
+}
+
+/* ---------------- ecranul de încărcare ---------------- */
+var LOAD = null;
+function fmtInt(n){ return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+
+function showLoading(title, phase){
+  LOAD = { t0: Date.now(), stats: {}, days: 0 };
+  $('#rail').classList.add('hide');
+  $('#main').className = 'main';
+  $('#main').innerHTML =
+    '<div class="empty loading" role="status" aria-live="polite">' +
+      '<h1>' + esc(title || 'Se încarcă datele sondelor') + '</h1>' +
+      '<p class="phase" id="lphase">' + esc(phase || '') + '</p>' +
+      '<div class="bars wait" id="lbar" role="progressbar" aria-label="Încărcarea datelor" ' +
+        'aria-valuemin="0" aria-valuemax="100"><i id="bars"></i></div>' +
+      '<div class="lrow"><b id="lpct">&nbsp;</b><span id="ptxt"></span></div>' +
+      '<p class="lnow" id="lnow"></p>' +
+      '<div class="lstats" id="lstats"></div>' +
+    '</div>';
+}
+function loadPhase(txt){ var el = $('#lphase'); if(el) el.textContent = txt; }
+
+/* frac: partea din întreaga încărcare (0–1); count: textul „x din y”; now: sonda curentă */
+function progress(frac, count, now){
+  var p = Math.max(0, Math.min(100, Math.floor(frac * 100)));
+  var bar = $('#lbar');
+  if(bar){ bar.classList.remove('wait'); bar.setAttribute('aria-valuenow', p); }
+  var b = $('#bars'); if(b) b.style.width = p + '%';
+  var pc = $('#lpct'); if(pc) pc.textContent = p + '%';
+  var st = $('#ptxt'); if(st && count != null) st.textContent = count;
+  var nw = $('#lnow'); if(nw && now != null) nw.textContent = now;
+}
+
+function countDoc(d){
+  if(!LOAD) return;
+  LOAD.stats[d.category] = (LOAD.stats[d.category] || 0) + 1;
+  LOAD.days += d.entries.length;
+}
+function renderLoadStats(){
+  var el = $('#lstats'); if(!el || !LOAD) return;
+  var html = '';
+  CATS.forEach(function(c){
+    if(LOAD.stats[c]) html += '<span><i style="background:' + colorOf(c) + '"></i>' + c + ' <b>' + fmtInt(LOAD.stats[c]) + '</b></span>';
+  });
+  el.innerHTML = html + '<span>zile raportate <b>' + fmtInt(LOAD.days) + '</b></span>';
+}
+/* Pauză scurtă între bucăți, ca bara să se redeseneze. Prin MessageChannel, nu prin
+   setTimeout: browserul încetinește temporizatoarele când fila nu e în față, iar
+   încărcarea ar dura minute; așa merge la fel de repede și când fila e în spate. */
+var TICK = null;
+if(typeof MessageChannel !== 'undefined'){
+  TICK = { ch: new MessageChannel(), q: [] };
+  TICK.ch.port1.onmessage = function(){ var f = TICK.q.shift(); if(f) f(); };
+}
+function tick(){
+  if(TICK) return new Promise(function(r){ TICK.q.push(r); TICK.ch.port2.postMessage(0); });
+  return new Promise(function(r){ setTimeout(r, 0); });
+}
+
+/* Indexul de căutare se construiește pe bucăți, ca bara să avanseze. */
+function indexInChunks(docs, from, to){
+  loadPhase('Construiesc indexul de căutare');
+  var i = 0, B = 40, n = docs.length;
+  function step(){
+    var end = Math.min(i + B, n);
+    W.buildIndex(docs.slice(i, end));
+    i = end;
+    progress(from + (to - from) * (n ? i / n : 1), 'indexate ' + i + ' din ' + n + ' ' + plural(n,'sondă','sonde','de sonde'),
+             n ? docs[i - 1].well : '');
+    return i < n ? tick().then(step) : Promise.resolve(docs);
+  }
+  return step();
+}
+
+/* Bara plină rămâne pe ecran o clipă, apoi se deschide programul. */
+function finishLoading(docs, folder, when){
+  progress(1, docs.length + ' ' + plural(docs.length,'sondă','sonde','de sonde') + ' încărcate', '');
+  var nd = LOAD ? LOAD.days : 0;
+  loadPhase('Gata: ' + fmtInt(docs.length) + ' ' + plural(docs.length,'sondă','sonde','de sonde') +
+            ', ' + fmtInt(nd) + ' ' + plural(nd,'zi raportată','zile raportate','de zile raportate'));
+  renderLoadStats();
+  return new Promise(function(r){ setTimeout(r, 350); }).then(function(){
+    LOAD = null;
+    adopt(docs, folder, when, true);
+  });
+}
+
+/* items: {name, path, blob} */
+function indexFiles(items, folderName){
+  // fișierele programelor („_import_log.csv”, „_backup/…”, „_situatie/…”) nu sunt rapoarte de sondă
+  items = items.filter(function(f){ return /\.csv$/i.test(f.name) && !String(f.path || f.name).split(/[\\\/]/).some(function(p){ return p.charAt(0) === '_'; }); });
+  if(!items.length){ showEmpty('Nu am găsit niciun fișier .csv în folderul ales. Alege folderul WO_final, cel care conține PP, RK, TF și EMZ.'); return Promise.resolve(); }
+  var total = items.length;
+  S.skipped = []; S.empty = []; S.templates = 0;
+  showLoading('Se încarcă datele sondelor', 'Citesc toate fișierele din folderul ' + (folderName || 'WO'));
+  // fără memorie între deschideri: fiecare fișier se citește integral, de fiecare dată
+  var docs = [], done = 0, B = 12, fresh = items.slice();
+
+  progress(0, '0 din ' + fmtInt(total) + ' ' + plural(total,'fișier','fișiere','de fișiere'), '');
+  return tick().then(function(){ return batch(0); }).then(function(){
+    docs.sort(function(a,b){ return a.name.localeCompare(b.name,'ro',{numeric:true}); });
+    return indexInChunks(docs, 0.85, 1);
+  }).then(function(){
+    return finishLoading(docs, folderName, Date.now());
+  });
+
+  function batch(i){
+    if(i >= fresh.length) return Promise.resolve();
+    var slice = fresh.slice(i, i + B), last = '';
+    return Promise.all(slice.map(function(it){
+      return readBuffer(it.blob).then(function(buf){
+        var cat = W.categoryFor(it.path, it.name), dec = decode(buf);
+        var d = W.parseWoFile(it.name, cat, dec.text);
+        d.path = it.path; d.enc = dec.enc;
+        if(dec.enc !== 'utf-8') d.issues.unshift({ code:'enc', text:'salvat în codificarea ' + dec.enc + ', nu în UTF-8' });
+        if(d.entries.length || d.undated.length){ docs.push(d); countDoc(d); last = cat + '  ' + d.well; }
+        else if(/(^|\s)A Raport$/i.test(d.name)){ S.templates = (S.templates || 0) + 1; }   // șablon gol de raport („1 A Raport”)
+        else S.empty = (S.empty || []).concat([{ file:it.name, category:cat, well:d.well }]);
+      })['catch'](function(){
+        S.skipped = (S.skipped || []).concat([{ file:it.name, category:W.categoryFor(it.path, it.name),
+          issues:[{ code:'read', text:'fișierul nu a putut fi citit (poate este blocat de alt program)' }] }]);
+      })
+      .then(function(){ done++; });
+    })).then(function(){
+      progress(0.85 * done / total, fmtInt(done) + ' din ' + fmtInt(total) + ' ' + plural(total,'fișier','fișiere','de fișiere'), last);
+      renderLoadStats();
+      return tick().then(function(){ return batch(i + B); });
+    });
+  }
+}
+
+function adopt(docs, folderName, when, indexed){
+  S.docs = indexed ? docs : W.buildIndex(docs);
+  S.folder = folderName || 'WO';
+  S.when = when || Date.now();
+  S.dix = null; S.calKey = null; S.calMonth = null; S.mode = 'wells';
+  $('#q').disabled = false;
+  enableModes(true);
+  renderState();
+  showEmpty(null);                    // lista de sonde nu se mai deschide singură după încărcare;
+  closeSearch();                      // apare doar când scrii sau dai clic în caseta de căutare
+}
+
+/* ---------------- folderul principal: WO_final din rețea (cerințe 05–06.10.2026) ----------------
+   Fără fișiere .cmd și fără server: browserul nu poate deschide singur o cale de rețea, așa că folderul din
+   rețea se alege o singură dată („Alege folderul din rețea”); programul ține minte DOAR acest acces (nu și
+   datele) și la fiecare pornire citește din nou toate fișierele de acolo. Doar dacă acolo nu găsește nimic
+   (fără acces sau fără PP/RK/TF/EMZ) oferă alegerea altui folder. */
+var NET_ROOT = '\\\\10.11.1.13\\bkpdate\\Geologic\\Serviciul Geologic\\WO_final';
+var NET_KEY = 'retea';
+function hasWoDirs(h){
+  var names = ['PP', 'RK', 'TF', 'EMZ'], i = 0;
+  function next(){
+    if(i >= names.length) return Promise.resolve(false);
+    return h.getDirectoryHandle(names[i++]).then(function(){ return true; }, next);
+  }
+  return next();
+}
+/* Deschide folderul din rețea memorat; fără clic merge doar dacă browserul a păstrat permisiunea. */
+function openNet(h, ask){
+  S.net = h;
+  return h.queryPermission({ mode:'read' }).then(function(p){
+    return (p !== 'granted' && ask) ? h.requestPermission({ mode:'read' }) : p;
+  })['catch'](function(){ return 'prompt'; }).then(function(p){
+    if(p !== 'granted'){ S.netState = 'perm'; showEmpty(null); return; }
+    $('#state').textContent = 'Se citește folderul din rețea…';
+    return hasWoDirs(h).then(function(ok){
+      if(!ok){
+        S.netState = 'gol'; $('#state').textContent = 'Niciun folder încărcat';
+        showEmpty('În ' + NET_ROOT + ' nu am găsit nimic (fără acces la rețea sau fără subfolderele PP, RK, TF, EMZ). Încearcă din nou sau alege alt folder:');
+        return;
+      }
+      S.netState = 'ok';
+      return fromDirHandle(h, NET_ROOT);
+    });
+  })['catch'](function(err){
+    S.netState = 'gol'; $('#state').textContent = 'Niciun folder încărcat';
+    showEmpty('Folderul din rețea nu a putut fi citit (' + (err && err.message || err) + '). Încearcă din nou sau alege alt folder:');
+  });
+}
+function startNet(ask){
+  return kvGet(NET_KEY).then(function(h){
+    if(!h){ S.netState = 'first'; showEmpty(null); return; }
+    return openNet(h, ask);
+  });
+}
+function pickNet(){
+  return window.showDirectoryPicker({ mode:'read', id:'wo-retea' }).then(function(h){
+    return hasWoDirs(h).then(function(ok){
+      if(!ok){ showEmpty('Folderul ales (' + h.name + ') nu conține PP, RK, TF sau EMZ. Alege folderul WO_final din rețea.'); return; }
+      return kvSet(NET_KEY, h).then(function(){ S.netState = 'ok'; S.net = h; return fromDirHandle(h, NET_ROOT); });
+    });
+  })['catch'](function(err){
+    if(err && err.name === 'AbortError') return;
+    showEmpty('Folderul din rețea nu a putut fi deschis (' + (err && err.message || err) + ').');
+  });
+}
+/* Blocul de sus al ecranului de pornire: folderul din rețea. */
+function netHtml(){
+  var fs = ('showDirectoryPicker' in window), st = S.netState;
+  if(!fs || st === 'ok') return '';
+  var t = st === 'perm' ? '<b>Folderul din rețea așteaptă permisiunea ta.</b> Apasă butonul; ca browserul să nu mai întrebe, alege „Permite la fiecare vizită” (dacă apare).'
+        : st === 'gol' ? '<b>Folderul din rețea nu este disponibil acum.</b>'
+        : '<b>Alege o singură dată folderul WO_final din rețea.</b> În fereastra care se deschide scrie în bara de adrese <b>' + esc(NET_ROOT) +
+          '</b>, apasă Enter și apoi „Selectare folder”. Programul îl ține minte și îl deschide singur la pornirile următoare.';
+  return '<div class="auto">' + t + '<div style="margin-top:10px">' +
+    (st === 'perm' || st === 'gol' ? '<button class="pick" id="btnNetOpen">' + (st === 'perm' ? 'Deschide folderul din rețea' : 'Încearcă din nou') + '</button> ' : '') +
+    '<button class="pick' + (st === 'first' ? '' : ' ghost') + '" id="btnNetPick">' + (S.net ? 'Alege din nou folderul din rețea' : 'Alege folderul din rețea') + '</button></div></div>';
+}
+
+/* ---------------- surse de fișiere ---------------- */
+function fromInput(files){
+  S.root = '';                        // folder ales de utilizator, nu cel din rețea
+  var arr = [];
+  for(var i=0;i<files.length;i++){
+    var f = files[i];
+    arr.push({ name:f.name, path:(f.webkitRelativePath || f.name), blob:f });
+  }
+  var root = '';
+  if(files.length && files[0].webkitRelativePath) root = files[0].webkitRelativePath.split('/')[0];
+  return indexFiles(arr, root);
+}
+
+function fromDirHandle(handle, root){
+  S.root = root || '';                // NET_ROOT = folderul din rețea; altfel alt folder ales de utilizator
+  var out = [];
+  function walk(dir, prefix){
+    var it = dir.values(), acc = [];
+    function step(){
+      return it.next().then(function(r){
+        if(r.done) return Promise.all(acc);
+        var e = r.value, p = prefix + '/' + e.name;
+        if(e.kind === 'file'){
+          if(/\.csv$/i.test(e.name)) acc.push(e.getFile().then(function(f){ out.push({name:e.name, path:p, blob:f}); }));
+        } else if(e.kind === 'directory'){
+          acc.push(walk(e, p));
+        }
+        return step();
+      });
+    }
+    return step();
+  }
+  return walk(handle, handle.name).then(function(){ return indexFiles(out, handle.name); });
+}
+
+function fromDataTransfer(dt){
+  S.root = '';
+  var out = [], jobs = [];
+  function walkEntry(entry, prefix){
+    return new Promise(function(res){
+      if(entry.isFile){
+        entry.file(function(f){
+          if(/\.csv$/i.test(f.name)) out.push({name:f.name, path:prefix+'/'+f.name, blob:f});
+          res();
+        }, res);
+      } else if(entry.isDirectory){
+        var rd = entry.createReader(), all = [];
+        (function more(){
+          rd.readEntries(function(ents){
+            if(!ents.length){
+              Promise.all(all.map(function(e){ return walkEntry(e, prefix+'/'+entry.name); })).then(res);
+              return;
+            }
+            all = all.concat(ents); more();
+          }, res);
+        })();
+      } else res();
+    });
+  }
+  var items = dt.items, root = '';
+  for(var i=0;i<items.length;i++){
+    var en = items[i].webkitGetAsEntry && items[i].webkitGetAsEntry();
+    if(en){ if(!root) root = en.name; jobs.push(walkEntry(en, '')); }
+  }
+  if(!jobs.length){ return fromInput(dt.files); }
+  return Promise.all(jobs).then(function(){ return indexFiles(out, root); });
+}
+
+/* ---------------- ecrane ---------------- */
+function showEmpty(message){
+  if(S.docs.length && !message){
+    $('#main').innerHTML =
+      '<div class="empty"><h1>' + esc(S.folder) + ' este indexat</h1>' +
+      '<p>Scrie în caseta de sus numele unei sonde sau un text din rapoarte. Poți restrânge căutarea la o categorie: PP, folderul RK (RK, RE, IN, FI), TF, EMZ sau NaN.</p>' +
+      issuesHtml() + infoHtml() + readonlyHtml() + legendHtml() + '</div>';
+    wireIssues();
+    return;
+  }
+  var fs = ('showDirectoryPicker' in window);
+  $('#rail').classList.add('hide');
+  $('#main').innerHTML =
+    '<div class="empty">' +
+      '<h1>Rapoarte de work-over</h1>' +
+      '<p>Deschide folderul WO_final — cel care conține PP, RK, TF și EMZ — și programul citește de fiecare dată toate fișierele .csv, le grupează pe sonde și le împarte pe intervenții.</p>' +
+      (message ? '<p style="color:#b23b17">' + esc(message) + '</p>' : '') +
+      netHtml() +
+      (S.netState && S.netState !== 'ok' ? '<p class="hint" style="margin:14px 0 6px">Sau alege alt folder WO_final:</p>' : '') +
+      '<div class="drop" id="drop">' +
+        '<button class="pick" id="btnDir">Alege folderul WO</button> ' +
+        (fs ? '<button class="pick ghost" id="btnFs">Alege folderul (fereastra Windows)</button>' : '') +
+        '<p class="hint">Sau trage folderul WO peste această zonă. ' +
+        '<button class="linklike" id="btnFiles" style="color:#203d88">Alege fișiere separate</button></p>' +
+      '</div>' +
+      readonlyHtml() +
+      legendHtml() +
+    '</div>';
+  wireEmpty();
+}
+
+/* Fișierele cu probleme: cele indexate, cu observații, și cele fără nicio zi citită. */
+function problemFiles(){
+  var out = [];
+  S.docs.forEach(function(d){ if(d.issues && d.issues.length) out.push({ doc:d, file:d.file, category:d.category, issues:d.issues }); });
+  (S.skipped || []).forEach(function(x){ out.push({ doc:null, file:x.file, category:x.category, issues:x.issues }); });
+  return out.sort(function(a,b){ return a.file.localeCompare(b.file, 'ro', {numeric:true}); });
+}
+function issuesHtml(){
+  var list = problemFiles();
+  if(!list.length) return '';
+  return '<section class="issues" id="issues"><h3>' + fmtInt(list.length) + ' ' +
+      plural(list.length,'fișier de verificat','fișiere de verificat','de fișiere de verificat') + '</h3>' +
+    '<p class="help">Fișierele de mai jos au fost citite, dar arată semne că au fost salvate altfel decât restul, de obicei din Excel. ' +
+      'Programul nu le modifică; corectura se face în fișier, cu un editor de text sau salvând din Excel ca „CSV UTF-8 (delimitat prin virgulă)”.</p>' +
+    '<ul>' + list.map(function(x, i){
+      return '<li><button data-iss="' + i + '"' + (x.doc ? '' : ' disabled') + '>' +
+        '<span class="tag" style="background:' + colorOf(x.category) + '">' + x.category + '</span>' +
+        '<span class="fn">' + esc(x.file) + '</span>' +
+        '<span class="why">' + x.issues.map(function(q){ return esc(q.text); }).join('; ') + '</span></button></li>';
+    }).join('') + '</ul></section>';
+}
+/* Informativ, nu de verificat: fișiere fără nicio zi (raportul Word are doar antetul) și șabloanele goale. */
+function infoHtml(){
+  var em = S.empty || [], t = S.templates || 0;
+  if(!em.length && !t) return '';
+  return '<section class="info" id="info"><h3>Informativ</h3><ul>' +
+    em.map(function(x){
+      return '<li><span class="tag" style="background:' + colorOf(x.category) + '">' + x.category + '</span>' +
+        '<span class="fn">' + esc(x.file) + '</span><span class="why">fără nicio zi de lucru; fișierul are doar antetul (ca raportul Word din care provine)</span></li>';
+    }).join('') +
+    (t ? '<li><span class="fn">' + t + ' ' + plural(t,'șablon gol','șabloane goale','de șabloane goale') + ' „A Raport”</span>' +
+         '<span class="why">formularul de raport necompletat; nu se afișează</span></li>' : '') +
+    '</ul></section>';
+}
+function wireIssues(){
+  var list = problemFiles();
+  Array.prototype.forEach.call(document.querySelectorAll('#issues [data-iss]'), function(b){
+    b.onclick = function(){ var x = list[+b.dataset.iss]; if(x && x.doc) choose(x.doc); };
+  });
+}
+
+function readonlyHtml(){
+  return '<p class="readonly"><b>Programul doar citește.</b> Nu modifică, nu redenumește, nu mută și nu șterge ' +
+    'niciodată fișierele .csv din folderul WO. Folderul este deschis cu drept de citire. Datele nu se păstrează ' +
+    'între deschideri: la fiecare pornire se citesc din nou toate fișierele; se ține minte doar accesul la folderul din rețea.</p>';
+}
+
+function legendHtml(){
+  return '<div class="legend"><dl>' +
+    '<dt style="background:var(--c-PP)">PP</dt><dd>Probe de producție</dd>' +
+    '<dt class="lg" style="background:var(--c-RK)">RK&nbsp;▸</dt><dd><b>Folderul RK</b>, cu subcategoriile:</dd>' +
+    '<dt class="lsub" style="background:var(--c-RK)">RK</dt><dd>Reparații capitalizabile</dd>' +
+    '<dt class="lsub" style="background:var(--c-RE)">RE</dt><dd>Reechipare</dd>' +
+    '<dt class="lsub" style="background:var(--c-IN)">IN</dt><dd>Intervenții</dd>' +
+    '<dt class="lsub" style="background:var(--c-FI)">FI</dt><dd>Fără instalație</dd>' +
+    '<dt style="background:var(--c-TF)">TF</dt><dd>Tub flexibil</dd>' +
+    '<dt style="background:var(--c-EMZ)">EMZ</dt><dd>Măsurători de zăcământ</dd>' +
+    '<dt style="background:var(--c-NaN)">NaN</dt><dd>Nu se aplică nicio activitate</dd>' +
+    '</dl><p class="lnote">Eticheta unei sonde și a fiecărei intervenții arată categoria stabilită în ultima zi ' +
+    '(coloana 3 din CSV), nu folderul: o sondă din folderul RK aflată în RE în ultima zi apare RE.</p></div>';
+}
+
+function wireEmpty(){
+  var drop = $('#drop');
+  var bno = $('#btnNetOpen'); if(bno) bno.onclick = function(){ if(S.net) openNet(S.net, true); else startNet(true); };
+  var bnp = $('#btnNetPick'); if(bnp) bnp.onclick = function(){ pickNet(); };
+  var bd = $('#btnDir'); if(bd) bd.onclick = function(){ $('#dirpick').click(); };
+  var bfl = $('#btnFiles'); if(bfl) bfl.onclick = function(){ $('#filepick').click(); };
+  var bf = $('#btnFs');
+  if(bf) bf.onclick = function(){
+    window.showDirectoryPicker({ mode:'read' }).then(function(h){
+      return fromDirHandle(h);
+    })['catch'](function(err){
+      if(err && err.name === 'AbortError') return;
+      showEmpty('Browserul nu permite această fereastră pentru un fișier deschis local. Folosește „Alege folderul WO”.');
+    });
+  };
+  if(!drop) return;
+  ['dragenter','dragover'].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.add('over'); });
+  });
+  ['dragleave','drop'].forEach(function(ev){
+    drop.addEventListener(ev, function(e){ e.preventDefault(); drop.classList.remove('over'); });
+  });
+  drop.addEventListener('drop', function(e){ if(e.dataTransfer) fromDataTransfer(e.dataTransfer); });
+}
+
+function renderState(){
+  var n = S.docs.length, byCat = {};
+  S.docs.forEach(function(d){ byCat[d.category] = (byCat[d.category]||0)+1; });
+  var parts = [];
+  CATS.forEach(function(c){ if(byCat[c]) parts.push(fmtInt(byCat[c]) + ' ' + c); });
+  $('#state').innerHTML = '<b' + (S.root ? ' title="' + esc(S.root) + '"' : '') + '>' + esc(S.folder) +
+    (S.root && S.root.indexOf('\\\\') === 0 ? ' (rețea)' : '') + '</b> — ' + fmtInt(n) + ' ' +
+    plural(n,'raport','rapoarte','de rapoarte') +
+    (parts.length ? ' (' + parts.join(', ') + ')' : '') +
+    ', citit ' + W.fmtDate(new Date(S.when)) +
+    (problemFiles().length ? '<button class="warnlink" id="btnIssues">' + fmtInt(problemFiles().length) + ' ' +
+      plural(problemFiles().length,'fișier de verificat','fișiere de verificat','de fișiere de verificat') + '</button>' : '') +
+    '<button class="linklike" id="btnReset">recitește folderul</button>';
+  if($('#btnIssues')) $('#btnIssues').onclick = function(e){
+    e.stopPropagation(); S.mode = 'wells'; syncModes(); S.doc = null; $('#rail').classList.add('hide'); showEmpty(null);
+    var box = $('#issues'); if(box && box.scrollIntoView) box.scrollIntoView({ block:'start' });
+  };
+  $('#btnReset').onclick = function(){
+    if(S.root === NET_ROOT && S.net){ openNet(S.net, true); return; }   // folderul din rețea: se recitește
+    if(S.net) S.netState = 'perm';
+    S.docs=[]; S.doc=null; $('#q').value=''; $('#q').disabled=true;
+    S.dix=null; S.mode='wells'; enableModes(false);
+    $('#finder').classList.remove('has'); closeSearch(); $('#rail').classList.add('hide');
+    $('#state').textContent='Niciun folder încărcat'; showEmpty(null);
+  };
+}
+
+/* ---------------- căutare ---------------- */
+var tmr = null;
+function onQuery(){
+  S.query = $('#q').value;
+  $('#finder').classList.toggle('has', !!S.query);
+  clearTimeout(tmr);
+  tmr = setTimeout(openSearch, 110);
+}
+function openSearch(){
+  if(!S.docs.length) return;
+  var res = W.search(S.docs, S.query, S.cat, 80);
+  S.results = res; S.hi = res.length ? 0 : -1;
+  var box = $('#results');
+  if(!res.length){
+    box.innerHTML = '<p class="note">Nicio sondă și niciun raport nu conține „' + esc(S.query) + '”.</p>';
+    box.classList.add('open'); return;
+  }
+  var html = '';
+  for(var i=0;i<res.length;i++){
+    var d = res[i].doc;
+    var per = W.splitPeriods(d.entries, d.category, S.gap);
+    var dc = W.docCat(d, S.gap) || d.category;
+    html += '<button class="hit' + (i===S.hi?' on':'') + '" data-i="' + i + '" role="option">' +
+      '<span class="tag" style="background:' + colorOf(dc) + '" title="' + esc(catTitle(dc, d.category)) + '">' + esc(dc) + '</span>' +
+      '<span class="nm">' + esc(d.well) +
+        (dc !== d.category ? '<i>folder ' + esc(d.category) + '</i>' : '') +
+        (res[i].where==='conținut' ? '<i>text găsit în raport</i>' : '') + '</span>' +
+      '<span class="mt">' + per.length + ' ' + plural(per.length,'intervenție','intervenții','de intervenții') +
+        '<em>' + (d.first ? W.fmtDate(d.first) + ' – ' + W.fmtDate(d.last) : '') + '</em></span>' +
+      '</button>';
+  }
+  box.innerHTML = html;
+  box.classList.add('open');
+  Array.prototype.forEach.call(box.querySelectorAll('.hit'), function(b){
+    b.onclick = function(){ choose(S.results[+b.dataset.i].doc); };
+  });
+}
+function closeSearch(){ $('#results').classList.remove('open'); }
+function moveHi(step){
+  if(!S.results || !S.results.length) return;
+  S.hi = (S.hi + step + S.results.length) % S.results.length;
+  var box = $('#results');
+  Array.prototype.forEach.call(box.querySelectorAll('.hit'), function(b,i){
+    b.classList.toggle('on', i===S.hi);
+    if(i===S.hi && b.scrollIntoView) b.scrollIntoView({block:'nearest'});
+  });
+}
+
+/* ---------------- deschiderea unei sonde ---------------- */
+function choose(doc, targetPeriod){
+  if(!doc) return;
+  S.mode = 'wells'; syncModes();
+  S.doc = doc;
+  S.periods = W.splitPeriods(doc.entries, doc.category, S.gap);
+  S.sel = targetPeriod || 'all';
+  S.inQuery = (S.query && W.search([doc], S.query, 'ALL')[0] && W.search([doc], S.query, 'ALL')[0].where === 'conținut') ? S.query : '';
+  closeSearch();
+  $('#q').blur();
+  renderRail(); renderDoc();
+  $('#main').scrollTop = 0;
+}
+
+/* Toate fișierele aceleiași sonde, din PP, RK și TF. */
+function familyOf(d){
+  var key = W.fold(d.well);
+  return S.docs.filter(function(o){ return W.fold(o.well) === key; });
+}
+
+function renderRail(){
+  var d = S.doc, rail = $('#rail');
+  rail.classList.remove('hide');
+
+  /* axa temporală acoperă întreaga istorie a sondei, din toate folderele */
+  var fam = familyOf(d), items = [], t0 = null, t1 = null, cats = {};
+  fam.forEach(function(o){
+    var per = (o === d) ? S.periods : W.splitPeriods(o.entries, o.category, S.gap);
+    per.forEach(function(x){
+      items.push({ doc:o, p:x });
+      if(t0 === null || x.start < t0) t0 = x.start;
+      if(t1 === null || x.end > t1) t1 = x.end;
+      cats[x.cat || o.category] = true;
+    });
+  });
+
+  var segs = '';
+  if(t0){
+    var span = Math.max(t1.getTime() - t0.getTime(), 1);
+    items.forEach(function(it){
+      var l = (it.p.start.getTime() - t0.getTime()) / span * 100;
+      var w = Math.max((it.p.end.getTime() - it.p.start.getTime()) / span * 100, 1.2);
+      if(l + w > 100) l = 100 - w;
+      var own = it.doc === d;
+      segs += '<button class="seg' + (own ? ' own' : '') + ((own && S.sel === it.p.id) ? ' on' : '') + '"' +
+        ' data-file="' + esc(it.doc.file) + '" data-p="' + it.p.id + '"' +
+        ' style="left:' + l.toFixed(2) + '%;width:' + w.toFixed(2) + '%;background:' + colorOf(it.p.cat || it.doc.category) + '"' +
+        ' title="' + esc(it.p.label + ' (folder ' + it.doc.category + '): ' + W.fmtDate(it.p.start) + ' – ' + W.fmtDate(it.p.end)) + '"></button>';
+    });
+  }
+  var leg = '';
+  if(Object.keys(cats).length > 1){
+    leg = '<div class="leg">' + CATS.filter(function(c){ return cats[c]; })
+      .map(function(c){ return '<span><i style="background:' + colorOf(c) + '"></i>' + c + '</span>'; }).join('') +
+      '</div>';
+  }
+
+  var total = d.entries.length;
+  var toc = '<li><button class="all" data-p="all" aria-current="' + (S.sel==='all') + '">' +
+    '<span class="lbl">Toate intervențiile</span>' +
+    '<span class="rng">' + total + ' ' + plural(total,'zi','zile','de zile') + ' de raport</span></button></li>';
+  S.periods.forEach(function(pp){
+    var m = W.periodIntervals(pp.entries, S.markers).total;
+    var hasAbd = abdMarker() && pp.entries.some(function(x){ return x.abd; });
+    toc += '<li><button data-p="' + pp.id + '" aria-current="' + (S.sel===pp.id) + '" title="' + esc(catTitle(pp.cat || d.category, d.category)) + '">' +
+      '<span class="lbl">' + esc(pp.label) + '</span>' +
+      '<span class="rng">' + W.fmtDate(pp.start) + ' – ' + W.fmtDate(pp.end) +
+      ' &nbsp;' + pp.entries.length + ' ' + plural(pp.entries.length,'zi','zile','de zile') +
+      (m ? ' <span class="pm">&nbsp;' + m + ' m perforați</span>' : '') +
+      (hasAbd ? ' <span class="abdm">&nbsp;ABD</span>' : '') +
+      '</span></button></li>';
+  });
+
+  var others = fam.filter(function(o){ return o !== d; });
+  var also = '';
+  if(others.length){
+    also = '<div class="also"><p>Aceeași sondă, alt folder</p>' +
+      others.map(function(o){
+        var per = W.splitPeriods(o.entries, o.category, S.gap);
+        return '<button data-file="' + esc(o.file) + '">' + o.category + ' — ' + per.length + ' ' +
+          plural(per.length,'intervenție','intervenții','de intervenții') + '</button>';
+      }).join('') + '</div>';
+  }
+
+  var dc = W.docCat(d, S.gap) || d.category;
+  rail.innerHTML =
+    '<h2>' + esc(d.well) + '</h2>' +
+    (dc === d.category
+      ? '<p class="sub"><b>' + d.category + '</b> — ' + esc(W.FOLDER_LABEL[d.category] || 'Alte rapoarte') + '</p>'
+      : '<p class="sub"><b>' + esc(dc) + '</b> — ' + esc(W.CATEGORY_LABEL[dc] || dc) + ', categoria din ultima zi · folder ' + esc(d.category) + '</p>') +
+    (t0 ? '<div class="axis"><div class="track">' + segs + '</div>' +
+      '<div class="yr"><span>' + t0.getFullYear() + '</span><span>' + t1.getFullYear() + '</span></div>' +
+      leg + '</div>' : '') +
+    '<ul class="toc">' + toc + '</ul>' + also;
+
+  Array.prototype.forEach.call(rail.querySelectorAll('[data-p]'), function(b){
+    b.onclick = function(){
+      var f = b.dataset.file;
+      if(f && f !== d.file){ choose(docByFile(f), b.dataset.p); return; }
+      S.sel = b.dataset.p; renderRail(); renderSheet(); $('#main').scrollTop = 0;
+    };
+  });
+  Array.prototype.forEach.call(rail.querySelectorAll('.also [data-file]'), function(b){
+    b.onclick = function(){ choose(docByFile(b.dataset.file)); };
+  });
+}
+
+function docByFile(f){
+  return S.docs.filter(function(x){ return x.file === f; })[0] || null;
+}
+
+function abdPill(e){
+  var am = e && e.abd ? abdMarker() : null;
+  return am ? '<span class="pill abdp" style="--mc:' + am.color + '" title="' + (e.abdStart ? 'Apare abandonarea: de azi până la finalul intervenției sonda e marcată ABD' : 'Sondă în procesul de abandonare (ABD)') + '">ABD</span>' : '';
+}
+function dayHtml(e, i, tl, pid){
+  var ms = W.markersIn(e.text, S.markers), tint = false, pills = abdPill(e);
+  for(var k=0;k<ms.length;k++){
+    if(ms[k].tint) tint = true;
+    pills += '<span class="pill" style="--mc:' + ms[k].color + '">' + esc(ms[k].word) + '</span>';
+  }
+  var dc = dayCat(e, S.doc);
+  return '<article id="d-' + pid + '-' + i + '" class="day' + (tint ? ' pf' : '') + (pills.indexOf('abdp') >= 0 ? ' abd' : '') +
+      '" style="border-left-color:' + colorOf(dc) + '">' +
+    (e.marks ? '<div class="mcj" title="Marcaj din raportul Word">' + e.marks.map(esc).join(' · ') + '</div>' : '') +
+    '<h4>' + (e.cat ? '<span class="dcat" style="background:' + colorOf(dc) + '" title="' + esc(W.CATEGORY_LABEL[dc] || dc) + '">' + esc(dc) + '</span>' : '') +
+    '<span>' + W.fmtDate(e.date) + '</span><span class="dw">' + W.dowRo(e.date) + '</span>' +
+    (pills ? '<span class="pills">' + pills + '</span>' : '') +
+    '<span class="zi">ziua ' + i + '</span></h4>' +
+    '<p>' + markup(e.text, tl, e.abd) + '</p>' +
+    (e.marksAfter ? '<div class="mcj after" title="Marcaj din raportul Word">' + e.marksAfter.map(esc).join(' · ') + '</div>' : '') +
+    '</article>';
+}
+
+var FS_MIN = -3, FS_MAX = 9;
+function applyLook(){
+  var m = $('#main');
+  m.className = 'main ' + (S.view==='list' ? 'list ' : '') + S.density + (S.mono ? ' mono' : '');
+  m.style.setProperty('--fs-delta', S.fsDelta + 'px');
+  var now = $('#fsNow');
+  if(now){
+    var base = S.density === 'compact' ? 12 : 13;
+    now.textContent = (base + S.fsDelta) + ' px';
+    $('#fsDown').disabled = S.fsDelta <= FS_MIN;
+    $('#fsUp').disabled = S.fsDelta >= FS_MAX;
+  }
+}
+
+function renderDoc(){
+  var d = S.doc, dc = W.docCat(d, S.gap) || d.category;
+  $('#main').innerHTML =
+    '<div class="head">' +
+      '<div class="row1">' +
+        '<h1>' + esc(d.well) + '</h1>' +
+        '<span class="tag" style="background:' + colorOf(dc) + '" title="' + esc(catTitle(dc, d.category)) + '">' + esc(dc) + '</span>' +
+        '<span class="file">' + (dc !== d.category ? 'folder ' + esc(d.category) + ' · ' : '') + esc(d.file) + '</span>' +
+      '</div>' +
+      '<div class="tools">' +
+        '<div class="grp" role="group" aria-label="Așezare">' +
+          '<button data-view="cols" aria-pressed="' + (S.view==='cols') + '">Coloane</button>' +
+          '<button data-view="list" aria-pressed="' + (S.view==='list') + '">O coloană</button>' +
+        '</div>' +
+        '<div class="grp" role="group" aria-label="Densitate">' +
+          '<button data-den="confort" aria-pressed="' + (S.density==='confort') + '">Lizibil</button>' +
+          '<button data-den="compact" aria-pressed="' + (S.density==='compact') + '">Dens</button>' +
+        '</div>' +
+        '<button class="plain" id="btnMono" aria-pressed="' + S.mono + '" title="Aliniază tabelele de presiuni">' +
+          'Scris cu lățime egală</button>' +
+        '<div class="grp zoom" role="group" aria-label="Mărimea textului">' +
+          '<button id="fsDown" title="Micșorează textul" aria-label="Micșorează textul">&minus;</button>' +
+          '<button id="fsUp" title="Mărește textul" aria-label="Mărește textul">+</button>' +
+        '</div>' +
+        '<span class="fs" id="fsNow"></span>' +
+        '<button class="plain" id="btnMk" aria-expanded="false">Cuvinte marcate</button>' +
+        '<div class="sep"></div>' +
+        '<div class="find"><input id="inq" type="search" placeholder="Caută în această sondă" value="' + esc(S.inQuery) + '"></div>' +
+        '<span class="cnt" id="cnt"></span>' +
+        '<button class="plain" id="btnPrint">Tipărește</button>' +
+      '</div>' +
+      '<div class="mkpanel" id="mkpanel" hidden></div>' +
+    '</div>' +
+    '<div class="sheet" id="sheet"></div>';
+  if(d.issues && d.issues.length){
+    $('#sheet').insertAdjacentHTML('beforebegin', '<div class="sheet" style="padding-bottom:0"><p class="docwarn"><b>De verificat în fișier:</b> ' +
+      d.issues.map(function(q){ return esc(q.text); }).join('; ') + '.</p></div>');
+  }
+  applyLook();
+  wireMarkers();
+
+  Array.prototype.forEach.call($('#main').querySelectorAll('[data-view]'), function(b){
+    b.onclick = function(){
+      S.view = b.dataset.view; applyLook();
+      Array.prototype.forEach.call($('#main').querySelectorAll('[data-view]'), function(x){
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+    };
+  });
+  Array.prototype.forEach.call($('#main').querySelectorAll('[data-den]'), function(b){
+    b.onclick = function(){
+      S.density = b.dataset.den; applyLook();
+      Array.prototype.forEach.call($('#main').querySelectorAll('[data-den]'), function(x){
+        x.setAttribute('aria-pressed', String(x === b));
+      });
+    };
+  });
+  $('#btnMono').onclick = function(){
+    S.mono = !S.mono; applyLook(); $('#btnMono').setAttribute('aria-pressed', String(S.mono));
+  };
+  $('#fsDown').onclick = function(){ if(S.fsDelta > FS_MIN){ S.fsDelta--; applyLook(); } };
+  $('#btnMk').onclick = function(e){
+    e.stopPropagation();
+    var pan = $('#mkpanel'), open = pan.hidden;
+    pan.hidden = !open; $('#btnMk').setAttribute('aria-expanded', String(open));
+    if(open) renderMarkers();
+  };
+  $('#fsUp').onclick   = function(){ if(S.fsDelta < FS_MAX){ S.fsDelta++; applyLook(); } };
+  $('#btnPrint').onclick = function(){ window.print(); };
+
+  var inq = $('#inq'), t2 = null;
+  inq.oninput = function(){
+    clearTimeout(t2);
+    t2 = setTimeout(function(){ S.inQuery = inq.value; renderSheet(); }, 200);
+  };
+  renderSheet();
+}
+
+/* Doar zilele se redesenează la schimbarea intervenției sau a căutării interne,
+   așa că bara de unelte nu clipește și cursorul rămâne în casetă. */
+function renderSheet(){
+  var d = S.doc, tl = terms(S.inQuery), hits = 0;
+  var list = S.sel === 'all' ? S.periods : S.periods.filter(function(p){ return p.id === S.sel; });
+
+  var sheets = list.map(function(p){
+    var days = p.entries.map(function(e,i){
+      if(!catPass(e, d)) return '';
+      if(tl.length){
+        var f = W.fold(e.text), okAll = true;
+        for(var t=0;t<tl.length;t++){ if(f.indexOf(tl[t])<0){ okAll = false; break; } }
+        if(okAll) hits++;
+      }
+      return dayHtml(e, i+1, tl, p.id);
+    }).join('');
+    return '<section class="period">' +
+      '<h3><span class="k" style="background:' + colorOf(p.cat || d.category) + '" title="' + esc(catTitle(p.cat || d.category, d.category)) + '">' + esc(p.label) + '</span>' +
+      '<span class="r">' + W.fmtDate(p.start) + ' – ' + W.fmtDate(p.end) + '</span>' +
+      '<span class="r">' + p.entries.length + ' ' + plural(p.entries.length,'zi','zile','de zile') + ' raportate</span>' +
+      '<span class="r">' + p.days + ' ' + plural(p.days,'zi','zile','de zile') + ' calendaristice</span></h3>' +
+      '<div class="grid">' + days + '</div></section>';
+  }).join('');
+
+  if(!sheets) sheets = '<p class="none">Această intervenție nu are zile raportate.</p>';
+  if(d.undated && d.undated.length && S.sel === 'all'){
+    sheets += '<section class="period undated"><h3><span class="k">Fără dată</span>' +
+      '<span class="r">' + d.undated.length + ' ' + plural(d.undated.length,'rând','rânduri','de rânduri') +
+      ' din fișier, cu data scrisă într-o formă pe care programul nu o poate citi sigur</span></h3><div class="grid">' +
+      d.undated.map(function(e){
+        return '<article class="day" style="border-left-color:var(--grey)"><h4><span>' + (esc(e.dateRaw) || '(fără dată)') +
+          '</span><span class="zi">dată nerecunoscută</span></h4><p>' + markup(e.text, tl) + '</p></article>';
+      }).join('') + '</div></section>';
+  }
+  $('#sheet').innerHTML = sheets;
+  $('#cnt').textContent = tl.length
+    ? hits + ' ' + plural(hits,'zi găsită','zile găsite','de zile găsite')
+    : '';
+}
+
+var MK_COLORS = ['#a8480a','#203d88','#067a4a','#1a7f9c','#4a5468','#7a1f4b','#8a6d00'];
+
+function renderMarkers(){
+  var pan = $('#mkpanel');
+  if(!pan) return;
+  pan.innerHTML = '<h5>Cuvintele evidențiate în rapoarte</h5>' +
+    S.markers.map(function(m, i){
+      return '<div class="mkrow">' +
+        '<input type="checkbox" data-on="' + i + '"' + (m.on ? ' checked' : '') + ' aria-label="Arată ' + esc(m.word) + '">' +
+        '<input type="color" data-col="' + i + '" value="' + m.color + '" aria-label="Culoarea pentru ' + esc(m.word) + '">' +
+        '<span class="w">' + (m.id === 'abd' ? '<b>ABD</b> — abandonată<span class="note">zilele de la primul „abandonare” sau „expert” până la finalul intervenției (din 01.09.2026)</span>' : esc(m.word)) + '</span>' +
+        (m.id.charAt(0) === 'u' ? '<button class="del" data-del="' + i + '" title="Scoate cuvântul" aria-label="Scoate ' + esc(m.word) + '">&times;</button>' : '') +
+        '</div>';
+    }).join('') +
+    '<div class="mkadd"><input id="mkNew" placeholder="alt cuvânt" maxlength="24">' +
+    '<button id="mkAdd">Adaugă</button></div>' +
+    '<button class="reset" id="mkReset">Revino la lista implicită</button>';
+
+  function save(){
+    kvSet('markers', markersToSave());
+    renderMarkers();
+    if(S.mode === 'cal'){ renderCalDay(); return; }
+    renderRail(); renderSheet();
+  }
+  Array.prototype.forEach.call(pan.querySelectorAll('[data-on]'), function(c){
+    c.onchange = function(){ S.markers[+c.dataset.on].on = c.checked; save(); };
+  });
+  Array.prototype.forEach.call(pan.querySelectorAll('[data-col]'), function(c){
+    c.onchange = function(){ S.markers[+c.dataset.col].color = c.value; save(); };
+  });
+  Array.prototype.forEach.call(pan.querySelectorAll('[data-del]'), function(b){
+    b.onclick = function(){ S.markers.splice(+b.dataset.del, 1); save(); };
+  });
+  $('#mkAdd').onclick = function(){
+    var v = $('#mkNew').value.trim();
+    if(!v) return;
+    var stem = W.fold(v);
+    if(S.markers.some(function(m){ return (m.stem || W.fold(m.word)) === stem; })){ $('#mkNew').value = ''; return; }
+    S.markers.push({ id:'u' + Date.now(), word:v, stem:stem, mode:'stem',
+                     color:MK_COLORS[S.markers.length % MK_COLORS.length], tint:false, on:true });
+    save();
+  };
+  $('#mkNew').onkeydown = function(e){ if(e.key === 'Enter') $('#mkAdd').onclick(); };
+  $('#mkReset').onclick = function(){
+    S.markers = W.DEFAULT_MARKERS.map(function(m){ return copyMarker(m); });
+    save();
+  };
+}
+
+function wireMarkers(){
+  var pan = $('#mkpanel');
+  if(pan) pan.onclick = function(e){ e.stopPropagation(); };
+}
+
+/* ================= pagina Calendar ================= */
+var LUNI = ['ianuarie','februarie','martie','aprilie','mai','iunie','iulie','august','septembrie','octombrie','noiembrie','decembrie'];
+var ZILE = ['duminică','luni','marți','miercuri','joi','vineri','sâmbătă'];
+
+function enableModes(on){
+  Array.prototype.forEach.call(document.querySelectorAll('.mode'), function(b){ b.disabled = !on; });
+  syncModes();
+}
+function syncModes(){
+  Array.prototype.forEach.call(document.querySelectorAll('.mode'), function(b){
+    b.setAttribute('aria-pressed', String(b.dataset.mode === S.mode));
+  });
+}
+function setMode(m){
+  if(!S.docs.length) return;
+  S.mode = m; syncModes(); closeSearch();
+  if(m === 'cal'){ openCalendar(); return; }
+  if(S.doc){ renderRail(); renderDoc(); }
+  else { $('#rail').classList.add('hide'); showEmpty(null); }
+}
+
+function ensureDayIndex(){
+  if(!S.dix) S.dix = W.buildDayIndex(S.docs, S.gap);
+  return S.dix;
+}
+function recs(key){ return W.dayRecords(ensureDayIndex(), key, S.cat); }
+
+function openCalendar(){
+  var ix = ensureDayIndex();
+  if(!S.calKey) S.calKey = W.dayKey(new Date());      // implicit: data curentă
+  var d = W.keyToDate(S.calKey);
+  S.calMonth = new Date(d.getFullYear(), d.getMonth(), 1, 12);
+  renderCalendar();
+}
+function selectDay(key){
+  S.calKey = key;
+  var d = W.keyToDate(key);
+  S.calMonth = new Date(d.getFullYear(), d.getMonth(), 1, 12);
+  renderCalendar();
+}
+function shiftDay(n){
+  var d = W.keyToDate(S.calKey); d.setDate(d.getDate() + n);
+  selectDay(W.dayKey(d));
+}
+function shiftMonth(n){
+  var m = S.calMonth;
+  S.calMonth = new Date(m.getFullYear(), m.getMonth() + n, 1, 12);
+  renderCalRail();
+}
+function renderCalendar(){ renderCalRail(); renderCalDay(); }
+
+function renderCalRail(){
+  var ix = ensureDayIndex(), rail = $('#rail'), m = S.calMonth;
+  rail.classList.remove('hide');
+  var y = m.getFullYear(), mo = m.getMonth();
+  var firstDow = (new Date(y, mo, 1, 12).getDay() + 6) % 7;        // luni = 0
+  var nDays = new Date(y, mo + 1, 0).getDate();
+  var todayKey = W.dayKey(new Date());
+
+  var cells = '', dayCount = 0, wells = {};
+  for(var i = 0; i < firstDow; i++) cells += '<td><span class="d out"></span></td>';
+  for(var dd = 1; dd <= nDays; dd++){
+    var key = W.dayKey(new Date(y, mo, dd, 12)), r = recs(key), n = r.length;
+    if(n){ dayCount++; r.forEach(function(x){ wells[x.doc.category + '|' + x.doc.well] = 1; }); }
+    var lvl = n === 0 ? '' : n === 1 ? ' l1' : n <= 3 ? ' l2' : ' l3';
+    cells += '<td><button class="d' + lvl + (key === S.calKey ? ' sel' : '') + (key === todayKey ? ' today' : '') +
+      '" data-k="' + key + '" title="' + W.fmtDate(W.keyToDate(key)) + (n ? ': ' + n + ' ' + plural(n,'sondă','sonde','de sonde') : ': fără lucrări') + '">' +
+      '<b>' + dd + '</b>' + (n ? '<small>' + n + '</small>' : '') + '</button></td>';
+    if((firstDow + dd) % 7 === 0 && dd < nDays) cells += '</tr><tr>';
+  }
+  var tail = (7 - (firstDow + nDays) % 7) % 7;
+  for(var t = 0; t < tail; t++) cells += '<td><span class="d out"></span></td>';
+
+  var y0 = ix.first ? ix.first.getFullYear() : y, y1 = ix.last ? ix.last.getFullYear() : y;
+  y0 = Math.min(y0, y); y1 = Math.max(y1, y, new Date().getFullYear());
+  var yOpts = '';
+  for(var yy = y1; yy >= y0; yy--) yOpts += '<option' + (yy === y ? ' selected' : '') + '>' + yy + '</option>';
+  var mOpts = LUNI.map(function(nm, k){ return '<option value="' + k + '"' + (k === mo ? ' selected' : '') + '>' + nm + '</option>'; }).join('');
+
+  var prev = W.nearestDay(ix, S.calKey, -1, S.cat), next = W.nearestDay(ix, S.calKey, 1, S.cat);
+  var nw = Object.keys(wells).length;
+
+  rail.innerHTML =
+    '<div class="cal">' +
+      '<h2>Calendar lucrări</h2>' +
+      '<div class="nav">' +
+        '<button class="arrow" id="cPrevM" title="Luna anterioară" aria-label="Luna anterioară">&lsaquo;</button>' +
+        '<select class="mo" id="cMon" aria-label="Luna">' + mOpts + '</select>' +
+        '<select id="cYear" aria-label="Anul">' + yOpts + '</select>' +
+        '<button class="arrow" id="cNextM" title="Luna următoare" aria-label="Luna următoare">&rsaquo;</button>' +
+      '</div>' +
+      '<table><thead><tr><th>Lu</th><th>Ma</th><th>Mi</th><th>Jo</th><th>Vi</th><th>Sâ</th><th>Du</th></tr></thead>' +
+      '<tbody><tr>' + cells + '</tr></tbody></table>' +
+      '<div class="scale"><span>Sonde pe zi:</span>' +
+        '<i style="background:#dfe7f6"></i>1 <i style="background:#a9bde6"></i>2–3 <i style="background:var(--blue)"></i>4+</div>' +
+      '<div class="jump">' +
+        '<button id="cPrevD"' + (prev ? '' : ' disabled') + ' title="' + (prev ? W.fmtDate(W.keyToDate(prev)) : '') + '">&lsaquo; Zi anterioară cu lucrări</button>' +
+        '<button id="cNextD"' + (next ? '' : ' disabled') + ' title="' + (next ? W.fmtDate(W.keyToDate(next)) : '') + '">Zi următoare cu lucrări &rsaquo;</button>' +
+      '</div>' +
+      '<label class="go">Mergi la data <input type="date" id="cDate" value="' + S.calKey + '"></label>' +
+      '<div class="stats">În ' + LUNI[mo] + ' ' + y + ': <b>' + dayCount + '</b> ' + plural(dayCount,'zi','zile','de zile') +
+        ' cu lucrări, <b>' + nw + '</b> ' + plural(nw,'sondă','sonde','de sonde') + '.' +
+        (S.cat !== 'ALL' ? ' Doar ' + (S.cat === 'GRK' ? 'folderul RK' : S.cat) + '.' : '') + '</div>' +
+      '<p class="keys">Săgețile mută ziua, Page Up și Page Down schimbă luna.</p>' +
+    '</div>';
+
+  Array.prototype.forEach.call(rail.querySelectorAll('.d[data-k]'), function(b){
+    b.onclick = function(){ selectDay(b.dataset.k); };
+  });
+  $('#cPrevM').onclick = function(){ shiftMonth(-1); };
+  $('#cNextM').onclick = function(){ shiftMonth(1); };
+  $('#cMon').onchange = function(){ S.calMonth = new Date(S.calMonth.getFullYear(), +this.value, 1, 12); renderCalRail(); };
+  $('#cYear').onchange = function(){ S.calMonth = new Date(+this.value, S.calMonth.getMonth(), 1, 12); renderCalRail(); };
+  if(prev) $('#cPrevD').onclick = function(){ selectDay(prev); };
+  if(next) $('#cNextD').onclick = function(){ selectDay(next); };
+  $('#cDate').onchange = function(){ if(/^\d{4}-\d{2}-\d{2}$/.test(this.value)) selectDay(this.value); };
+}
+
+function renderCalDay(){
+  var key = S.calKey, dt = W.keyToDate(key), list = recs(key), n = list.length;
+  var byCat = {};
+  list.forEach(function(r){ var c = dayCat(r.entry, r.doc); byCat[c] = (byCat[c] || 0) + 1; });
+  var parts = CATS.filter(function(c){ return byCat[c]; }).map(function(c){ return byCat[c] + ' ' + c; });
+
+  var cards = list.map(function(r, i){
+    var ms = W.markersIn(r.entry.text, S.markers), tint = false, pills = abdPill(r.entry);
+    for(var k = 0; k < ms.length; k++){
+      if(ms[k].tint) tint = true;
+      pills += '<span class="pill" style="--mc:' + ms[k].color + '">' + esc(ms[k].word) + '</span>';
+    }
+    var dc = dayCat(r.entry, r.doc), c = colorOf(dc);
+    return '<article class="day calcard' + (tint ? ' pf' : '') + (pills.indexOf('abdp') >= 0 ? ' abd' : '') + '" style="border-left-color:' + c + '">' +
+      (r.entry.marks ? '<div class="mcj" title="Marcaj din raportul Word">' + r.entry.marks.map(esc).join(' · ') + '</div>' : '') +
+      '<h4><span class="ctag" style="background:' + c + '" title="' + esc(W.CATEGORY_LABEL[dc] || dc) + '">' + esc(dc) + '</span>' +
+        (dc !== r.doc.category ? '<span class="fold">folder ' + esc(r.doc.category) + '</span>' : '') +
+        '<span class="wn">' + esc(r.doc.well) + '</span>' +
+        '<span class="dw">' + r.period.label + ', ziua ' + r.idx + ' din ' + r.n + '</span>' + pills +
+        '<span class="zi"><button class="open" data-i="' + i + '">Deschide sonda</button></span></h4>' +
+      '<p>' + markup(r.entry.text, [], r.entry.abd) + '</p></article>';
+  }).join('');
+
+  var ix = ensureDayIndex();
+  var prev = W.nearestDay(ix, key, -1, S.cat), next = W.nearestDay(ix, key, 1, S.cat);
+  if(!n){
+    cards = '<div class="none"><p>Nicio sondă nu are raport pe ' + W.fmtDate(dt) +
+      (S.cat !== 'ALL' ? ' în ' + catName(S.cat) : '') + '.</p>' +
+      (prev ? '<button class="plain" id="cEmptyPrev">&lsaquo; ' + W.fmtDate(W.keyToDate(prev)) + '</button> ' : '') +
+      (next ? '<button class="plain" id="cEmptyNext">' + W.fmtDate(W.keyToDate(next)) + ' &rsaquo;</button>' : '') +
+      '</div>';
+  }
+
+  $('#main').innerHTML =
+    '<div class="head">' +
+      '<div class="row1">' +
+        '<h1>' + ZILE[dt.getDay()].charAt(0).toUpperCase() + ZILE[dt.getDay()].slice(1) + ', ' + W.fmtDate(dt) + '</h1>' +
+        '<span class="file">' + (n ? n + ' ' + plural(n,'sondă lucrată','sonde lucrate','de sonde lucrate') +
+          ' — ' + parts.join(', ') : 'fără lucrări') + '</span>' +
+      '</div>' +
+      '<div class="tools">' +
+        '<div class="grp" role="group" aria-label="Zi">' +
+          '<button id="cDayPrev" title="Ziua precedentă (săgeată stânga)">&lsaquo; Ziua precedentă</button>' +
+          '<button id="cDayNext" title="Ziua următoare (săgeată dreapta)">Ziua următoare &rsaquo;</button>' +
+        '</div>' +
+        '<div class="grp zoom" role="group" aria-label="Mărimea textului">' +
+          '<button id="fsDown" title="Micșorează textul" aria-label="Micșorează textul">&minus;</button>' +
+          '<button id="fsUp" title="Mărește textul" aria-label="Mărește textul">+</button>' +
+        '</div>' +
+        '<span class="fs" id="fsNow"></span>' +
+        '<div class="sep"></div>' +
+        '<button class="plain" id="btnPrint">Tipărește</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="sheet"><div class="grid">' + cards + '</div></div>';
+  applyLook();
+
+  $('#cDayPrev').onclick = function(){ shiftDay(-1); };
+  $('#cDayNext').onclick = function(){ shiftDay(1); };
+  $('#fsDown').onclick = function(){ if(S.fsDelta > FS_MIN){ S.fsDelta--; applyLook(); } };
+  $('#fsUp').onclick   = function(){ if(S.fsDelta < FS_MAX){ S.fsDelta++; applyLook(); } };
+  $('#btnPrint').onclick = function(){ window.print(); };
+  if($('#cEmptyPrev')) $('#cEmptyPrev').onclick = function(){ selectDay(prev); };
+  if($('#cEmptyNext')) $('#cEmptyNext').onclick = function(){ selectDay(next); };
+  Array.prototype.forEach.call($('#main').querySelectorAll('.open[data-i]'), function(b){
+    b.onclick = function(){ openFromCalendar(list[+b.dataset.i]); };
+  });
+  $('#main').scrollTop = 0;
+}
+
+/* Deschide sonda în pagina Sonde, direct la ziua aleasă în calendar. */
+function openFromCalendar(r){
+  choose(r.doc, r.period.id);
+  var el = document.getElementById('d-' + r.period.id + '-' + r.idx);
+  if(!el) return;
+  if(el.scrollIntoView) el.scrollIntoView({ block:'center' });
+  el.classList.add('flash');
+  setTimeout(function(){ el.classList.remove('flash'); }, 1600);
+}
+
+/* ---------------- legături globale ---------------- */
+Array.prototype.forEach.call(document.querySelectorAll('.mode'), function(b){
+  b.onclick = function(e){ e.stopPropagation(); setMode(b.dataset.mode); };
+});
+document.addEventListener('keydown', function(e){
+  if(S.mode !== 'cal' || !S.calKey) return;
+  var tg = e.target && e.target.tagName;
+  if(tg === 'INPUT' || tg === 'SELECT' || tg === 'TEXTAREA') return;
+  var k = e.key, step = { ArrowLeft:-1, ArrowRight:1, ArrowUp:-7, ArrowDown:7 }[k];
+  if(step){ e.preventDefault(); shiftDay(step); return; }
+  if(k === 'PageUp' || k === 'PageDown'){
+    e.preventDefault();
+    var d = W.keyToDate(S.calKey); d.setMonth(d.getMonth() + (k === 'PageUp' ? -1 : 1));
+    selectDay(W.dayKey(d));
+  }
+});
+$('#q').addEventListener('input', onQuery);
+$('#q').addEventListener('focus', function(){ if(S.docs.length) openSearch(); });
+$('#q').addEventListener('keydown', function(e){
+  if(e.key === 'ArrowDown'){ e.preventDefault(); moveHi(1); }
+  else if(e.key === 'ArrowUp'){ e.preventDefault(); moveHi(-1); }
+  else if(e.key === 'Enter'){ if(S.results && S.results[S.hi]) choose(S.results[S.hi].doc); }
+  else if(e.key === 'Escape'){ closeSearch(); }
+});
+$('#qclear').onclick = function(){ $('#q').value=''; onQuery(); $('#q').focus(); };
+document.addEventListener('click', function(e){
+  if(!$('#finder').contains(e.target)) closeSearch();
+  var pan = $('#mkpanel');
+  if(pan && !pan.hidden){ pan.hidden = true; $('#btnMk').setAttribute('aria-expanded','false'); }
+});
+document.addEventListener('keydown', function(e){
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='k'){ e.preventDefault(); $('#q').focus(); $('#q').select(); }
+});
+Array.prototype.forEach.call(document.querySelectorAll('.scope'), function(b){
+  b.onclick = function(e){
+    e.stopPropagation();
+    S.cat = b.dataset.cat;
+    Array.prototype.forEach.call(document.querySelectorAll('.scope'), function(x){
+      x.setAttribute('aria-pressed', String(x === b));
+    });
+    if(S.mode === 'cal' && S.docs.length){ renderCalendar(); return; }
+    if(S.docs.length){ $('#q').focus(); openSearch(); }
+  };
+});
+$('#dirpick').addEventListener('change', function(e){ if(e.target.files.length) fromInput(e.target.files); });
+$('#filepick').addEventListener('change', function(e){ if(e.target.files.length) fromInput(e.target.files); });
+window.addEventListener('dragover', function(e){ e.preventDefault(); });
+window.addEventListener('drop', function(e){ e.preventDefault(); });
+
+/* lista de cuvinte marcate, dacă a fost schimbată vreodată */
+kvGet('markers').then(function(list){
+  if(list && list.length){
+    S.markers = list.map(function(m){ return copyMarker(m); });
+    if(!S.markers.some(function(m){ return m.id === 'abd'; }))
+      W.DEFAULT_MARKERS.forEach(function(m){ if(m.id === 'abd') S.markers.push(copyMarker(m)); });
+  }
+});
+
+/* pornire: nicio dată salvată; se șterg și eventualele date rămase de la versiunile
+   anterioare (indexarea salvată și folderul reținut), apoi se cere folderul WO */
+kvDel('cache'); kvDel('handle');
+startNet(false);
+})();
+</script>
+</body>
+</html>
