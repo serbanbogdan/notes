@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Calculator local de traiect sondă și deviație în coordonate Stereo 70.">
+<title>Calculator traiect sondă · Serviciul Geologic</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23203d88'/%3E%3Cpath d='M10 5v9q0 10 15 12' stroke='white' stroke-width='3' fill='none'/%3E%3C/svg%3E">
+<style>
+:root{--blue:#203d88;--mid:#5876b3;--light:#eaf0fb;--green:#00bc70;--cyan:#54c8e8;--orange:#ee7623;--ink:#183062;--muted:#64728b;--border:#d5dfef;--bg:#f4f7fc;--white:#fff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 'Trebuchet MS',Arial,sans-serif}button,input,select,textarea{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:default}a{color:var(--blue)}button,input,select,textarea,a,summary{outline-offset:3px}button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--cyan)}
+header{background:var(--blue);color:white;padding:18px 30px;display:flex;justify-content:space-between;align-items:center;gap:18px;border-bottom:4px solid var(--cyan)}h1{font-size:1.35rem;margin:0}header p{margin:3px 0 0;font-size:.875rem;color:#d4e0fb}.header-meta{text-align:right;font-size:.875rem}.topbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:20px 0 16px}.toolbar{display:flex;gap:8px;flex-wrap:wrap}button,.file-label{background:white;border:1px solid var(--border);color:var(--blue);border-radius:7px;padding:9px 13px;font-weight:bold;font-size:.875rem;display:inline-flex;align-items:center;justify-content:center;gap:7px}.primary{background:var(--blue);border-color:var(--blue);color:#fff}.small{padding:6px 10px}.file-label{cursor:pointer}.file-input{position:absolute;width:1px;height:1px;opacity:0}.wrap{max-width:1600px;margin:auto;padding:0 24px 24px}.layout{display:grid;grid-template-columns:380px minmax(0,1fr);gap:20px;align-items:start}.card{background:white;border:1px solid var(--border);border-radius:12px;overflow:hidden}.inputs{padding:20px}.card h2{font-size:1.08rem;margin:0 0 16px}.card h3{font-size:1rem;margin:0}.caption{color:var(--muted);font-size:.875rem}.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;background:var(--light);padding:4px;border-radius:9px;margin-bottom:19px;gap:3px}.tabs button{border:0;background:transparent;font-size:.8rem;padding:10px 5px;line-height:1.3}.tabs button[aria-selected=true]{background:var(--blue);color:white}.fields{display:grid;grid-template-columns:1fr 1fr;gap:13px 12px}.field{min-width:0}.field.full{grid-column:1/-1}label{display:block;font-size:.875rem;font-weight:bold;margin-bottom:5px}.unit{font-weight:normal;color:var(--muted)}input,select,textarea{background:white;color:var(--ink);border:1px solid var(--border);border-radius:6px;width:100%;padding:9px 10px;min-width:0}input::placeholder{color:#8794ab;font-size:.875rem}input[readonly]{background:var(--bg)}.hint{font-size:.8rem;color:var(--muted);margin:5px 0 0}.spaced{margin-top:18px}.section-line{border-top:1px solid var(--border);padding-top:17px;margin-top:19px}details summary{font-size:.92rem;font-weight:bold;cursor:pointer;list-style-position:outside;margin-left:16px}details[open] summary{margin-bottom:14px}.calc-row{display:flex;gap:8px;margin-top:20px}.calc-row .primary{flex:1;padding:12px}.panel[hidden],[hidden]{display:none!important}.mode-info{background:var(--light);padding:10px 12px;border-radius:7px;font-size:.83rem;margin:0 0 15px}.chips{display:flex;gap:7px;flex-wrap:wrap}.chip{padding:4px 9px;border-radius:5px;background:var(--light);font-size:.8rem;color:var(--blue)}.status{padding:14px 17px;border:1px solid var(--border);border-left:4px solid var(--blue);background:white;border-radius:8px;margin-bottom:15px;font-size:.92rem}.status.error{border-left-color:var(--orange);background:#fff6ef}.status.warn{border-left-color:var(--orange)}.status strong{display:block;margin-bottom:3px}.status ul{margin:6px 0 0;padding-left:20px}.metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:16px}.metric{padding:15px 16px;background:white;border:1px solid var(--border);border-radius:9px}.metric .label{font-size:.8rem;color:var(--muted)}.metric .value{font-size:1.42rem;font-weight:bold;color:var(--blue);margin-top:3px}.metric .value small{font-size:.82rem;font-weight:normal}.metric .sub{font-size:.78rem;color:var(--muted);margin-top:3px}.charts{display:grid;grid-template-columns:1.25fr 1fr;gap:14px}.chart-head{padding:15px 16px 9px;display:flex;align-items:center;justify-content:space-between;gap:10px}.chart-head span{font-size:.8rem}.plot{display:block;width:100%;aspect-ratio:1.15;background:white;touch-action:pan-y}.plot text{font-family:'Trebuchet MS',Arial,sans-serif}.chart-foot{padding:0 16px 14px;font-size:.8rem;color:var(--muted)}.legend{display:flex;flex-wrap:wrap;gap:14px;padding:13px 1px;font-size:.8rem}.legend span:before{content:'';display:inline-block;width:20px;border-top:3px solid var(--blue);vertical-align:middle;margin-right:6px}.legend .vertical:before{border-color:#98aed5}.legend .build:before{border-color:#203d88}.legend .hold:before{border-color:#5876b3}.legend .drop:before{border-color:#94aed8;border-top-style:dashed}.legend .target:before{border-color:var(--orange)}.chart-controls{display:flex;gap:15px;align-items:center;flex-wrap:wrap;margin:12px 0}.check{display:inline-flex;gap:7px;align-items:center;font-size:.875rem;font-weight:normal;margin:0}.check input{width:auto}.check select{width:auto;padding:5px 7px;font-size:.85rem}.table-head{padding:16px;display:flex;gap:12px;justify-content:space-between;align-items:center}.table-scroll{overflow:auto;max-height:440px}table{border-collapse:collapse;width:100%;font-size:.83rem;white-space:nowrap}th,td{padding:9px 12px;text-align:right;border-bottom:1px solid #e4ebf5}th{background:var(--light);color:var(--blue);position:sticky;top:0;z-index:1}th:first-child,td:first-child{text-align:left}tbody tr:hover,tbody tr.active{background:var(--light)}.survey-edit td,.survey-edit th{padding:5px}.survey-edit input{padding:6px;font-size:.85rem}.survey-edit .remove-row{padding:5px 7px}.table-note{padding:10px 16px;font-size:.8rem;color:var(--muted)}.lower{padding:17px 20px;margin-top:16px}.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}.info-grid dl{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin:0;font-size:.875rem}.info-grid dt{color:var(--muted)}.info-grid dd{margin:0;text-align:right;font-weight:bold}.assumptions{padding-left:18px;margin:7px 0 0;font-size:.875rem;color:var(--muted)}.note{background:var(--light);padding:12px;border-radius:7px;font-size:.875rem;margin-top:13px}.help{max-width:100%;margin-top:20px;padding:19px 22px}.help p,.help li{font-size:.875rem;color:var(--muted)}.help p{margin:8px 0}.help ul{padding-left:20px}.help code{font-size:.875rem;color:var(--blue)}.footer{display:flex;justify-content:space-between;gap:16px;font-size:.78rem;color:var(--muted);margin-top:20px}.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--blue);color:white;border-radius:8px;padding:12px 20px;z-index:50;max-width:90%;box-shadow:0 3px 20px #203d8826}.tooltip{position:fixed;background:var(--blue);color:white;padding:9px 11px;border-radius:7px;font-size:.8rem;pointer-events:none;z-index:40;white-space:pre-line}.badge{font-size:.75rem;background:#eaf0fb;padding:4px 8px;border-radius:4px;color:var(--blue)}.empty{padding:35px;color:var(--muted);text-align:center}.survey-buttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.survey-buttons button,.survey-buttons .file-label{font-size:.8rem}.export-select{width:auto;max-width:200px;font-size:.83rem;padding:8px}.export-group{display:flex;gap:7px;align-items:center;flex-wrap:wrap}#selectedStation{min-height:23px;font-size:.83rem;color:var(--blue);margin:0 0 10px}
+.inputs,.results,.card{min-width:0}.info-grid dl{grid-template-columns:minmax(0,1fr) auto}.table-scroll{max-width:100%}
+@media(max-width:1150px){.layout{grid-template-columns:340px minmax(0,1fr)}.charts{grid-template-columns:1fr}.plot{aspect-ratio:1.65}.metrics{grid-template-columns:1fr 1fr}.topbar{align-items:flex-start}}@media(max-width:760px){header{padding:16px 18px}.header-meta{display:none}.wrap{padding:0 12px 20px}.layout{grid-template-columns:minmax(0,1fr)}.inputs{padding:17px}.charts{grid-template-columns:minmax(0,1fr)}.plot{aspect-ratio:1.1}.topbar{flex-direction:column;margin-top:14px}.info-grid{grid-template-columns:minmax(0,1fr)}.table-head{align-items:flex-start;flex-direction:column}.metric{padding:12px}.metric .value{font-size:1.3rem}.footer{flex-direction:column;gap:4px}}
+@media print{body{background:#fff;font-size:10pt}.wrap{padding:0}header{background:white;color:var(--blue);padding:8px 0;border-bottom:2px solid var(--blue)}header p{color:var(--muted)}.inputs,.topbar,.chart-controls,.export-group,.help,.footer,.calc-row,.toast{display:none!important}.layout{display:block}.charts{grid-template-columns:1.3fr 1fr}.plot{aspect-ratio:1.1}.metrics{grid-template-columns:repeat(4,1fr)}.card,.metric{break-inside:avoid}.table-scroll{max-height:none;overflow:visible}.results .card{margin-bottom:10px}.status{margin:12px 0}.header-meta{display:block}.table-head{padding:8px}th{position:static}#resultRows tr{break-inside:avoid}.lower{padding:12px}.table-note{padding:6px}.metric .value{font-size:1rem}button{display:none!important}}
+</style>
+</head>
+<body>
+<header><div><h1>Calculator traiect sondă</h1><p>Serviciul Geologic · planificare și calculul deviației</p></div><div class="header-meta">Stereo 70 · metri<br><span id="headerWell">Exemplu demonstrativ</span></div></header>
+<main class="wrap">
+ <div class="topbar"><div class="chips"><span class="chip">Fișier local</span><span class="chip">Azimut față de nordul grilei</span><span class="chip">DLS în °/30 m</span></div><div class="toolbar"><button id="exampleBtn">Exemplu</button><button id="saveBtn">Salvează proiect</button><label class="file-label" for="projectFile">Deschide proiect</label><input id="projectFile" class="file-input" type="file" accept=".json,application/json"><button id="printBtn">Tipărește / PDF</button></div></div>
+ <div class="layout">
+ <aside class="card inputs">
+  <h2>Date de intrare</h2>
+  <div class="tabs" role="tablist" aria-label="Mod de calcul"><button id="tab-offset" role="tab" aria-selected="true" aria-controls="offsetPanel" data-mode="offset">Adâncime și deplasare</button><button id="tab-coordinates" role="tab" aria-selected="false" aria-controls="coordinatesPanel" data-mode="coordinates">Coordonate și țintă</button><button id="tab-survey" role="tab" aria-selected="false" aria-controls="surveyPanel" data-mode="survey">Deviație măsurată</button></div>
+  <div class="fields"><div class="field full"><label for="wellName">Numele sondei <span class="unit">· opțional</span></label><input id="wellName" maxlength="120" value="Exemplu demonstrativ"></div></div>
+  <div id="offsetPanel" class="panel spaced" role="tabpanel" aria-labelledby="tab-offset">
+   <div class="fields"><div class="field"><label for="depth">Adâncime țintă <span class="unit">m</span></label><input id="depth" data-num value="2500" inputmode="decimal"></div><div class="field"><label for="depthType">Tip de adâncime</label><select id="depthType"><option value="tvd">TVD · verticală</option><option value="md">MD · pe traiect</option></select></div><div class="field"><label for="offset">Deplasare la talpă <span class="unit">m</span></label><input id="offset" data-num value="800" inputmode="decimal"></div><div class="field"><label for="azimuth">Azimut grilă <span class="unit">°</span></label><input id="azimuth" data-num value="60" placeholder="Automat: 0°" inputmode="decimal"></div></div>
+   <p class="hint">TVD/MD sunt măsurate de la reperul selectat mai jos. Fără azimut se folosește nordul (0°).</p>
+  </div>
+  <div id="coordinatesPanel" class="panel spaced" hidden role="tabpanel" aria-labelledby="tab-coordinates">
+   <p class="mode-info">X = nord, Y = est, în Stereo 70. Adâncimea sau cota țintei este necesară în plus față de X/Y.</p>
+   <div class="fields"><div class="field"><label for="targetX">X talpă / țintă <span class="unit">m</span></label><input id="targetX" data-num value="500400" inputmode="decimal"></div><div class="field"><label for="targetY">Y talpă / țintă <span class="unit">m</span></label><input id="targetY" data-num value="450692,820323" inputmode="decimal"></div><div class="field full"><label for="targetType">Poziția verticală a țintei</label><select id="targetType"><option value="tvd">Adâncime TVD de la reper (m)</option><option value="md">Adâncime MD pe traiect (m)</option><option value="elevation">Cotă absolută Z a țintei (m)</option></select></div><div class="field full"><label for="targetValue" id="targetValueLabel">TVD țintă <span class="unit">m</span></label><input id="targetValue" data-num value="2500" inputmode="decimal"></div></div>
+  </div>
+  <div id="surveyPanel" class="panel spaced" hidden role="tabpanel" aria-labelledby="tab-survey">
+   <p class="mode-info">Introdu MD, înclinarea față de verticală și azimutul de grilă. Prima stație trebuie să fie la MD = 0. Calcul prin curbură minimă.</p>
+   <div class="table-scroll"><table class="survey-edit"><thead><tr><th>MD, m</th><th>I, °</th><th>Az, °</th><th><span class="caption">Șterge</span></th></tr></thead><tbody id="surveyRows"></tbody></table></div><div class="survey-buttons"><button id="addRowBtn">Adaugă stație</button><label class="file-label" for="surveyFile">Import CSV / TSV</label><input id="surveyFile" type="file" class="file-input" accept=".csv,.tsv,.txt"><button id="surveyExampleBtn">Exemplu deviație</button></div>
+   <p class="hint">Import: primele trei coloane MD, I, Az sau antet MD;INC;AZI. Separator ;, tab ori virgulă. Zecimale cu virgulă doar pentru ; sau tab.</p>
+  </div>
+  <div class="section-line fields"><div class="field"><label for="surfaceX">X suprafață · nord <span class="unit">m</span></label><input id="surfaceX" data-num value="500000" placeholder="Opțional" inputmode="decimal"></div><div class="field"><label for="surfaceY">Y suprafață · est <span class="unit">m</span></label><input id="surfaceY" data-num value="450000" placeholder="Opțional" inputmode="decimal"></div><div class="field"><label for="ground">Elevație la sol <span class="unit">m</span></label><input id="ground" data-num value="350" placeholder="Opțional" inputmode="decimal"></div><div class="field"><label for="datumOffset">Reper peste sol <span class="unit">m</span></label><input id="datumOffset" data-num placeholder="Sol: 0 · KB: ex. 5" inputmode="decimal"></div></div>
+  <p class="hint">Reperul adâncimilor = sol + înălțime KB/masă rotativă. Cu elevația solului se calculează cota Z și TVDSS. Fără X/Y se afișează deplasări locale.</p>
+  <div id="planControls" class="section-line"><div class="fields"><div class="field full"><label for="profile">Profilul traiectului</label><select id="profile"><option value="j">J · vertical + creștere + tangentă</option><option value="s">S · creștere + tangentă + scădere</option><option value="horizontal">Orizontal · palier la 90°</option></select></div><div class="field"><label for="kop">KOP <span class="unit">m</span></label><input id="kop" data-num placeholder="Automat" inputmode="decimal"></div><div class="field"><label for="buildRate">Rată de creștere <span class="unit">°/30 m</span></label><input id="buildRate" data-num placeholder="Automat · uzual 2" inputmode="decimal"></div></div><p class="hint" id="profileHint">KOP este începutul devierii, de la reperul adâncimilor. În secțiunea verticală inițială, MD = TVD.</p></div>
+  <details class="section-line" open><summary>Limite și opțiuni</summary><div class="fields"><div class="field"><label for="maxDls">Dogleg maxim <span class="unit">°/30 m</span></label><input id="maxDls" data-num placeholder="Implicit: 3" inputmode="decimal"></div><div class="field"><label for="maxInc">Înclinare maximă <span class="unit">°</span></label><input id="maxInc" data-num placeholder="Implicit: 85" inputmode="decimal"></div><div class="field" id="dropRateField" hidden><label for="dropRate">Rată de scădere <span class="unit">°/30 m</span></label><input id="dropRate" data-num placeholder="Automat: ca la creștere" inputmode="decimal"></div><div class="field" id="endIncField"><label for="endInc">Înclinare la talpă <span class="unit">°</span></label><input id="endInc" data-num placeholder="Calculată" inputmode="decimal"></div><div class="field" id="stepField"><label for="step">Pas stații export <span class="unit">m</span></label><input id="step" data-num placeholder="Implicit: 30" inputmode="decimal"></div><div class="field"><label for="vsAzimuth">Azimut secțiune VS <span class="unit">°</span></label><input id="vsAzimuth" data-num placeholder="Automat: direcția talpei" inputmode="decimal"></div></div><p class="hint" id="limitsHint">Câmp gol = alegere automată. Valorile completate sunt constrângeri; o țintă imposibilă produce un mesaj explicativ.</p></details>
+  <div class="calc-row"><button id="calculateBtn" class="primary">Calculează traiectul</button><button id="clearBtn" title="Golește datele introduse">Golește</button></div><p class="hint">Numere fără separator de mii; se acceptă 2500,5 sau 2500.5.</p>
+ </aside>
+ <section class="results" aria-label="Rezultatele calculului">
+  <div id="status" class="status" role="status" aria-live="polite"><strong>Exemplu demonstrativ</strong>Modifică datele și apasă „Calculează traiectul”.</div>
+  <div class="metrics"><div class="metric"><div class="label">Adâncime pe traiect · MD</div><div class="value" id="metricMd">—</div><div class="sub" id="metricTvd">TVD —</div></div><div class="metric"><div class="label">Deplasare la talpă</div><div class="value" id="metricOffset">—</div><div class="sub" id="metricAzi">Azimut grilă —</div></div><div class="metric"><div class="label">Înclinare maximă</div><div class="value" id="metricInc">—</div><div class="sub" id="metricEnd">La talpă —</div></div><div class="metric"><div class="label">Dogleg maxim · DLS</div><div class="value" id="metricDls">—</div><div class="sub" id="metricKop">KOP —</div></div></div>
+  <div class="chart-controls"><label class="check"><input id="equalScale" type="checkbox" checked>Scări egale pe axe</label><label class="check">Axa verticală <select id="verticalAxis"><option value="tvd">TVD de la reper</option><option value="elevation">Cotă absolută Z</option></select></label><label class="check"><input id="showStations" type="checkbox">Stații</label></div>
+  <div class="charts"><div class="card"><div class="chart-head"><h3>Secțiune verticală</h3><span id="vsLabel" class="caption">VS · m</span></div><svg id="verticalPlot" class="plot" role="img" aria-label="Traiectul sondei în secțiune verticală"></svg><div class="chart-foot">VS = proiecția orizontală pe azimutul secțiunii.</div></div><div class="card"><div class="chart-head"><h3>Vedere în plan</h3><span class="caption">Nord în sus</span></div><svg id="planPlot" class="plot" role="img" aria-label="Traiectul sondei în plan orizontal"></svg><div class="chart-foot" id="planFoot">Stereo 70 · X = nord / Y = est</div></div></div>
+  <div class="legend"><span class="vertical">Vertical</span><span class="build">Creștere</span><span class="hold">Tangentă / palier</span><span class="drop">Scădere</span><span class="target">Talpă</span></div><p id="selectedStation">Indică un punct pe schiță pentru valorile stației.</p>
+  <div class="card"><div class="table-head"><div><h3>Tabel de deviație</h3><span id="stationCount" class="caption">— stații</span></div><div class="export-group"><select id="exportFormat" class="export-select" aria-label="Format export deviație"><option value="csv">CSV complet · Excel RO</option><option value="tsv">TSV complet · zecimale punct</option><option value="survey">MD / INC / AZI · TSV</option></select><button id="exportBtn" class="primary" disabled>Exportă deviația</button><button id="svgBtn" disabled>Exportă schițele SVG</button></div></div><div class="table-scroll"><table id="resultTable"><thead><tr><th>MD (m)</th><th>I (°)</th><th>Az (°)</th><th>TVD (m)</th><th>TVDSS (m)</th><th>X nord (m)</th><th>Y est (m)</th><th>Z cotă (m)</th><th>ΔN (m)</th><th>ΔE (m)</th><th>VS (m)</th><th>DLS (°/30 m)</th><th>Tronson</th></tr></thead><tbody id="resultRows"><tr><td colspan="13" class="empty">Calculează pentru a genera stațiile.</td></tr></tbody></table></div><div class="table-note" id="tableNote">Coordonatele absolute necesită X/Y suprafață. TVDSS și Z necesită elevația solului.</div></div>
+  <div class="card lower"><div class="info-grid"><div><h3>Geometrie calculată</h3><dl class="spaced" id="geometry"></dl></div><div><h3>Alegeri automate și observații</h3><ul class="assumptions" id="assumptions"><li>Rezultatele vor apărea după calcul.</li></ul></div></div><div class="note">Plan geometric preliminar. Verificarea de foraj trebuie să includă și anti-coliziune, geologie, mecanică și capabilitatea echipamentului.</div></div>
+ </section>
+ </div>
+ <details class="card help"><summary>Convenții, formule și utilizare</summary>
+  <p><b>Adâncimi:</b> MD = lungime măsurată de-a lungul sondei; TVD = adâncime verticală, pozitivă în jos de la reper. Cota reperului = elevația solului + înălțimea reperului. Z = cota reperului − TVD; TVDSS = TVD − cota reperului, pozitiv sub nivelul mării. Cota țintei și elevația solului trebuie să folosească același reper altimetric.</p>
+  <p><b>Stereo 70:</b> X este nordul, Y este estul, în metri. Se folosesc direct coordonatele din aceeași grilă; nu se fac transformări din WGS84 sau corecții grilă–teren. Azimutul este de grilă, măsurat în sens orar de la nord: 0° N, 90° E, 180° S, 270° V. Nu introduce azimut magnetic fără corecții. Cotele sunt introduse separat de coordonatele plane.</p>
+  <p><b>Planificare:</b> profilele J, S și orizontal sunt într-un singur plan, cu azimut constant, arce de cerc și tronsoane drepte. J permite fixarea înclinării la talpă; S revine implicit la 0° și permite o altă înclinare finală; orizontal ajunge la 90°. KOP automat este ales de algoritm și nu reprezintă o recomandare geologică. Dacă există mai multe soluții, aplicația livrează una fezabilă și descrie alegerile. Datele completate nu sunt relaxate pentru a forța atingerea țintei.</p>
+  <p><b>Parametri automați:</b> KOP până la 20% din adâncime, rata inițială de 2°/30 m și limitele implicite 3°/30 m / 85° sunt setări ale aplicației. Ele se pot modifica și trebuie alese în funcție de datele geologice și programul de foraj. Alegerea automată caută o soluție geometrică fezabilă și explică ajustările.</p>
+  <p><b>Limitele profilelor:</b> profilul S se încheie în țintă la sfârșitul scăderii. Modelul orizontal conține o singură creștere până la 90° și palierul final. Alte configurații, cu tronsoane suplimentare, pot fi analizate ca deviație MD/INC/AZI introdusă separat.</p>
+  <p><b>Curbură:</b> R = 30 / (DLS · π/180). Pentru creștere de la 0 la I: ΔTVD = R sin(I), deplasare = R[1 − cos(I)], lungime = R·I (I în radiani). În deviația măsurată se utilizează metoda curburii minime între stații.</p>
+  <p><code>β = acos[cos(I₁)cos(I₂) + sin(I₁)sin(I₂)cos(A₂−A₁)]</code><br><code>RF = 2·tan(β/2)/β</code> (RF = 1 pentru β = 0).<br>ΔTVD = ΔMD/2 · [cos(I₁)+cos(I₂)] · RF; ΔN = ΔMD/2 · [sin(I₁)cos(A₁)+sin(I₂)cos(A₂)] · RF; ΔE folosește sin(A). DLS = β în grade · 30/ΔMD. DLS din tabel este media pe intervalul care se termină la stație; în planificare maximul raportat include rata exactă a arcelor, chiar pentru intervale scurte.</p>
+  <p><b>Maximul înclinării:</b> în modul deviație măsurată se verifică atât stațiile, cât și punctele interioare ale arcelor de curbură minimă. Dacă maximul calculat între stații este mai mare decât citirile introduse, diferența este explicată în observații. Forma reală dintre măsurători rămâne dependentă de ipoteza curburii minime.</p>
+  <p><b>Export:</b> CSV complet folosește separator „;”, virgulă zecimală și antet cu unități. TSV folosește tab și punct zecimal. Exportul MD/INC/AZI conține trei coloane și poate fi mapat în aplicația de destinație. Stațiile de planificare includ multiplii pasului ales, limitele tronsoanelor și talpa exactă. Importul deviației păstrează stațiile originale.</p>
+  <p><b>Date locale:</b> aplicația nu trimite date și nu încarcă biblioteci de pe internet. Proiectele JSON salvează numai datele de intrare, inclusiv coordonate, în clar. La redeschidere rezultatele se recalculează. CSV/TSV pot fi reimportate în modul „Deviație măsurată”.</p>
+  <p><b>Bibliografie verificată:</b> Angus Jamieson, <a href="https://www.iscwsa.net/files/741/" target="_blank" rel="noopener noreferrer">Introduction to Wellbore Positioning</a>, UHI/ISCWSA, V09.10.17, anexa D, pp. 234–237 (raza și curbura minimă vectorială); Musa și colab., <a href="https://uofkej.uofk.edu/index.php/uofkej/article/download/167/91/103" target="_blank" rel="noopener noreferrer">Directional Drilling Design Using Computer Model</a>, University of Khartoum Engineering Journal 7(1), 2017, p. 54, ec. (1)–(5) (formulele scalare); Wiggins, Choe și Juvkam-Wold, <a href="https://www.ogj.com/home/article/17219296/single-equation-simplifies-horizontal-directional-drilling-plans" target="_blank" rel="noopener noreferrer">Single equation simplifies horizontal, directional drilling plans</a>, Oil &amp; Gas Journal, 2.11.1992 (profile și ipoteze de planificare). Valorile numerice au fost comparate și cu exemplul BP/SPE din <a href="https://www.bsee.gov/sites/bsee.gov/files/research-reports/761aa.pdf" target="_blank" rel="noopener noreferrer">raportul BSEE, august 2016</a>, figura 12, p. 3-15; diferența maximă pentru cele două intervale verificate a fost 0,00318 m, compatibilă cu rotunjirea tabelului.</p>
+  <p><b>Coordonate:</b> <a href="https://epsg.org/crs/wkt/id/31700" target="_blank" rel="noopener noreferrer">EPSG · axele Stereo 70</a>. Codul actual Stereo 70 este EPSG:3844; EPSG:31700 apare în date mai vechi. Verifică sistemul declarat în documentația topografică; aplicația nu transformă coordonatele între realizări.</p>
+ </details>
+ <div class="footer"><span>Calculator traiect sondă · v1.1 · calcule reverificate 07.10.2026</span><span>Trebuchet MS · toate lungimile în metri</span></div>
+</main><div id="tooltip" class="tooltip" hidden></div><div id="toast" class="toast" role="status" hidden></div>
+<script>
+/* Offline well trajectory geometry. Angles: degrees; distances: metres; DLS: deg/30 m. */
+(function (root, factory) {
+  'use strict';
+  var api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.WellEngine = api;
+})(typeof globalThis !== 'undefined' ? globalThis : this, function () {
+  'use strict';
+  var DEG = Math.PI / 180;
+  var DLS_RADIUS = 30 / DEG;
+  var EPS = 1e-9;
+  var MAX_ROWS = 5000;
+
+  function fail(message) { throw new Error(message); }
+  function present(value) { return value !== null && value !== undefined && !(typeof value === 'string' && value.trim() === ''); }
+  function finite(value, label) {
+    if (!present(value) || (typeof value !== 'number' && typeof value !== 'string') || !Number.isFinite(Number(value))) fail(label + ': introduceți un număr finit.');
+    return Number(value);
+  }
+  function bounded(value, label, min, max) {
+    value = finite(value, label);
+    if (value < min || value > max) fail(label + ': valoarea trebuie să fie între ' + min + ' și ' + max + '.');
+    return value;
+  }
+  function optional(value, label, min, max) { return present(value) ? bounded(value, label, min, max) : null; }
+  function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+  function tidy(value) { return Math.abs(value) < 1e-10 ? 0 : value; }
+  function approx(a, b) { return Math.abs(a - b) <= 1e-6 + 1e-9 * Math.max(Math.abs(a), Math.abs(b)); }
+  function fnum(value) { return String(Math.round(value * 1000) / 1000); }
+  function normAzi(value) { return ((value % 360) + 360) % 360; }
+  function oneMinusCos(angle) { var s = Math.sin(angle / 2); return 2 * s * s; }
+  function cosDifference(a, b) { return 2 * Math.sin((a + b) / 2) * Math.sin((b - a) / 2); }
+  function sinDifference(a, b) { return 2 * Math.cos((a + b) / 2) * Math.sin((b - a) / 2); }
+  function radiusAtAngle(depthType, remainingDepth, offset, angle) {
+    if (depthType === 'tvd') return (remainingDepth * Math.sin(angle) - offset * Math.cos(angle)) / oneMinusCos(angle);
+    return (offset - remainingDepth * Math.sin(angle)) / (oneMinusCos(angle) - angle * Math.sin(angle));
+  }
+
+  function controls(options) {
+    options = options || {};
+    var x = optional(options.surfaceX, 'X de suprafață', -1e8, 1e8);
+    var y = optional(options.surfaceY, 'Y de suprafață', -1e8, 1e8);
+    if ((x === null) !== (y === null)) fail('Introduceți împreună X (Nord) și Y (Est) de suprafață sau lăsați ambele câmpuri goale.');
+    var ground = optional(options.ground, 'Elevația terenului', -1e6, 1e6);
+    var datumOffset = present(options.datumOffset) ? bounded(options.datumOffset, 'Înălțimea reperului față de teren', -1e5, 1e5) : 0;
+    return {
+      surfaceX: x, surfaceY: y, ground: ground, datumOffset: datumOffset,
+      datumElevation: ground === null ? null : ground + datumOffset
+    };
+  }
+  function direction(inc, azi) {
+    var i = inc * DEG, a = azi * DEG;
+    return [Math.sin(i) * Math.cos(a), Math.sin(i) * Math.sin(a), Math.cos(i)];
+  }
+  function dogleg(inc1, azi1, inc2, azi2) {
+    var a = direction(inc1, azi1), b = direction(inc2, azi2);
+    var cx = a[1] * b[2] - a[2] * b[1];
+    var cy = a[2] * b[0] - a[0] * b[2];
+    var cz = a[0] * b[1] - a[1] * b[0];
+    var dot = clamp(a[0] * b[0] + a[1] * b[1] + a[2] * b[2], -1, 1);
+    return Math.atan2(Math.hypot(cx, cy, cz), dot);
+  }
+  // Maximum inclination of the inferred minimum-curvature arc, including interior points.
+  // Rodrigues rotation: t(w)=u*cos(w)+(normal cross u)*sin(w), 0<=w<=beta.
+  function arcMaxInclination(u, v, beta, endpointMax) {
+    if (beta < 1e-12) return endpointMax;
+    var cx = u[1] * v[2] - u[2] * v[1];
+    var cy = u[2] * v[0] - u[0] * v[2];
+    var cz = u[0] * v[1] - u[1] * v[0];
+    var crossLength = Math.hypot(cx, cy, cz);
+    if (crossLength < 1e-15) return endpointMax;
+    var wz = (cx * u[1] - cy * u[0]) / crossLength;
+    var omega = (Math.atan2(wz, u[2]) + Math.PI + 2 * Math.PI) % (2 * Math.PI);
+    if (omega <= 0 || omega >= beta) return endpointMax;
+    var wx = (cy * u[2] - cz * u[1]) / crossLength;
+    var wy = (cz * u[0] - cx * u[2]) / crossLength;
+    var co = Math.cos(omega), si = Math.sin(omega);
+    var tx = u[0] * co + wx * si, ty = u[1] * co + wy * si;
+    var zMinimum = u[2] * co + wz * si;
+    return Math.max(endpointMax, Math.atan2(Math.hypot(tx, ty), zMinimum) / DEG);
+  }
+  function station(md, inc, azi, tvd, n, e, dls, phase, cfg, sectionAzi) {
+    var a = sectionAzi * DEG;
+    return {
+      md: tidy(md), inc: tidy(inc), azi: normAzi(azi), tvd: tidy(tvd), n: tidy(n), e: tidy(e),
+      x: cfg.surfaceX === null ? null : cfg.surfaceX + n,
+      y: cfg.surfaceY === null ? null : cfg.surfaceY + e,
+      z: cfg.datumElevation === null ? null : cfg.datumElevation - tvd,
+      dls: tidy(dls), closure: Math.hypot(n, e), vs: tidy(n * Math.cos(a) + e * Math.sin(a)), phase: phase
+    };
+  }
+
+  // Positive displacement, constant azimuth. Build and drop are exact circular arcs.
+  // For a peak angle t and final angle p: A=Rb+Rd*cos(p), B=Rb+Rd.
+  // Offset=A-B*cos(t)+H*sin(t), where H is tangent length.
+  // KOP is then derived from the specified target TVD or MD.
+  function solveGeometry(cfg, buildRate, dropRate) {
+    var rb = DLS_RADIUS / buildRate;
+    var rd = cfg.profile === 's' ? DLS_RADIUS / dropRate : 0;
+    var p = cfg.profile === 's' ? cfg.endInc * DEG : 0;
+    var A = rb + rd * Math.cos(p), B = rb + rd;
+    var target = cfg.depth, D = cfg.offset;
+    var fixedAngle = cfg.profile === 'horizontal' ? Math.PI / 2 : (cfg.profile === 'j' && cfg.endInc !== null ? cfg.endInc * DEG : null);
+
+    function geometry(t) {
+      if (!(t > 0)) fail('Un traseu deviat are nevoie de o înclinare pozitivă.');
+      var arcOffset = rb * oneMinusCos(t) + rd * cosDifference(p, t);
+      var h = (D - arcOffset) / Math.sin(t);
+      if (h < -1e-6) fail('Deplasarea este prea mică pentru raza de curbură și înclinarea finală alese. Măriți rata de creștere sau reduceți înclinarea.');
+      h = Math.max(0, h);
+      var arcTvd = rb * Math.sin(t) + rd * sinDifference(p, t);
+      var arcMd = B * t - rd * p;
+      var residual = cfg.depthType === 'md' ? arcMd + h : arcTvd + h * Math.cos(t);
+      return { theta: t, hold: h, kop: target - residual, rb: rb, rd: rd, p: p, arcTvd: arcTvd, arcMd: arcMd };
+    }
+
+    if (fixedAngle !== null) {
+      if (fixedAngle <= EPS || fixedAngle > cfg.maxInc * DEG + EPS) fail('Înclinarea finală trebuie să fie pozitivă și să nu depășească înclinarea maximă.');
+      var fixed = geometry(fixedAngle);
+      if (fixed.kop < -1e-6) fail('Adâncimea este prea mică pentru deplasarea și înclinarea finală alese la rata de creștere curentă.');
+      fixed.kop = Math.max(0, fixed.kop);
+      if (cfg.kop !== null && !approx(fixed.kop, cfg.kop)) fail('Datele sunt supradeterminate: pentru adâncimea, deplasarea, rata și înclinarea finală date, KOP trebuie să fie ' + fnum(fixed.kop) + ' m (a fost introdus ' + fnum(cfg.kop) + ' m).');
+      if (cfg.kop !== null) fixed.kop = cfg.kop;
+      return fixed;
+    }
+
+    var high = cfg.maxInc * DEG;
+    var halfAngleSinSquared = (D + rd * oneMinusCos(p)) / (2 * B);
+    high = Math.min(high, 2 * Math.asin(Math.sqrt(clamp(halfAngleSinSquared, 0, 1))));
+    var low = Math.max(p, Math.min(1e-12, D / (target + 1) * 1e-6));
+    if (high + EPS < low) fail('Înclinarea finală sau raza de curbură nu permit deplasarea cerută.');
+    high = Math.max(high, low);
+    var top = geometry(high), bottom = geometry(low);
+    if (top.kop < -1e-6) fail('Ținta nu poate fi atinsă: adâncimea este prea mică pentru deplasarea cerută, în limita înclinării maxime și a doglegului. Reduceți deplasarea, măriți adâncimea sau ajustați limitele.');
+    var chosenKop;
+    if (cfg.kop !== null) chosenKop = cfg.kop;
+    else chosenKop = Math.max(0, bottom.kop, Math.min(target * 0.2, top.kop));
+    if (chosenKop < bottom.kop - 1e-6) fail('Înclinarea finală și deplasarea cerute necesită un KOP de cel puțin ' + fnum(bottom.kop) + ' m. Introduceți un KOP mai mare sau modificați înclinarea finală.');
+    if (chosenKop > top.kop + 1e-6) fail('KOP este prea adânc pentru țintă și limitele alese. KOP maxim fezabil: ' + fnum(Math.max(0, top.kop)) + ' m.');
+    if (approx(chosenKop, top.kop)) { top.kop = chosenKop; return top; }
+    if (approx(chosenKop, bottom.kop)) { bottom.kop = chosenKop; return bottom; }
+    for (var iter = 0; iter < 100; iter++) {
+      var mid = (low + high) / 2, candidate = geometry(mid);
+      if (candidate.kop < chosenKop) low = mid; else high = mid;
+    }
+    var result = geometry((low + high) / 2);
+    result.kop = chosenKop;
+    return result;
+  }
+
+  function fixedAngleAutomaticRate(cfg) {
+    // An entered KOP plus terminal angle determines the radius exactly.
+    if (cfg.kop === null || cfg.buildExplicit || cfg.profile === 's') return null;
+    var t = cfg.profile === 'horizontal' ? Math.PI / 2 : (cfg.endInc === null ? null : cfg.endInc * DEG);
+    if (t === null || t <= EPS) return null;
+    var L = cfg.depth - cfg.kop, D = cfg.offset;
+    var radius = radiusAtAngle(cfg.depthType, L, D, t);
+    if (!(radius > 0) || !Number.isFinite(radius)) fail('KOP, adâncimea, deplasarea și înclinarea finală nu definesc o rază de creștere pozitivă.');
+    var rate = DLS_RADIUS / radius;
+    if (rate > cfg.maxDls + 1e-8) fail('Geometria cere o rată de creștere de ' + fnum(rate) + '°/30 m, peste doglegul maxim de ' + fnum(cfg.maxDls) + '°/30 m.');
+    return rate;
+  }
+
+  function makeSegments(geometry, cfg, buildRate, dropRate) {
+    var segments = [], md = 0, tvd = 0, vs = 0;
+    function add(phase, length, i0, i1, rate) {
+      if (length <= 1e-8) return;
+      var deltaT, deltaV;
+      if (Math.abs(i1 - i0) < 1e-12) { deltaT = length * Math.cos(i0); deltaV = length * Math.sin(i0); }
+      else { var k = (i1 - i0) / length; deltaT = sinDifference(i0, i1) / k; deltaV = cosDifference(i0, i1) / k; }
+      segments.push({ phase: phase, startMd: md, endMd: md + length, length: length,
+        startInc: i0 / DEG, endInc: i1 / DEG, rate: rate, radius: Math.abs(rate) > EPS ? DLS_RADIUS / Math.abs(rate) : null,
+        startTvd: tvd, endTvd: tvd + deltaT, startVs: vs, endVs: vs + deltaV });
+      md += length; tvd += deltaT; vs += deltaV;
+    }
+    add('vertical', geometry.kop, 0, 0, 0);
+    add('build', geometry.rb * geometry.theta, 0, geometry.theta, buildRate);
+    add(cfg.profile === 'horizontal' ? 'horizontal' : 'hold', geometry.hold, geometry.theta, geometry.theta, 0);
+    if (cfg.profile === 's') add('drop', geometry.rd * (geometry.theta - geometry.p), geometry.theta, geometry.p, -dropRate);
+    return segments;
+  }
+
+  function evaluateSegment(s, md) {
+    var ds = clamp(md - s.startMd, 0, s.length);
+    var i0 = s.startInc * DEG, k = (s.endInc - s.startInc) * DEG / s.length;
+    var i = i0 + k * ds, tvd, vs;
+    if (Math.abs(k) < 1e-15) { tvd = s.startTvd + ds * Math.cos(i0); vs = s.startVs + ds * Math.sin(i0); }
+    else { tvd = s.startTvd + sinDifference(i0, i) / k; vs = s.startVs + cosDifference(i0, i) / k; }
+    return { inc: i / DEG, tvd: tvd, vs: vs, phase: s.phase };
+  }
+
+  function sampledPlan(segments, cfg) {
+    var end = segments[segments.length - 1].endMd;
+    if (Math.ceil(end / cfg.step) + segments.length * 2 + 2 > MAX_ROWS) fail('Pasul generează prea multe stații (maximum ' + MAX_ROWS + '). Măriți pasul de eșantionare.');
+    var depths = [0, end];
+    for (var k = 1, count = Math.floor(end / cfg.step); k <= count; k++) depths.push(k * cfg.step);
+    segments.forEach(function (s) { depths.push(s.startMd, s.endMd); });
+    depths.sort(function (a, b) { return a - b; });
+    var unique = depths.filter(function (v, ix) { return ix === 0 || Math.abs(v - depths[ix - 1]) > 1e-7; });
+    var rows = [], index = 0, az = cfg.azimuth * DEG;
+    unique.forEach(function (md) {
+      while (index < segments.length - 1 && md > segments[index].endMd + 1e-8) index++;
+      var point = evaluateSegment(segments[index], md), dls = 0;
+      if (rows.length) { var prev = rows[rows.length - 1]; dls = dogleg(prev.inc, prev.azi, point.inc, cfg.azimuth) / DEG * 30 / (md - prev.md); }
+      rows.push(station(md, point.inc, cfg.azimuth, point.tvd, point.vs * Math.cos(az), point.vs * Math.sin(az), dls, point.phase, cfg, cfg.azimuth));
+    });
+    return rows;
+  }
+
+  function summarize(rows, cfg, extra) {
+    var last = rows[rows.length - 1], maxInc = 0, maxDls = 0;
+    rows.forEach(function (r) { maxInc = Math.max(maxInc, r.inc); maxDls = Math.max(maxDls, r.dls); });
+    var result = { md: last.md, tvd: last.tvd, offset: last.closure, azi: cfg.azimuth === undefined ? (last.closure > EPS ? normAzi(Math.atan2(last.e, last.n) / DEG) : 0) : cfg.azimuth,
+      maxInc: maxInc, maxDls: maxDls, endInc: last.inc, endAzimuth: last.azi, surfaceX: cfg.surfaceX, surfaceY: cfg.surfaceY,
+      ground: cfg.ground, datumOffset: cfg.datumOffset, datumElevation: cfg.datumElevation, x: last.x, y: last.y, z: last.z,
+      north: last.n, east: last.e, stations: rows.length, verticalSectionAzimuth: cfg.sectionAzimuth === undefined ? cfg.azimuth : cfg.sectionAzimuth };
+    Object.keys(extra || {}).forEach(function (key) { result[key] = extra[key]; });
+    return result;
+  }
+
+  function plan(options) {
+    options = options || {};
+    var cfg = controls(options), assumptions = [], warnings = [];
+    cfg.depth = bounded(options.depth, 'Adâncimea țintei', 0.01, 100000);
+    cfg.depthType = options.depthType || 'tvd';
+    if (cfg.depthType !== 'tvd' && cfg.depthType !== 'md') fail('Tipul adâncimii trebuie să fie TVD sau MD.');
+    cfg.offset = bounded(options.offset, 'Deplasarea la talpă', 0, 100000);
+    cfg.azimuth = present(options.azimuth) ? normAzi(bounded(options.azimuth, 'Azimut', 0, 360)) : 0;
+    if (!present(options.azimuth) && cfg.offset > 0) assumptions.push('Azimut neintrodus: 0° față de Nordul grilei Stereo 70.');
+    cfg.profile = options.profile || 'j';
+    if (['j', 's', 'horizontal'].indexOf(cfg.profile) === -1) fail('Profil necunoscut. Alegeți J, S sau orizontal.');
+    cfg.kop = optional(options.kop, 'KOP', 0, cfg.depth);
+    cfg.maxDls = present(options.maxDls) ? bounded(options.maxDls, 'Dogleg maxim', 0.001, 180) : 3;
+    cfg.maxInc = present(options.maxInc) ? bounded(options.maxInc, 'Înclinare maximă', 0, 90) : (cfg.profile === 'horizontal' ? 90 : 85);
+    cfg.endInc = optional(options.endInc, 'Înclinare finală', 0, 90);
+    cfg.step = present(options.step) ? bounded(options.step, 'Pasul stațiilor', 0.1, 10000) : 30;
+    cfg.buildExplicit = present(options.buildRate);
+    cfg.dropExplicit = present(options.dropRate);
+    var buildRate = cfg.buildExplicit ? bounded(options.buildRate, 'Rata de creștere', 0.001, 180) : Math.min(2, cfg.maxDls);
+    var dropRate = cfg.dropExplicit ? bounded(options.dropRate, 'Rata de scădere', 0.001, 180) : buildRate;
+    if (buildRate > cfg.maxDls + 1e-9) fail('Rata de creștere depășește doglegul maxim introdus.');
+    if (cfg.profile === 's' && dropRate > cfg.maxDls + 1e-9) fail('Rata de scădere depășește doglegul maxim introdus.');
+    if (cfg.profile === 's' && cfg.endInc === null) cfg.endInc = 0;
+    if (cfg.profile === 'horizontal') {
+      if (cfg.endInc !== null && !approx(cfg.endInc, 90)) fail('Profilul orizontal are obligatoriu înclinarea finală de 90°.');
+      cfg.endInc = 90;
+      if (cfg.maxInc < 90 - 1e-9) fail('Profilul orizontal necesită înclinare maximă de cel puțin 90°.');
+    }
+    if (cfg.endInc !== null && cfg.endInc > cfg.maxInc + 1e-9) fail('Înclinarea finală depășește înclinarea maximă.');
+
+    if (cfg.offset < 1e-9) {
+      if (cfg.profile === 'horizontal' || (cfg.endInc !== null && cfg.endInc > EPS)) fail('O țintă cu deplasare zero nu admite profil orizontal sau înclinare finală pozitivă în acest model plan.');
+      var vseg = [{ phase: 'vertical', startMd: 0, endMd: cfg.depth, length: cfg.depth, startInc: 0, endInc: 0, rate: 0, radius: null, startTvd: 0, endTvd: cfg.depth, startVs: 0, endVs: 0 }];
+      var vrows = sampledPlan(vseg, cfg);
+      assumptions.push('Deplasare zero: traseu vertical; KOP și ratele de curbură nu sunt necesare.');
+      return { stations: vrows, segments: vseg, summary: summarize(vrows, cfg, { kop: null, buildRate: 0, dropRate: 0, radius: null, dropRadius: null, profile: 'vertical', targetType: cfg.depthType }), warnings: warnings, assumptions: assumptions };
+    }
+    if (cfg.maxInc <= EPS) fail('O deplasare pozitivă necesită o înclinare maximă pozitivă.');
+    if (cfg.profile === 'j' && cfg.endInc !== null && cfg.endInc <= EPS) fail('Un profil J deviat nu poate avea înclinare finală zero. Alegeți profil S.');
+    var exactRate = fixedAngleAutomaticRate(cfg);
+    if (exactRate !== null) buildRate = exactRate;
+    var geometry;
+    try { geometry = solveGeometry(cfg, buildRate, dropRate); }
+    catch (firstError) {
+      var buildAdjustable = !cfg.buildExplicit && exactRate === null;
+      var dropAdjustable = cfg.profile === 's' && !cfg.dropExplicit;
+      if (!buildAdjustable && !dropAdjustable) throw firstError;
+      var candidates = [cfg.maxDls];
+      // Search the allowed automatic rates, preserving every explicitly entered rate.
+      // A logarithmic grid covers low rates; a linear grid covers narrow intervals near ordinary values.
+      for (var ri = 1; ri < 96; ri++) candidates.push(cfg.maxDls - (cfg.maxDls - 0.001) * ri / 96);
+      for (var li = 1; li <= 96; li++) candidates.push(cfg.maxDls * Math.pow(0.001 / cfg.maxDls, li / 96));
+      // At peak = terminal inclination the S drop has zero length. Its exact build radius
+      // supplies a guaranteed feasibility boundary, including maxInc = endInc (a single rate).
+      if (buildAdjustable && cfg.profile === 's' && cfg.endInc > EPS && cfg.kop !== null) {
+        var terminalRadius = radiusAtAngle(cfg.depthType, cfg.depth - cfg.kop, cfg.offset, cfg.endInc * DEG);
+        var terminalRate = DLS_RADIUS / terminalRadius;
+        if (terminalRadius > 0 && terminalRate >= 0.001 - EPS && terminalRate <= cfg.maxDls + EPS) candidates.push(Math.min(terminalRate, cfg.maxDls));
+      }
+      var solved = false;
+      for (var ci = 0; ci < candidates.length; ci++) {
+        var retryBuild = buildAdjustable ? candidates[ci] : buildRate;
+        var retryDrop = dropAdjustable ? candidates[ci] : dropRate;
+        if (approx(retryBuild, buildRate) && approx(retryDrop, dropRate)) continue;
+        try { geometry = solveGeometry(cfg, retryBuild, retryDrop); }
+        catch (_) { continue; }
+        buildRate = retryBuild; dropRate = retryDrop; solved = true; break;
+      }
+      if (!solved) throw firstError;
+      assumptions.push('Ratele automate inițiale nu ating ținta; s-au căutat rate fezabile în intervalul permis, păstrând ratele introduse explicit.');
+    }
+    if (!cfg.buildExplicit) assumptions.push('Rată de creștere calculată/aleasă automat: ' + fnum(buildRate) + '°/30 m.');
+    if (cfg.profile === 's' && !cfg.dropExplicit) assumptions.push('Rată de scădere aleasă automat: ' + fnum(dropRate) + '°/30 m.');
+    if (cfg.kop === null) assumptions.push('KOP automat: ' + fnum(geometry.kop) + ' m' + (cfg.profile === 'horizontal' || (cfg.profile === 'j' && cfg.endInc !== null) ? ', impus de geometria și înclinarea finală.' : (geometry.kop > cfg.depth * 0.2 + 1e-6 ? ', limita orientativă de 20% nu este fezabilă; s-a ales cel mai apropiat KOP fezabil mai adânc.' : ', cel mai adânc fezabil până la 20% din adâncimea introdusă.')));
+    if (cfg.profile === 's' && !present(options.endInc)) assumptions.push('Profil S: înclinare finală implicită 0°.');
+    if (cfg.profile === 's' && Math.abs(geometry.theta - geometry.p) < 1e-10) assumptions.push('Pentru aceste date, înclinarea maximă coincide cu cea finală; segmentul de scădere are lungime zero.');
+    var segments = makeSegments(geometry, cfg, buildRate, dropRate), rows = sampledPlan(segments, cfg);
+    var summary = summarize(rows, cfg, { kop: geometry.kop, buildRate: buildRate, dropRate: cfg.profile === 's' ? dropRate : 0,
+      radius: geometry.rb, dropRadius: cfg.profile === 's' ? geometry.rd : null, holdLength: geometry.hold, profile: cfg.profile, targetType: cfg.depthType, targetDepth: cfg.depth, targetOffset: cfg.offset });
+    segments.forEach(function (s) { summary.maxDls = Math.max(summary.maxDls, Math.abs(s.rate)); });
+    if (!approx(summary.offset, cfg.offset) || !approx(cfg.depthType === 'md' ? summary.md : summary.tvd, cfg.depth)) fail('Geometria nu se închide numeric în țintă. Verificați datele introduse.');
+    if (summary.maxInc > cfg.maxInc + 1e-6 || summary.maxDls > cfg.maxDls + 1e-6) fail('Traiectoria rezultată depășește limitele introduse.');
+    return { stations: rows, summary: summary, segments: segments, warnings: warnings, assumptions: assumptions };
+  }
+
+  function survey(inputRows, options) {
+    options = options || {};
+    if (!Array.isArray(inputRows) || inputRows.length < 2) fail('Deviația trebuie să conțină minimum două stații, inclusiv originea MD = 0.');
+    if (inputRows.length > MAX_ROWS) fail('Deviația conține prea multe stații (maximum ' + MAX_ROWS + ').');
+    var cfg = controls(options), warnings = [], assumptions = [];
+    var maxAllowedDls = optional(options.maxDls, 'Dogleg maxim', 0.001, 180);
+    var maxAllowedInc = optional(options.maxInc, 'Înclinare maximă', 0, 180);
+    var checked = inputRows.map(function (r, ix) {
+      if (!r || typeof r !== 'object') fail('Stația ' + (ix + 1) + ' este invalidă.');
+      return { md: bounded(r.md, 'MD la stația ' + (ix + 1), 0, 1e6), inc: bounded(r.inc, 'Înclinarea la stația ' + (ix + 1), 0, 180), azi: normAzi(bounded(r.azi, 'Azimutul la stația ' + (ix + 1), 0, 360)) };
+    });
+    if (checked[0].md !== 0) fail('Prima stație trebuie să fie MD = 0. Adăugați explicit originea și orientarea ei.');
+    checked.forEach(function (r, ix) { if (ix && r.md <= checked[ix - 1].md) fail('MD trebuie să crească strict: stația ' + (ix + 1) + ' este duplicată sau în afara ordinii.'); });
+    var aziSection = present(options.sectionAzimuth) ? normAzi(bounded(options.sectionAzimuth, 'Azimutul secțiunii verticale', 0, 360)) : null;
+    var positions = [{ md: checked[0].md, inc: checked[0].inc, azi: checked[0].azi, tvd: 0, n: 0, e: 0, dls: 0, phase: 'survey' }];
+    var segments = [];
+    for (var ix = 1; ix < checked.length; ix++) {
+      var a = checked[ix - 1], b = checked[ix], ds = b.md - a.md;
+      var beta = dogleg(a.inc, a.azi, b.inc, b.azi);
+      if (beta >= Math.PI - 1e-8) fail('Stațiile ' + ix + ' și ' + (ix + 1) + ' au dogleg de 180°. Metoda curburii minime nu definește o traiectorie unică pentru direcții opuse.');
+      var ratio = beta < 1e-6 ? 1 + beta * beta / 12 + Math.pow(beta, 4) / 120 : 2 * Math.tan(beta / 2) / beta;
+      var u = direction(a.inc, a.azi), v = direction(b.inc, b.azi), prev = positions[ix - 1];
+      var maximumArcInc = arcMaxInclination(u, v, beta, Math.max(a.inc, b.inc));
+      var dls = beta / DEG * 30 / ds;
+      var point = { md: b.md, inc: b.inc, azi: b.azi, tvd: prev.tvd + ds * 0.5 * (u[2] + v[2]) * ratio,
+        n: prev.n + ds * 0.5 * (u[0] + v[0]) * ratio, e: prev.e + ds * 0.5 * (u[1] + v[1]) * ratio, dls: dls, phase: 'survey' };
+      if (![point.tvd, point.n, point.e, dls].every(Number.isFinite)) fail('Calcul numeric invalid între stațiile ' + ix + ' și ' + (ix + 1) + '.');
+      positions.push(point);
+      segments.push({ phase: 'survey', startMd: a.md, endMd: b.md, length: ds, startInc: a.inc, endInc: b.inc,
+        startAzimuth: a.azi, endAzimuth: b.azi, dogleg: beta / DEG, rate: dls, radius: beta > EPS ? ds / beta : null,
+        startTvd: prev.tvd, endTvd: point.tvd, maxInc: maximumArcInc });
+    }
+    var final = positions[positions.length - 1];
+    if (aziSection === null) {
+      aziSection = Math.hypot(final.n, final.e) > EPS ? normAzi(Math.atan2(final.e, final.n) / DEG) : checked[checked.length - 1].azi;
+      assumptions.push('Azimutul secțiunii verticale este azimutul deplasării finale (' + fnum(aziSection) + '°).');
+    }
+    cfg.sectionAzimuth = aziSection;
+    var rows = positions.map(function (p) { return station(p.md, p.inc, p.azi, p.tvd, p.n, p.e, p.dls, p.phase, cfg, aziSection); });
+    var summary = summarize(rows, cfg, { kop: null, buildRate: null, dropRate: null, radius: null, dropRadius: null, profile: 'survey' });
+    summary.maxMeasuredInc = summary.maxInc;
+    segments.forEach(function (segment) { summary.maxInc = Math.max(summary.maxInc, segment.maxInc); });
+    if (maxAllowedDls !== null && summary.maxDls > maxAllowedDls + 1e-8) warnings.push('Deviația măsurată depășește doglegul de control: ' + fnum(summary.maxDls) + '°/30 m față de ' + fnum(maxAllowedDls) + '°/30 m.');
+    if (maxAllowedInc !== null && summary.maxInc > maxAllowedInc + 1e-8) warnings.push('Traiectul calculat prin curbură minimă depășește înclinarea de control: ' + fnum(summary.maxInc) + '° față de ' + fnum(maxAllowedInc) + '°.');
+    if (summary.maxInc > summary.maxMeasuredInc + 1e-6) assumptions.push('Maximul calculat între stații este ' + fnum(summary.maxInc) + '°; maximul înclinărilor măsurate la stații este ' + fnum(summary.maxMeasuredInc) + '°.');
+    if (summary.maxInc > 90 + EPS) warnings.push('Există înclinări peste 90°: unele intervale pot urca în TVD.');
+    assumptions.push('Coordonate calculate prin metoda curburii minime; DLS-ul fiecărei stații descrie intervalul de la stația precedentă.');
+    return { stations: rows, summary: summary, segments: segments, warnings: warnings, assumptions: assumptions };
+  }
+
+  return { plan: plan, survey: survey, dogleg: function (i1, a1, i2, a2) { return dogleg(i1, a1, i2, a2) / DEG; }, version: '1.1.0' };
+});
+
+</script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), DEG=Math.PI/180;
+const numberIds=['depth','offset','azimuth','targetX','targetY','targetValue','surfaceX','surfaceY','ground','datumOffset','kop','buildRate','maxDls','maxInc','dropRate','endInc','step','vsAzimuth'];
+const selectIds=['depthType','targetType','profile'];
+const phaseNames={vertical:'Vertical',build:'Creștere',hold:'Tangentă / palier',drop:'Scădere',survey:'Măsurat',horizontal:'Palier orizontal'};
+let mode='offset', result=null, calculatedConfig=null, dirty=false, activeStation=-1, toastTimer;
+const nf=new Intl.NumberFormat('ro-RO',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt=(v,d=2)=>Number.isFinite(v)?(d===2?nf.format(v):v.toLocaleString('ro-RO',{minimumFractionDigits:d,maximumFractionDigits:d})):'—';
+const phase=p=>phaseNames[p]||p||'Măsurat';
+const safeText=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function parseNumber(value,label,required=false){const s=String(value??'').trim();if(!s){if(required)throw Error('Completează '+label+'.');return null;}if(!/^[+-]?(?:\d+(?:[.,]\d*)?|[.,]\d+)$/.test(s))throw Error(label+': folosește un număr fără separator de mii.');const v=Number(s.replace(',','.'));if(!Number.isFinite(v)||Math.abs(v)>1e8)throw Error(label+': valoare în afara domeniului admis (±100.000.000).');return v;}
+function num(id,required=false){return parseNumber($(id).value,document.querySelector('label[for="'+id+'"]')?.textContent||id,required);}
+function toast(s){$('toast').textContent=s;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,3600);}
+function addSurveyRow(values=['','','']){if($('surveyRows').children.length>=5000){toast('Maximum 5.000 de stații.');return;}const tr=document.createElement('tr');['MD','Înclinare','Azimut'].forEach((label,i)=>{const td=document.createElement('td'),input=document.createElement('input');input.type='text';input.inputMode='decimal';input.value=values[i]??'';input.setAttribute('aria-label',label+' stație '+($('surveyRows').children.length+1));input.addEventListener('input',markDirty);td.append(input);tr.append(td);});const td=document.createElement('td'),b=document.createElement('button');b.type='button';b.textContent='×';b.className='remove-row';b.setAttribute('aria-label','Șterge stația');b.addEventListener('click',()=>{tr.remove();markDirty();});td.append(b);tr.append(td);$('surveyRows').append(tr);}
+function setSurvey(rows){$('surveyRows').replaceChildren();rows.forEach(addSurveyRow);}
+function surveyValues(){return [...$('surveyRows').children].map(tr=>[...tr.querySelectorAll('input')].map(i=>i.value));}
+function readSurvey(){const rows=surveyValues().filter(row=>row.some(v=>String(v).trim()));if(rows.length<2)throw Error('Introdu cel puțin două stații de deviație, inclusiv MD = 0.');return rows.map((v,i)=>({md:parseNumber(v[0],'MD la stația '+(i+1),true),inc:parseNumber(v[1],'Înclinare la stația '+(i+1),true),azi:parseNumber(v[2],'Azimut la stația '+(i+1),true)}));}
+function setMode(next,mark=true){mode=next;for(const v of ['offset','coordinates','survey']){$(v+'Panel').hidden=v!==mode;$('tab-'+v).setAttribute('aria-selected',String(v===mode));$('tab-'+v).tabIndex=v===mode?0:-1;}$('planControls').hidden=mode==='survey';$('calculateBtn').textContent=mode==='survey'?'Calculează deviația':'Calculează traiectul';$('stepField').hidden=mode==='survey';$('endIncField').hidden=mode==='survey';$('dropRateField').hidden=mode==='survey'||$('profile').value!=='s';$('limitsHint').textContent=mode==='survey'?'Limitele semnalează depășirile măsurate. Stațiile și valorile introduse se păstrează.':'Câmp gol = alegere automată. Valorile completate sunt constrângeri; o țintă imposibilă produce un mesaj explicativ.';updateProfile();if(mark)markDirty();}
+function updateProfile(){const p=$('profile').value,survey=mode==='survey';$('dropRateField').hidden=survey||p!=='s';$('endIncField').hidden=survey;$('endInc').disabled=p==='horizontal';$('endInc').placeholder=p==='s'?'Implicit: 0°':p==='horizontal'?'Fix: 90°':'Calculată';$('maxInc').placeholder=p==='horizontal'?'Implicit: 90°':'Implicit: 85°';$('profileHint').textContent=p==='horizontal'?'Palier la 90°. Dacă KOP este automat, se determină din adâncimea și raza de curbură necesare.':'KOP este începutul devierii, de la reperul adâncimilor. În secțiunea verticală inițială, MD = TVD.';}
+function captureConfig(){const c={app:'well-trajectory-stereo70',version:1,mode,wellName:$('wellName').value};for(const id of [...numberIds,...selectIds])c[id]=$(id).value;c.survey=surveyValues();c.equalScale=$('equalScale').checked;c.showStations=$('showStations').checked;c.verticalAxis=$('verticalAxis').value;return c;}
+function markDirty(){dirty=true;$('exportBtn').disabled=true;$('svgBtn').disabled=true;$('printBtn').disabled=true;if(result){$('status').className='status warn';$('status').replaceChildren();const strong=document.createElement('strong');strong.textContent='Date modificate · rezultatul afișat este cel anterior';$('status').append(strong,document.createTextNode('Apasă „Calculează” pentru actualizare și export.'));}}
+function commonOptions(){const surfaceX=num('surfaceX'),surfaceY=num('surfaceY'),ground=num('ground'),datumOffset=num('datumOffset')??0;if((surfaceX===null)!==(surfaceY===null))throw Error('Completează ambele coordonate de suprafață X și Y sau lasă-le pe ambele goale.');if(datumOffset<0||datumOffset>200)throw Error('Înălțimea reperului peste sol trebuie să fie între 0 și 200 m.');const maxDls=num('maxDls')??3,maxInc=num('maxInc')??($('profile').value==='horizontal'?90:85);if(maxDls<=0||maxDls>60)throw Error('Dogleg maxim trebuie să fie > 0 și ≤ 60°/30 m.');if(maxInc<0||maxInc>180)throw Error('Înclinarea maximă trebuie să fie între 0 și 180°.');return{surfaceX,surfaceY,ground,datumOffset,maxDls,maxInc};}
+function calculate(){try{if(typeof WellEngine==='undefined')throw Error('Motorul de calcul nu este disponibil.');const opts=commonOptions(),vs=num('vsAzimuth');if(vs!==null&&(vs<0||vs>360))throw Error('Azimutul secțiunii trebuie să fie între 0° și 360°.');let r,notes=[];if(mode==='survey'){r=WellEngine.survey(readSurvey(),{...opts,sectionAzimuth:vs});}else{let depth,depthType,offset,azimuth;if(mode==='offset'){depth=num('depth',true);depthType=$('depthType').value;offset=num('offset',true);azimuth=num('azimuth')??0;if(!$('azimuth').value.trim())notes.push('Azimut necompletat: 0° (nordul grilei).');}else{if(opts.surfaceX===null)throw Error('Modul coordonate necesită X și Y la suprafață.');const x=num('targetX',true),y=num('targetY',true),dn=x-opts.surfaceX,de=y-opts.surfaceY;offset=Math.hypot(dn,de);azimuth=offset>1e-9?(Math.atan2(de,dn)/DEG+360)%360:0;depth=num('targetValue',true);depthType=$('targetType').value;if(depthType==='elevation'){if(opts.ground===null)throw Error('Pentru o cotă Z a țintei trebuie introdusă elevația solului.');depth=opts.ground+opts.datumOffset-depth;depthType='tvd';notes.push('TVD țintă = cota reperului − cota țintei: '+fmt(depth)+' m.');}notes.push('Azimut și deplasare calculate din diferențele coordonatelor Stereo 70.');}if(depth<=0||depth>100000)throw Error('Adâncimea trebuie să fie > 0 și ≤ 100.000 m.');if(offset<0||offset>100000)throw Error('Deplasarea trebuie să fie între 0 și 100.000 m.');if(azimuth<0||azimuth>360)throw Error('Azimutul trebuie să fie între 0° și 360°.');const step=num('step')??30;if(step<1||step>10000)throw Error('Pasul stațiilor trebuie să fie între 1 și 10.000 m.');const profile=$('profile').value;const endInc=profile==='horizontal'?90:num('endInc');r=WellEngine.plan({...opts,depth,depthType,offset,azimuth:azimuth%360,profile,kop:num('kop'),buildRate:num('buildRate'),dropRate:profile==='s'?num('dropRate'):null,endInc,step});}
+ const end=r.stations[r.stations.length-1],vsAzi=vs??(Math.hypot(end.n,end.e)>1e-7?(Math.atan2(end.e,end.n)/DEG+360)%360:0);r.vsAzimuth=vsAzi%360;r.stations.forEach(s=>{s.vs=s.n*Math.cos(r.vsAzimuth*DEG)+s.e*Math.sin(r.vsAzimuth*DEG);s.tvdss=opts.ground===null?null:s.tvd-opts.ground-opts.datumOffset;});r.assumptions=[...notes,...(r.assumptions||[])];if(opts.surfaceX===null)r.assumptions.push('Fără coordonate de suprafață: sunt disponibile doar deplasările locale ΔN/ΔE.');if(opts.ground===null)r.assumptions.push('Fără elevația solului: cota Z și TVDSS nu sunt determinate.');r.options=opts;r.wellName=$('wellName').value.trim()||'Sondă fără nume';result=r;calculatedConfig=captureConfig();dirty=false;activeStation=-1;render();$('exportBtn').disabled=false;$('svgBtn').disabled=false;$('printBtn').disabled=false;}
+ catch(err){result=null;calculatedConfig=null;dirty=false;clearResults();$('status').className='status error';$('status').replaceChildren();const strong=document.createElement('strong');strong.textContent='Calculul nu poate fi finalizat';$('status').append(strong,document.createTextNode(err.message||String(err)));}}
+function clearResults(){for(const id of ['metricMd','metricTvd','metricOffset','metricAzi','metricInc','metricEnd','metricDls','metricKop'])$(id).textContent='—';for(const id of ['verticalPlot','planPlot','geometry','assumptions'])$(id).replaceChildren();$('resultRows').replaceChildren();const row=document.createElement('tr'),cell=document.createElement('td');cell.colSpan=13;cell.className='empty';cell.textContent='Nu există un rezultat valid pentru export.';row.append(cell);$('resultRows').append(row);$('stationCount').textContent='— stații';$('exportBtn').disabled=true;$('svgBtn').disabled=true;$('printBtn').disabled=true;$('selectedStation').textContent='Indică un punct pe schiță pentru valorile stației.';}
+function metric(id,v,u){$(id).innerHTML=fmt(v)+' <small>'+safeText(u)+'</small>';}
+function render(){const r=result,s=r.summary,end=r.stations.at(-1);$('headerWell').textContent=r.wellName;metric('metricMd',end.md,'m');$('metricTvd').textContent='TVD '+fmt(end.tvd)+' m';metric('metricOffset',Math.hypot(end.n,end.e),'m');$('metricAzi').textContent='Azimut '+(Math.hypot(end.n,end.e)<1e-7?'nedeterminat (vertical)':fmt((Math.atan2(end.e,end.n)/DEG+360)%360)+'°');metric('metricInc',s.maxInc,'°');$('metricEnd').textContent='La talpă '+fmt(end.inc)+'°';metric('metricDls',s.maxDls,'°/30 m');$('metricKop').textContent='KOP '+(Number.isFinite(s.kop)?fmt(s.kop)+' m':'— (măsurat)');$('vsLabel').textContent='VS · Az '+fmt(r.vsAzimuth,1)+'°';$('planFoot').textContent=r.options.surfaceX===null?'Deplasări locale · ΔN / ΔE':'Stereo 70 · X = nord / Y = est';$('verticalAxis').options[1].disabled=r.options.ground===null;if(r.options.ground===null)$('verticalAxis').value='tvd';$('status').className='status'+(r.warnings?.length?' warn':'');$('status').replaceChildren();const title=document.createElement('strong');title.textContent=mode==='survey'?'Deviație calculată prin curbură minimă':'Țintă atinsă geometric';$('status').append(title,document.createTextNode(r.wellName+' · '+(mode==='survey'?'stații măsurate':$('profile').selectedOptions[0].textContent)));if(r.warnings?.length){const ul=document.createElement('ul');r.warnings.forEach(w=>{const li=document.createElement('li');li.textContent=w;ul.append(li);});$('status').append(ul);}renderTable();drawCharts();renderGeometry();$('assumptions').replaceChildren();(r.assumptions.length?r.assumptions:['Toate valorile necesare au fost introduse.']).forEach(a=>{const li=document.createElement('li');li.textContent=a;$('assumptions').append(li);});}
+function renderTable(){const fragment=document.createDocumentFragment();result.stations.forEach((s,i)=>{const tr=document.createElement('tr');tr.dataset.index=i;[s.md,s.inc,s.azi,s.tvd,s.tvdss,s.x,s.y,s.z,s.n,s.e,s.vs,s.dls,phase(s.phase)].forEach((v,c)=>{const td=document.createElement('td');td.textContent=c===12?v:fmt(v,c===5||c===6?3:2);tr.append(td);});tr.addEventListener('click',()=>selectStation(i));fragment.append(tr);});$('resultRows').replaceChildren(fragment);$('stationCount').textContent=result.stations.length.toLocaleString('ro-RO')+' stații · '+(mode==='survey'?'pas original':'pas nominal '+(num('step')??30)+' m, plus repere');$('tableNote').textContent='DLS este media pe intervalul anterior. '+(result.options.surfaceX===null?'X/Y absolute lipsesc. ':'')+(result.options.ground===null?'Z/TVDSS lipsesc. ':'')+'TVDSS pozitiv = sub nivelul mării.';}
+function renderGeometry(){const s=result.summary,end=result.stations.at(-1),items=[['Cotă reper',result.options.ground===null?'—':fmt(result.options.ground+result.options.datumOffset)+' m'],['Cotă talpă Z',fmt(end.z)+' m'],['TVDSS la talpă',fmt(end.tvdss)+' m'],['X talpă · nord',fmt(end.x,3)+' m'],['Y talpă · est',fmt(end.y,3)+' m'],['Rată creștere',fmt(s.buildRate)+' °/30 m'],['Rază de creștere',fmt(s.radius??s.buildRadius)+' m'],['Rată scădere',fmt(s.dropRate)+' °/30 m']];for(const seg of (result.summary.profile==='survey'?[]:result.segments||[]))items.push([phase(seg.phase)+' · MD',fmt(seg.startMd)+' – '+fmt(seg.endMd)+' m']);$('geometry').replaceChildren();items.forEach(([key,val])=>{const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=key;dd.textContent=val;$('geometry').append(dt,dd);});}
+function svgEl(tag,attrs={},text){const node=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const[k,v]of Object.entries(attrs))node.setAttribute(k,String(v));if(text!==undefined)node.textContent=text;return node;}
+function plotPointer(svg,ev){const point=svg.createSVGPoint();point.x=ev.clientX;point.y=ev.clientY;return point.matrixTransform(svg.getScreenCTM().inverse());}
+function tickStep(range){const raw=range/5,p=Math.pow(10,Math.floor(Math.log10(raw))),n=raw/p;return(n<=1?1:n<=2?2:n<=5?5:10)*p;}
+function drawCharts(){if(!result)return;drawPlot('verticalPlot',false);drawPlot('planPlot',true);}
+function drawPlot(id,plan){const svg=$(id),r=result,W=660,H=530,m={l:78,r:35,t:45,b:63},pw=W-m.l-m.r,ph=H-m.t-m.b,elev=!plan&&$('verticalAxis').value==='elevation',points=r.stations.map(s=>({x:plan?s.e:s.vs,y:plan?s.n:elev?s.z:s.tvd,s}));const xs=points.map(p=>p.x),ys=points.map(p=>p.y);let xMin=Math.min(...xs),xMax=Math.max(...xs),yMin=Math.min(...ys),yMax=Math.max(...ys);let xr=Math.max(xMax-xMin,50),yr=Math.max(yMax-yMin,50);const xm=(xMin+xMax)/2,ym=(yMin+yMax)/2;xr*=1.16;yr*=1.16;if($('equalScale').checked){const scale=Math.max(xr/pw,yr/ph);xr=scale*pw;yr=scale*ph;}xMin=xm-xr/2;xMax=xm+xr/2;yMin=ym-yr/2;yMax=ym+yr/2;const x=v=>m.l+(v-xMin)/xr*pw,y=v=>m.t+((plan||elev)?(yMax-v)/yr:(v-yMin)/yr)*ph;svg.replaceChildren();svg.setAttribute('viewBox',`0 0 ${W} ${H}`);const defs=svgEl('defs'),clip=svgEl('clipPath',{id:id+'Clip'});clip.append(svgEl('rect',{x:m.l,y:m.t,width:pw,height:ph}));defs.append(clip);svg.append(defs);svg.append(svgEl('rect',{x:m.l,y:m.t,width:pw,height:ph,fill:'#f8faff',stroke:'#d5dfef'}));const tx=tickStep(xr),ty=tickStep(yr);let guard=0;for(let v=Math.ceil(xMin/tx)*tx;v<=xMax+1e-8&&guard++<25;v+=tx){svg.append(svgEl('line',{x1:x(v),x2:x(v),y1:m.t,y2:H-m.b,stroke:'#dce5f3','stroke-width':1}));svg.append(svgEl('text',{x:x(v),y:H-m.b+22,'text-anchor':'middle',fill:'#64728b','font-size':13},fmt(v,0)));}guard=0;for(let v=Math.ceil(yMin/ty)*ty;v<=yMax+1e-8&&guard++<25;v+=ty){svg.append(svgEl('line',{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v),stroke:'#dce5f3','stroke-width':1}));svg.append(svgEl('text',{x:m.l-10,y:y(v)+4,'text-anchor':'end',fill:'#64728b','font-size':13},fmt(v,0)));}svg.append(svgEl('text',{x:m.l+pw/2,y:H-14,'text-anchor':'middle',fill:'#203d88','font-size':15},plan?'ΔE · est (m)':'Secțiune verticală VS (m)'));const axisLabel=plan?'ΔN · nord (m)':elev?'Cotă absolută Z (m)':'TVD de la reper (m)';svg.append(svgEl('text',{x:21,y:m.t+ph/2,transform:`rotate(-90 21 ${m.t+ph/2})`,'text-anchor':'middle',fill:'#203d88','font-size':15},axisLabel));if(plan){svg.append(svgEl('path',{d:`M ${W-54} 28 l 0 -15 m -5 6 l 5 -6 l 5 6`,stroke:'#203d88',fill:'none','stroke-width':2}));svg.append(svgEl('text',{x:W-54,y:44,'text-anchor':'middle',fill:'#203d88','font-size':14},'N'));}
+ const g=svgEl('g',{'clip-path':`url(#${id}Clip)`});const colors={vertical:'#98aed5',build:'#203d88',hold:'#5876b3',drop:'#94aed8',horizontal:'#5876b3',survey:'#203d88'};let previousPhase='',line=[];function flush(){if(line.length<2)return;g.append(svgEl('polyline',{points:line.map(p=>`${x(p.x)},${y(p.y)}`).join(' '),fill:'none',stroke:colors[previousPhase]||'#203d88','stroke-width':3.2,'stroke-linejoin':'round','stroke-linecap':'round','stroke-dasharray':previousPhase==='drop'?'7 4':'none'}));}for(let i=1;i<points.length;i++){const p=points[i],pp=points[i-1],pPhase=p.s.phase||'survey';if(pPhase!==previousPhase){flush();line=[pp];previousPhase=pPhase;}line.push(p);}flush();if($('showStations').checked){const stride=Math.max(1,Math.ceil(points.length/700));points.forEach((p,i)=>{if(i%stride===0)g.append(svgEl('circle',{cx:x(p.x),cy:y(p.y),r:2.5,fill:'#203d88',stroke:'white','stroke-width':.8}));});}if(activeStation>=0&&points[activeStation]){const p=points[activeStation];g.append(svgEl('circle',{cx:x(p.x),cy:y(p.y),r:6,fill:'#54c8e8',stroke:'#203d88','stroke-width':2}));}svg.append(g);const start=points[0],end=points.at(-1);svg.append(svgEl('circle',{cx:x(start.x),cy:y(start.y),r:5,fill:'white',stroke:'#203d88','stroke-width':2}));svg.append(svgEl('text',{x:x(start.x)+8,y:y(start.y)-9,fill:'#203d88','font-size':14},'Reper'));svg.append(svgEl('circle',{cx:x(end.x),cy:y(end.y),r:5,fill:'#ee7623',stroke:'white','stroke-width':1.5}));svg.append(svgEl('text',{x:Math.min(x(end.x)+9,W-85),y:y(end.y)+20,fill:'#203d88','font-size':14},'Talpă'));if(!plan&&Number.isFinite(r.summary.kop)&&r.summary.kop>0){const kop=r.stations.find(s=>Math.abs(s.md-r.summary.kop)<1e-5);if(kop){const ky=y(elev?kop.z:kop.tvd);svg.append(svgEl('circle',{cx:x(kop.vs),cy:ky,r:4,fill:'#54c8e8',stroke:'#203d88','stroke-width':1}));svg.append(svgEl('text',{x:x(kop.vs)+10,y:ky-8,fill:'#203d88','font-size':13},'KOP '+fmt(kop.md,0)+' m'));}}svg.append(svgEl('text',{x:m.l,y:22,fill:'#64728b','font-size':13},$('equalScale').checked?'Scară 1:1 · același metru pe ambele axe':'Scări independente pe axe'));
+ svg.onpointermove=ev=>{if(ev.pointerType==='touch')return;const pointer=plotPointer(svg,ev),px=pointer.x,py=pointer.y;let index=0,best=Infinity;points.forEach((p,i)=>{const d=(x(p.x)-px)**2+(y(p.y)-py)**2;if(d<best){best=d;index=i;}});if(best>35**2){$('tooltip').hidden=true;return;}const s=points[index].s;$('tooltip').textContent=`MD ${fmt(s.md)} m · TVD ${fmt(s.tvd)} m\nI ${fmt(s.inc)}° · Az ${fmt(s.azi)}°\nΔN ${fmt(s.n)} m · ΔE ${fmt(s.e)} m`;$('tooltip').hidden=false;$('tooltip').style.left=Math.min(ev.clientX+14,window.innerWidth-270)+'px';$('tooltip').style.top=Math.max(8,Math.min(ev.clientY+14,window.innerHeight-95))+'px';};svg.onpointerleave=()=>$('tooltip').hidden=true;svg.onclick=ev=>{const pointer=plotPointer(svg,ev),px=pointer.x,py=pointer.y;let index=0,best=Infinity;points.forEach((p,i)=>{const d=(x(p.x)-px)**2+(y(p.y)-py)**2;if(d<best){best=d;index=i;}});selectStation(index);};}
+function selectStation(i){if(!result)return;activeStation=i;const s=result.stations[i];$('resultRows').querySelector('.active')?.classList.remove('active');$('resultRows').children[i]?.classList.add('active');$('selectedStation').textContent=`Stație ${i+1} · MD ${fmt(s.md)} m · TVD ${fmt(s.tvd)} m · I ${fmt(s.inc)}° · Az ${fmt(s.azi)}° · DLS ${fmt(s.dls)}°/30 m · ${phase(s.phase)}`;drawCharts();}
+function filename(){return(result?.wellName||$('wellName').value||'sonda').replace(/[^\p{L}\p{N}_ -]+/gu,'_').slice(0,80).trim().replace(/ +/g,'_')||'sonda';}
+function download(content,name,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
+function exportDeviation(){if(!result||dirty)return;const type=$('exportFormat').value,ro=type==='csv',delimiter=ro?';':'\t',headers=type==='survey'?['MD','INC','AZI']:['MD_m','INC_deg','AZI_grid_deg','TVD_m','TVDSS_m','X_Nord_m','Y_Est_m','Z_cota_m','dN_m','dE_m','Closure_m','VS_m','DLS_deg_30m','Tronson'];const toN=v=>Number.isFinite(v)?v.toFixed(6).replace('.',ro?',':'.'):'';const rows=result.stations.map(s=>{const values=type==='survey'?[s.md,s.inc,s.azi]:[s.md,s.inc,s.azi,s.tvd,s.tvdss,s.x,s.y,s.z,s.n,s.e,Math.hypot(s.n,s.e),s.vs,s.dls,phase(s.phase)];return values.map((v,i)=>typeof v==='number'||v===null||v===undefined?toN(v):String(v).replace(/[\t\r\n;]/g,' ')).join(delimiter);});download((ro?'\ufeff':'')+headers.join(delimiter)+'\r\n'+rows.join('\r\n')+'\r\n',filename()+'_deviatie.'+(ro?'csv':'tsv'),ro?'text/csv;charset=utf-8':'text/tab-separated-values;charset=utf-8');toast('Deviația a fost exportată.');}
+function exportSvg(){if(!result||dirty)return;const serializer=new XMLSerializer(),v=$('verticalPlot').cloneNode(true),p=$('planPlot').cloneNode(true);v.setAttribute('x','0');v.setAttribute('y','80');v.setAttribute('width','660');v.setAttribute('height','530');p.setAttribute('x','660');p.setAttribute('y','80');p.setAttribute('width','660');p.setAttribute('height','530');const title=safeText(result.wellName);const content=`<svg xmlns="http://www.w3.org/2000/svg" width="1320" height="650" viewBox="0 0 1320 650"><rect width="1320" height="650" fill="white"/><text x="28" y="30" font-family="Trebuchet MS,Arial,sans-serif" font-size="22" fill="#203d88">${title} · traiect sondă</text><text x="28" y="55" font-family="Trebuchet MS,Arial,sans-serif" font-size="14" fill="#203d88">MD ${fmt(result.stations.at(-1).md)} m · TVD ${fmt(result.stations.at(-1).tvd)} m · Stereo 70 / deplasări în metri · Azimut VS ${fmt(result.vsAzimuth)}°</text>${serializer.serializeToString(v)}${serializer.serializeToString(p)}<text x="28" y="635" font-family="Trebuchet MS,Arial,sans-serif" font-size="13" fill="#64728b">Plan geometric preliminar · X=nord, Y=est · 07.10.2026</text></svg>`;download(content,filename()+'_schite.svg','image/svg+xml;charset=utf-8');toast('Cele două schițe au fost exportate într-un SVG.');}
+function parseDelimited(text){if(text.length>2e6)throw Error('Fișier prea mare. Limita este 2 MB.');text=text.replace(/^\ufeff/,'');const lines=text.split(/\r?\n/).filter(l=>l.trim()&&!l.trim().startsWith('#'));if(lines.length<2)throw Error('Fișierul trebuie să conțină cel puțin două stații.');if(lines.length>5001)throw Error('Maximum 5.000 de stații.');const first=lines[0],sep=first.includes('\t')?'\t':first.includes(';')?';':first.includes(',')?',':null;const split=line=>sep?line.split(sep).map(v=>v.trim().replace(/^"(.*)"$/,'$1')):line.trim().split(/\s+/);const fields=split(first);let indexes=[0,1,2],start=0;const normalize=s=>s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'');if(fields.some(v=>/[A-Za-z]/.test(v))){const labels=fields.map(normalize);indexes=[labels.findIndex(v=>/^md(?:m)?$/.test(v)||v==='measureddepth'),labels.findIndex(v=>['inc','i','incl','inclination','incdeg','inclinare'].includes(v)),labels.findIndex(v=>['azi','az','azimuth','azideg','azigriddeg','azimut'].includes(v))];if(indexes.some(i=>i<0))throw Error('Antet nerecunoscut. Folosește MD;INC;AZI sau exportul complet al aplicației.');start=1;}const rows=lines.slice(start).map((line,i)=>{const f=split(line);return indexes.map((c,j)=>String(parseNumber(f[c],['MD','Înclinare','Azimut'][j]+' pe rândul '+(i+start+1),true)));});if(rows.length<2)throw Error('Importul necesită cel puțin două stații.');return rows;}
+function applyConfig(c){if(!c||typeof c!=='object'||c.app!=='well-trajectory-stereo70'||c.version!==1)throw Error('Proiect incompatibil. Este necesar un JSON salvat de această aplicație (v1).');if(!['offset','coordinates','survey'].includes(c.mode))throw Error('Modul de calcul din proiect nu este valid.');for(const[id,allowed]of Object.entries({depthType:['tvd','md'],targetType:['tvd','md','elevation'],profile:['j','s','horizontal']}))if(!allowed.includes(c[id]))throw Error('Opțiune invalidă: '+id);for(const id of numberIds){if(typeof c[id]!=='string'||c[id].length>50)throw Error('Valoare invalidă: '+id);parseNumber(c[id],id);}if(typeof c.wellName!=='string'||c.wellName.length>120)throw Error('Nume sondă invalid.');if(!Array.isArray(c.survey)||c.survey.length>5000||c.survey.some(row=>!Array.isArray(row)||row.length!==3||row.some(v=>typeof v!=='string'&&typeof v!=='number')))throw Error('Tabel de deviație invalid.');c.survey.forEach((row,i)=>row.forEach((v,j)=>parseNumber(v,'Stație '+(i+1))));for(const id of [...numberIds,...selectIds])$(id).value=c[id];$('wellName').value=c.wellName;setSurvey(c.survey);$('equalScale').checked=c.equalScale!==false;$('showStations').checked=c.showStations===true;$('verticalAxis').value=c.verticalAxis==='elevation'?'elevation':'tvd';setMode(c.mode,false);updateTargetLabel();calculate();if(!result)toast('Proiect încărcat. Corectează datele indicate pentru calcul.');else toast('Proiect încărcat și recalculat.');}
+function updateTargetLabel(){const labels={tvd:'TVD țintă',md:'MD țintă',elevation:'Cotă Z țintă'};$('targetValueLabel').textContent=labels[$('targetType').value]+' (m)';}
+function example(){for(const id of numberIds)$(id).value='';Object.entries({depth:'2500',offset:'800',azimuth:'60',targetX:'500400',targetY:'450692,820323',targetValue:'2500',surfaceX:'500000',surfaceY:'450000',ground:'350',kop:'500'}).forEach(([id,v])=>$(id).value=v);$('wellName').value='Exemplu demonstrativ';$('profile').value='j';$('depthType').value='tvd';$('targetType').value='tvd';$('verticalAxis').value='tvd';$('equalScale').checked=true;setSurvey([[0,0,60],[300,0,60],[600,20,60],[2000,20,60]].map(r=>r.map(String)));setMode('offset',false);updateTargetLabel();calculate();}
+document.querySelectorAll('[data-mode]').forEach(b=>{b.addEventListener('click',()=>setMode(b.dataset.mode));b.addEventListener('keydown',ev=>{if(!['ArrowLeft','ArrowRight','Home','End'].includes(ev.key))return;ev.preventDefault();const modes=['offset','coordinates','survey'],i=modes.indexOf(mode),next=ev.key==='Home'?0:ev.key==='End'?2:(i+(ev.key==='ArrowRight'?1:2))%3;setMode(modes[next]);$('tab-'+modes[next]).focus();});});
+for(const id of [...numberIds,...selectIds,'wellName'])$(id).addEventListener('input',markDirty);$('profile').addEventListener('change',updateProfile);$('targetType').addEventListener('change',updateTargetLabel);$('calculateBtn').addEventListener('click',calculate);$('exampleBtn').addEventListener('click',example);$('addRowBtn').addEventListener('click',()=>{const last=surveyValues().at(-1);let next='';try{const md=parseNumber(last?.[0],'MD');if(md!==null)next=String(md+30);}catch{}addSurveyRow([next,last?.[1]||'',last?.[2]||'']);markDirty();});$('surveyExampleBtn').addEventListener('click',()=>{setSurvey([[0,0,60],[300,0,60],[600,20,60],[2000,20,70]].map(r=>r.map(String)));markDirty();});$('clearBtn').addEventListener('click',()=>{for(const id of numberIds)$(id).value='';$('wellName').value='';setSurvey([['0','0','0'],['','','']]);result=null;calculatedConfig=null;clearResults();$('status').className='status';$('status').replaceChildren(document.createTextNode('Introdu datele cunoscute și apasă „Calculează”.'));$('headerWell').textContent='Sondă fără nume';});$('exportBtn').addEventListener('click',exportDeviation);$('svgBtn').addEventListener('click',exportSvg);$('printBtn').addEventListener('click',()=>{if(result&&!dirty)window.print();});$('saveBtn').addEventListener('click',()=>{download(JSON.stringify(captureConfig(),null,2),filename()+'_proiect.json','application/json;charset=utf-8');toast('Datele de intrare au fost salvate în proiect.');});$('projectFile').addEventListener('change',async ev=>{try{const f=ev.target.files[0];if(!f)return;if(f.size>2e6)throw Error('Maximum 2 MB pentru un proiect.');applyConfig(JSON.parse(await f.text()));}catch(e){toast(e.message);}finally{ev.target.value='';}});$('surveyFile').addEventListener('change',async ev=>{try{const f=ev.target.files[0];if(!f)return;if(f.size>2e6)throw Error('Maximum 2 MB pentru un CSV/TSV.');const rows=parseDelimited(await f.text());setSurvey(rows);setMode('survey');calculate();if(result)toast('Stațiile au fost importate și calculate.');}catch(e){toast(e.message);}finally{ev.target.value='';}});['equalScale','showStations','verticalAxis'].forEach(id=>$(id).addEventListener('change',drawCharts));document.addEventListener('keydown',ev=>{if(ev.key==='Enter'&&(ev.ctrlKey||ev.metaKey)){ev.preventDefault();calculate();}});
+example();
+</script>
+</body>
+</html>
