@@ -1,17 +1,11 @@
 Fisier cu prompturi
 
 
-
-Si mai vreua si este un upgrade foare importa:
-- vreua sapot adauga mau multe sonde si sa le vad side by side si sa le pot coreeala
-- pe langa butonul "Adauga LAS la sonda" un butoore adauga alta sonda
-- vreau sa am optiuni de normalizare. calcul Sw si calcualtoe si restul optiuniloe si individula pe fiecare sonda in parte dar si pentru toate
-- in partea dreapta vreau un panou cu toate sonde din proiect (sa aiba optiune de hine hide, autohide si pin)
-- sa pot salva proiectul si sa includ toate sondele
-- sa pot da falt pe MD, TVDss si topuri formatiuni (daca au acelasi nume si sunt aceleasi topuri)
-- in momutul incare dau falt pe TVDss sau MD vreau ca tras de adancime sa fie similara petru ambel sonde pentru a le putena compara
-- din trsa Adancime sa aleg care sa din adancimi sa fie setat ca default
-- orce alte functionalizti consideri se sumt important de adaugat si se gasesc ca optiue in Petrel in "Well Section Windows"
-
-Mai vreau sa am si buton de "Undo" si desemean si btonul "Save" sa fie in bara de sus si in optiuena Fisier
-Mai vreau ca si elementele din trasa sonda sa fie dezactivate sau activate ca si celelante loguri
+Aplicatia ca fi solosita doar de echipa mea, si vreau am si niste masuri de siranta implementate un fel de copyright sa nu poata fi folosita de altcineva, vreau sa ma ajuti cu nistesugestii mai intai si dupa sa implemetam. 
+Eu am sa iti spun ce vreau si tu sa cauti soluii:
+- doar echipa mea sa poata s autilizeze aplicatia
+- sa nu trebuiasca o parola la pornire, scopul ei e sa fie rapida nu sa pierdem timp cu parole
+- vreau ca nimeni sa nu poata vizuzliza codul fisierului html ni daca vrea sa il deschida separata nici daca vrea sa faca asta in browse
+- eventula sa fie nevoie de o cheie un fisier separta pe care el sa il inlocuiesc separata la operioada de timp
+- orce implementare sa faca aplicatai sa se rezume la un singur fisier cu o cheie tip licenta care sa fie maxim un fisier .txt
+- orce alta sugesti ai avea pentru a putea asugura sigurata aplciatie 
