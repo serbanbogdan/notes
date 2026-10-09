@@ -25,3 +25,18 @@ Se poate face o protecție bună pe care tu o controlezi, dar nu una absolută. 
 4. Generezi tu licențele cu un generator separat, sau ți le fac eu la fiecare perioadă?
 
 Secțiunea cu această cerere o adaug în `serviciu_geologic_instructiuni.md` la implementare, pentru că acum calculatorul nu e legat la sesiune.
+
+
+Vreau sa ma ajuti sa imprelmantez tot ce ai propus tu mai us dar cu rmatoarele restrictii:
+- nu o sa pun fisierul pe intranet
+- vreau ca licenta sa indeplineasca condiitiile:sa fie valabila in functie de cat vreau eu, sa fie una petru toti colegii
+- folderul unde se afal aplicatii este in "\\10.11.1.13\bkpdate\Geologic\Serviciul Geologic\Aplicatii" si sa nu functioneze din alta parte care este un share drive de pe retea
+- sa implementtesi criptarea codului
+- Copyright vizibil "Propietate Serban Bogdan - uz intern"
+
+Acum vrau ca cheia sa o pot genera eu cu un program html (la care o sa am acces doar eu si o sa fie stacat pe telefon): functionalite:
+- fisierul html o sa-l deschide cu  chorme de pe mobil
+- sa pot sa regenerez orcete licente vreau
+- sa pot selecta perioada care sa fie valabila
+- sa am rapid optiuen de a trimite cheia pe gmail cate o adresa
+  
