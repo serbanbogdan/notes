@@ -9,3 +9,5 @@ Eu am sa iti spun ce vreau si tu sa cauti soluii:
 - eventula sa fie nevoie de o cheie un fisier separta pe care el sa il inlocuiesc separata la operioada de timp
 - orce implementare sa faca aplicatai sa se rezume la un singur fisier cu o cheie tip licenta care sa fie maxim un fisier .txt
 - orce alta sugesti ai avea pentru a putea asugura sigurata aplciatie 
+
+Freau foarte pe scurt sa imi oferi o solutie pentru punctele de mai sus
