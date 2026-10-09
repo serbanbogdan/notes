@@ -1,17 +1,8 @@
 Fisier cu prompturi
 
-
-
-Vreau sa ma ajuti sa imprelmantez tot ce ai propus tu mai us dar cu rmatoarele restrictii:
-- nu o sa pun fisierul pe intranet
-- vreau ca licenta sa indeplineasca condiitiile:sa fie valabila in functie de cat vreau eu, sa fie una petru toti colegii
-- folderul unde se afal aplicatii este in "\\10.11.1.13\bkpdate\Geologic\Serviciul Geologic\Aplicatii" si sa nu functioneze din alta parte care este un share drive de pe retea
-- sa implementtesi criptarea codului
-- Copyright vizibil "Propietate Serban Bogdan - uz intern"
-
-Acum vrau ca cheia sa o pot genera eu cu un program html (la care o sa am acces doar eu si o sa fie stacat pe telefon): functionalite:
-- fisierul html o sa-l deschide cu  chorme de pe mobil
-- sa pot sa regenerez orcete licente vreau
-- sa pot selecta perioada care sa fie valabila
-- sa am rapid optiuen de a trimite cheia pe gmail cate o adresa
-  
+Pe langa cele 4 pucnte mai vreu urmatoarele: 
+In pozitia 1 Introducere in care vreau sa prezinti faptul ca in rpezent in cadrul romgaz este in desfarsura un contratc de consultas pentru analzia sonde cadidait pentru stimulare hidrauluica si pentru achiziti se ulteriora de servicii de fisurate. principalu lscot este de a analzia sonde deja sapte care se preteaza pentru fisura hidraulica nu si sonde ce Punctul cu "Prezentarea zacamantuui Nades-prod-Seleus" este un pic cam lung renunta la jumatate din text si vreau sa inisiti mai mult pe Badenina care este un zacamant cu permeabilitate mica spre "tight" cu gaze prezente dar propietati de curgere mai slabe, si u nzacamant unde nu exista propiertati geomecanice a rocilor.
+La finalul punctului "Justificarea saparii sondei 156 Prod" la final dupa tabelul 3 vreua sa mai spui ca conditiile tehnico economice nu sjustifaica saparea mai multor sonde iar sisirarea hidraiulica este forma optima de a creste productivitea si factorul final de recuperare care poate sa cresa productivitatea cu de 4x pana la 8x, daca fisaura hidraaulic fata de o echipare dor cu pefrorare simpla. Efectul fisiratii asupra productivitaii sone se ca stavili de catre contractor.
+Vreau sa mentionezi ca tabelil 4 repezinta forma actual de proiectarea a sonde in care nu este proiectata si fisurarea hidrauluica.
+La punctul cu solicitare elimina :"unui program de săpare adaptat executării operației de stimulare hidraulică la obiectivul Bn XIX-XX-XXI;" dar adauga: - analiza productivitatii (mai detaliat)
+Si de asemean mai vreau o fraza finala de incheiesre care consider ca lipseste.
