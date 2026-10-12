@@ -29,6 +29,7 @@ Echipa:
 Nu stiu exact cum sa arate prima pagina deacea vreau sa analizei intregul text si sa faci designul dupa ce ai toate informatiile, dar stiu ca vreau un buton "Calendar" care sa afiseze pe toata interfat bwoserului un calendar cu sarcile echipei, sa se poata selecta fiecare mebru ale ecipei, sa existe posibilitae de afisare pe an luni sapramnai chiar si zile.
 
 Ce am:
+- date care acopera in mare parte ultimii 2 ani
 - cateva fisiere .csv cu avize si acorduri ANRMPSG ca au temene si la unele trebuie intocmie diferite documetaii de prelungire sau conforamare
 - fisier cu temene pentru anumite valori estimate si finale pentru care trebuie intocmite "Proiecte tehnice pentru valori finale"
 - mai jos este detaliata structura fisierelor enumerat emai sus
