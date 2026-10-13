@@ -17,3 +17,4 @@ vreau sa am extrem de multe optiune de setare si de modificare aspect.
 Al doilea widget sa fie unul petru vremea (sursa de vremea sa fie luata cea oferita de google  iar locatia sa fie una dinamica in lucte de unde se afla telefonul si sa afriseze lcoalitatea si vreema pt acea locatie)
 Aspectul sa fie unul similar oferit de widgetul oficial Samsung (poza atasata)
 La fe lca la Samsung vreau sa il faci dimanim in functie de conditiile meteo (daca ploua sa schimbi aspectul - alta poza atasta sa are cantitatea de apa, sal alte informatii electvelte care au logica pentru acele conditii
+Sa aiba iconite simialre cu samsung care se se actualize in functiie de toate conditiile posibile
