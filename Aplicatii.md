@@ -4,6 +4,7 @@ Widgeturile sa aiba aceasi dimenis una mica (2x1) si una mare (4x2) astefl incat
 Informatiile sa fie in limba engleaza doar daca ele snt extrase din surce cu continut im limba romana atuci pasterezi limba romana.
 Updaturile sa se faca si cand telefonul este blocat.
 Toate wigeturile sa aiba varaitna light dar si darck in functie de cum este tefefonul si sa se schimbe in momebtul cat aceste is modifica Darck Mode Scheduale.
+Imaginle sunt doar pt aspect nu ca le considera ca sunt doar orintattice petru aspect
 
 Vreau sa imi faci o aplicatie al carui scop este de a crea widgetui pentru ecranul principal al telefonului meu.
 in principal eu o sa explica cum vreau sa are wingetul sau atasez o imagine iar tu o optimizezi pentru telefonul meu.
@@ -18,3 +19,4 @@ Al doilea widget sa fie unul petru vremea (sursa de vremea sa fie luata cea ofer
 Aspectul sa fie unul similar oferit de widgetul oficial Samsung (poza atasata)
 La fe lca la Samsung vreau sa il faci dimanim in functie de conditiile meteo (daca ploua sa schimbi aspectul - alta poza atasta sa are cantitatea de apa, sal alte informatii electvelte care au logica pentru acele conditii
 Sa aiba iconite simialre cu samsung care se se actualize in functiie de toate conditiile posibile
+
