@@ -1,2 +1,1 @@
-vreau un widget care in sare initiala ala forma unei simple iconite similare cu cele din poza (icon pack default Samsung)
-sa pot pune o poza in locul iconitei pentru ca wigestul vreau sa aapara ca o o aplciatie in starea ei dar la cluc sa se deschida in sus o optiune si sa serevesaca ca un contact wigest si sa am scurtatru cate a trimite mesaj pesoei respecti, scurtatura de whatapp petnru pesoana respetiva si direct call catrel persoan respectava , acu apre iconita facuta de mien cu albastru dacpreaza
+Wigetul "Bara de cautare stil Googlee" in montul de fata est epozitionata in mujlocul spatiului selecta vreau opriunesa in functie de ce spatiu am sa pot muta in sus in jos drepatra stanga etc
