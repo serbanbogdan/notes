@@ -1,1 +1,5 @@
-Vreau un widgest care periodia (se paote alege si un inrval dar defaut sa fie 15 min) se preai ultima stire de pe situl https://www.biziday.ro/ si se icorporeaza si o imgina repetativa sti cu mult brul intr-un widget 2x2 care la clic deschide aplciatia bizidai de pe mobil
+Vreau o aplciatie similara cu Contact in sensu incare descgie pop up
+de data aceasta vreau sa deschida o pagina de net iar pagina sa fie
+1 "" daca nu sunt acasat in functie de profilul Tasker
+sau 2 "" daca sutn acasa tot asa in functie de profilul Tasket
+pentru pop up sa optiunile simialare cu cela de moficicare ale aplciaia Contacts
