@@ -1,4 +1,11 @@
-Am atasta ultimele 4 rapoarte pe care aplicatai Import Rapoarte WO nu le incarca corespunzator in special partea e tubing felzibil care apare de 2 ori in 2 tabele adapteaza aplciatia si pentru asemena cazuri.
-analizeaz fisieerele si vezi daca sunt si alte moficar pe care trebuie sa le implementezi.
-
-Vreau sa editezi aplicatai de wisdeturi si cea de avertizare anm, astfel inncat daca modific gridul de la 2x2 la 4x4 (exeplmu un poza 2 atasata) chiar daca griful este 4x4 sa marimea textul la colatie a iconiteleor  sa ramana cea din 2x2 doar sa pot marii fiecare elemnt in mare . deoare ca daca 4x4 in redimensimnez mai mic (poza 1) nu vad prea bine scrisul este prea mic vreau sa faci asta la toatre widetuile si la aplciatia anm. demean chair daca eu mares la 4x4 sa am optiue de a fisa varanta 2x2. la widgetul bizidai vre si optiuen ca jumatatea superioa a wigetului un de nu amtext imagiena sa nu mai fie blurata sau dimata sa fie cea reala sa sa pot blur asi dima numai lat text, acesa sa fie o optiuen. tot odarta tasker nu modifca profile vreau sa verifica daca totul es ok, am taskul importa facut de tine
+Am atasat o poza care sa serveasca ca un template pentru un CV pentru Alina.
+vreua sa iei date le din CV Alina si sa faci altul nou ca si cel din model
+vreau sa pastrezi informatiile din CV Alina dar sa faci urmatoarele modificari:
+  - adreasa acum este Medias
+  - elimina linkedin
+  - elimina de la proiecte parte cu AVON, Deva
+  - si limba spaniola
+Ce vreaus adaugi: din foaiea matricola atasata de la facultate vreua sa extragi informatii care sa fac foste vizibila amteriile care au legaura cu un post la un laborator de chimie analitica
+vreau sa scoti inforamtii elecvete si sa faci sa fie foste vizibile aceest informatii
+pe langa asta vreau sa pui in CV si faptul ca in anul 2026 s-a absolvit si un curs de "Curs Manager al Sistemelor de Management al Calității" gassest informatii https://apsap.ro/curs-manager-al-sistemelor-de-calitate/
+vreau sa vi cu un fisier .md in care fosrte pe scur im recoman ce activate din facultate ar fi facut candidatul foarte atrativ pentru postul de "laborant chimsi" la un laborat de analzia chimice analite al unie compani 
