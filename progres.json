@@ -1,0 +1,389 @@
+{
+  "schema_version": 1,
+  "generat_la": "2026-10-17T16:00:00+03:00",
+  "sursa": {
+    "strava_athlete_id": 28920338,
+    "ultima_activitate_strava_id": "20568742427",
+    "ultima_activitate_data": "2026-10-13",
+    "nota": "Alergari (sport_type=Run). Bicicleta e in alte_activitati. Cadenta Strava e pe picior; aici e deja ×2 (spm)."
+  },
+  "atlet": {
+    "nume": "Bogdan",
+    "varsta": 41,
+    "inaltime_cm": 185,
+    "greutate_kg": 83,
+    "oras": "Mediaș",
+    "ceas": "Garmin Venu X1",
+    "hr_max_real": 195
+  },
+  "tinta": {
+    "descriere": "10 km alergare continua",
+    "distanta_m": 10000,
+    "ritm_tinta_alergare_min_km": "7:30-8:00",
+    "timp_estimat_10km_la_7_45_min": 77.5,
+    "data_start_plan": "2026-08-29"
+  },
+  "progres_catre_10km": {
+    "procent_headline": 2.0,
+    "procent_headline_definitie": "distanta echivalenta a celui mai lung bloc continuu de alergare verificat / 10 km; echivalenta = durata bloc × ritm 7:45/km",
+    "cel_mai_lung_bloc_continuu_s": 92,
+    "cel_mai_lung_bloc_continuu_sursa": "S1.6, 14.09.2026, blocuri de 84-92 s masurate din seria Strava",
+    "distanta_echivalenta_m": 198,
+    "distanta_ramasa_m": 9802,
+    "procent_pe_timp": 2.0,
+    "procent_pe_timp_definitie": "durata celui mai lung bloc continuu / timpul estimat pentru 10 km la 7:45/km (77,5 min)",
+    "procent_distanta_maxima_sesiune": 40.1,
+    "procent_distanta_maxima_sesiune_definitie": "cea mai lunga sesiune (alergare + mers) / 10 km. Include mersul, deci NU e alergare continua",
+    "sesiune_cea_mai_lunga_km": 4.01,
+    "sesiune_cea_mai_lunga_data": "2026-09-16",
+    "incertitudine": "Sesiunile din 06.10 si 13.10 nu au structura verificata. 13.10 are cel mai rapid km (8:25/km) si timp total ~ timp in miscare, deci posibil blocuri continue mai lungi decat 92 s. Valoarea headline e o limita inferioara pana la verificarea cu get_activity_streams."
+  },
+  "jaloane": [
+    {
+      "cod": "L1-test",
+      "descriere": "Test 25 min alergare continua",
+      "tinta_min": 25,
+      "tinta_distanta_km": null,
+      "status": "in_asteptare",
+      "progres_pct": 6.1
+    },
+    {
+      "cod": "L2",
+      "descriere": "40 min alergare continua",
+      "tinta_min": 40,
+      "tinta_distanta_km": null,
+      "status": "in_asteptare",
+      "progres_pct": 3.8
+    },
+    {
+      "cod": "L3",
+      "descriere": "8 km alergare continua",
+      "tinta_min": null,
+      "tinta_distanta_km": 8,
+      "status": "in_asteptare",
+      "progres_pct": 2.5
+    },
+    {
+      "cod": "L4",
+      "descriere": "10 km alergare continua - obiectiv final",
+      "tinta_min": null,
+      "tinta_distanta_km": 10,
+      "status": "in_asteptare",
+      "progres_pct": 2.0
+    }
+  ],
+  "jalon_curent": "L1-test",
+  "luna_1": {
+    "sesiuni_executate": 9,
+    "sesiuni_planificate_initial": 12,
+    "progres_pct_sesiuni_initiale": 75.0,
+    "nota": "Planul initial: 4 saptamani × 3 sesiuni = 12, ultima = test 25 min continuu. Luna 1 a fost extinsa (sesiuni repetate), deci procentul e orientativ."
+  },
+  "totaluri": {
+    "alergari": 9,
+    "distanta_totala_km": 33.77,
+    "timp_in_miscare_total_s": 20471,
+    "timp_in_miscare_total_h": 5.69,
+    "relative_effort_total": 272,
+    "ritm_mediu_global_min_km": "10:06",
+    "distanta_medie_pe_sesiune_km": 3.75
+  },
+  "ultima_sesiune": {
+    "nr": 9,
+    "strava_id": "20568742427",
+    "data": "2026-10-13",
+    "ora_start": "17:22",
+    "sesiune_plan": null,
+    "titlu_plan": null,
+    "distanta_km": 3.3,
+    "distanta_cumulata_km": 33.78,
+    "timp_in_miscare_s": 1804,
+    "timp_total_s": 1834,
+    "ritm_mediu_in_miscare_min_km": "9:07",
+    "ritm_mediu_in_miscare_s_km": 547,
+    "ritm_mediu_total_min_km": "9:16",
+    "cel_mai_rapid_km_s": 505,
+    "cel_mai_rapid_km_min_km": "8:25",
+    "puls_mediu": 127.8,
+    "puls_max": 164,
+    "puls_max_pct_din_195": 84.1,
+    "relative_effort": 19,
+    "cadenta_medie_sesiune_spm": 118,
+    "cadenta_in_alergare_spm": null,
+    "plan": {
+      "durata_planificata_s": null,
+      "alergare_planificata_s": null,
+      "blocuri_planificate": null,
+      "blocuri_executate": null,
+      "bloc_alergare_max_masurat_s": null
+    },
+    "realizat_fata_de_plan": {
+      "durata_pct": null,
+      "blocuri_pct": null,
+      "nota": "durata_pct = timp total Strava / durata planificata; null cand sesiunea nu a putut fi legata de un plan"
+    },
+    "praguri": {
+      "puls_max_sub_155_proxy": false,
+      "nota": "proxy: HR max al intregii sesiuni <= 155; pragul real e pe blocurile de alergare, deci proxy-ul e mai strict"
+    },
+    "observatii": "Cel mai rapid km din istoric (8:25/km), fara pauze lungi (elapsed ~ moving). Structura de verificat."
+  },
+  "tendinte": {
+    "distanta_km": [
+      3.84,
+      3.64,
+      3.48,
+      3.66,
+      3.91,
+      3.93,
+      4.01,
+      4.0,
+      3.3
+    ],
+    "puls_mediu": [
+      152,
+      129,
+      118,
+      125,
+      118,
+      130,
+      134.3,
+      135.7,
+      127.8
+    ],
+    "puls_max": [
+      193,
+      159,
+      154,
+      162,
+      155,
+      160,
+      166,
+      166,
+      164
+    ],
+    "relative_effort": [
+      85,
+      24,
+      14,
+      20,
+      15,
+      27,
+      32,
+      36,
+      19
+    ],
+    "ritm_mediu_in_miscare_s_km": [
+      511,
+      691,
+      638,
+      631,
+      615,
+      617,
+      604,
+      601,
+      547
+    ],
+    "cel_mai_rapid_km_s": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      551,
+      538,
+      505
+    ],
+    "etichete_date": [
+      "2026-08-29",
+      "2026-09-04",
+      "2026-09-05",
+      "2026-09-07",
+      "2026-09-13",
+      "2026-09-14",
+      "2026-09-16",
+      "2026-10-06",
+      "2026-10-13"
+    ],
+    "interpretare": {
+      "distanta": "creste de la 3,84 km (S1.1) la 4,01 km (S1.7 si 06.10); 13.10 mai scurta (3,30 km) dar mai rapida",
+      "cel_mai_rapid_km": "551 s (16.09) -> 538 s (06.10) -> 505 s (13.10): 8:25/km, -46 s in 4 saptamani",
+      "puls_max": "peste 155 la 6 din 9 sesiuni; ultimele 3 au 166/166/164, mai sus decat S1.3 si S1.5 (154/155)",
+      "pauze": "pauza de 20 de zile (16.09 -> 06.10) rupe seria; de la 06.10 ritmul e de o alergare pe saptamana"
+    }
+  },
+  "consistenta": {
+    "pauze_intre_alergari": [
+      {
+        "de_la": "2026-08-29",
+        "pana_la": "2026-09-04",
+        "zile": 6
+      },
+      {
+        "de_la": "2026-09-04",
+        "pana_la": "2026-09-05",
+        "zile": 1
+      },
+      {
+        "de_la": "2026-09-05",
+        "pana_la": "2026-09-07",
+        "zile": 2
+      },
+      {
+        "de_la": "2026-09-07",
+        "pana_la": "2026-09-13",
+        "zile": 6
+      },
+      {
+        "de_la": "2026-09-13",
+        "pana_la": "2026-09-14",
+        "zile": 1
+      },
+      {
+        "de_la": "2026-09-14",
+        "pana_la": "2026-09-16",
+        "zile": 2
+      },
+      {
+        "de_la": "2026-09-16",
+        "pana_la": "2026-10-06",
+        "zile": 20
+      },
+      {
+        "de_la": "2026-10-06",
+        "pana_la": "2026-10-13",
+        "zile": 7
+      }
+    ],
+    "cea_mai_lunga_pauza_zile": 20,
+    "zile_de_la_ultima_alergare": 4,
+    "saptamani": [
+      {
+        "saptamana_iso": "2026-W35",
+        "sesiuni": 1,
+        "km": 3.84,
+        "timp_in_miscare_s": 1964,
+        "relative_effort_total": 85
+      },
+      {
+        "saptamana_iso": "2026-W36",
+        "sesiuni": 2,
+        "km": 7.12,
+        "timp_in_miscare_s": 4739,
+        "relative_effort_total": 38
+      },
+      {
+        "saptamana_iso": "2026-W37",
+        "sesiuni": 2,
+        "km": 7.57,
+        "timp_in_miscare_s": 4713,
+        "relative_effort_total": 35
+      },
+      {
+        "saptamana_iso": "2026-W38",
+        "sesiuni": 2,
+        "km": 7.94,
+        "timp_in_miscare_s": 4843,
+        "relative_effort_total": 59
+      },
+      {
+        "saptamana_iso": "2026-W41",
+        "sesiuni": 1,
+        "km": 4.0,
+        "timp_in_miscare_s": 2408,
+        "relative_effort_total": 36
+      },
+      {
+        "saptamana_iso": "2026-W42",
+        "sesiuni": 1,
+        "km": 3.3,
+        "timp_in_miscare_s": 1804,
+        "relative_effort_total": 19
+      }
+    ]
+  },
+  "praguri_si_zone": {
+    "zone_puls_bpm": {
+      "Z1": [
+        98,
+        117
+      ],
+      "Z2": [
+        117,
+        137
+      ],
+      "Z3": [
+        137,
+        156
+      ],
+      "Z4": [
+        156,
+        176
+      ],
+      "Z5": [
+        176,
+        195
+      ]
+    },
+    "praguri_plan": {
+      "puls_sub_in_intervale": 155,
+      "puls_sub_inainte_de_reluare": 130,
+      "cadenta_in_alergare_spm": [
+        165,
+        170
+      ],
+      "timp_minim_in_Z1_Z2_pct": 85,
+      "ritm_alergare_min_km": "7:30-8:00",
+      "ritm_limita_dura_min_km": "7:15"
+    },
+    "sesiuni_cu_puls_max_sub_155": 2,
+    "sesiuni_cu_puls_max_sub_155_pct": 22.2
+  },
+  "alte_activitati": [
+    {
+      "strava_id": "20127977849",
+      "tip": "Ride",
+      "data": "2026-09-11",
+      "titlu": "Sibiu–Rășinari",
+      "distanta_km": 25.85,
+      "timp_in_miscare_s": 7306,
+      "timp_total_s": 12713,
+      "urcare_m": 188,
+      "relative_effort": 110,
+      "calorii": 1106,
+      "nota": "Cel mai mare Relative Effort din istoric. Complementar, nu inlocuieste alergarea."
+    }
+  ],
+  "urmatoarea_sesiune": {
+    "cod": "S1.8",
+    "fisier_plan": "planuri/S1.8.json",
+    "data_planificata": "2026-10-17",
+    "titlu": "Proba + 5×(2'30 alergat / 2'30 mers)",
+    "durata_planificata_s": 2625,
+    "alergare_planificata_s": 810,
+    "bloc_continuu_planificat_s": 150,
+    "procent_headline_dupa_executie_corecta": 3.2,
+    "nota": "Daca blocurile de 150 s sunt executate corect, cel mai lung bloc continuu urca de la 92 s la 150 s."
+  },
+  "echipament": {
+    "incaltaminte": [],
+    "nota": "Strava get_gear a returnat lista goala; nicio pereche de pantofi asociata activitatilor."
+  },
+  "widget_hint": {
+    "titlu": "Drum spre 10 km",
+    "valoare_principala": "progres_catre_10km.procent_headline",
+    "text_principal": "{procent_headline}% din 10 km continuu",
+    "valori_secundare": [
+      "progres_catre_10km.cel_mai_lung_bloc_continuu_s",
+      "totaluri.distanta_totala_km",
+      "ultima_sesiune.puls_max",
+      "consistenta.zile_de_la_ultima_alergare"
+    ],
+    "culori": {
+      "sub_25": "#F0574E",
+      "25_75": "#E7B366",
+      "peste_75": "#57CFC3"
+    }
+  }
+}
