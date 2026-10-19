@@ -1,2 +1,1 @@
-# gemeni
-
+vreau sa imi mai faci un widget similar ce ucele din widget studio iar de aceasta data sa vreau ca din https://www.flashscore.ro/fotbal/romania/superliga/#/pOcTEGTq/clasamente/per-total/ sa imi faci un wiget cu clasamentul SUperligi savad primele 5 claste dar sa si pot derula in jos, o alta varataina cu meciurile etape curente ce s-a fianlizat si ce urmaza sa se joace si alta varitna cu pe acelasi winget cu ultimul meci si cu uramtoru maeic al U BT Cluj la baschet (https://www.flashscore.ro/echipa/csu-cluj-napoca/Iy6Md8xS/)
