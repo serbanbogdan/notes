@@ -1,10 +1,10 @@
 {
   "schema_version": 2,
-  "generat_la": "2026-10-19T14:40:00+03:00",
+  "generat_la": "2026-10-19T20:55:00+03:00",
   "sursa": {
     "strava_athlete_id": 28920338,
-    "ultima_activitate_strava_id": "20621071322",
-    "ultima_activitate_data": "2026-10-17",
+    "ultima_activitate_strava_id": "20650259427",
+    "ultima_activitate_data": "2026-10-19",
     "nota": "Alergari (sport_type=Run). Bicicleta e in alte_activitati. Cadenta Strava e pe picior; aici e deja ×2 (spm). Spinning (YESOUL S3) e in sectiunea spinning si NU intra in statisticile de alergare."
   },
   "atlet": {
@@ -343,7 +343,7 @@
       }
     ],
     "cea_mai_lunga_pauza_zile": 20,
-    "zile_de_la_ultima_alergare": 0,
+    "zile_de_la_ultima_alergare": 2,
     "saptamani": [
       {
         "saptamana_iso": "2026-W35",
@@ -442,25 +442,16 @@
     }
   ],
   "urmatoarea_sesiune": {
-    "cod": "SP1",
-    "tip_activitate": "spinning",
-    "fisier_plan": "planuri/SP1.json",
-    "data_planificata": "2026-10-20",
-    "inlocuieste": "S1.9",
-    "titlu": "Calibrare R + 4×(6' Z2 / 2' usor) + 3' cadenta rapida",
-    "durata_planificata_s": 3600,
-    "lucru_z2_planificat_s": 1440,
-    "cadenta_tinta_rpm": [
-      85,
-      90
-    ],
-    "puls_tinta": [
-      117,
-      137
-    ],
-    "alerta_puls": 150,
-    "echivalent_alergare_min": 16.8,
-    "nota": "Prima sesiune pe YESOUL S3. Calibreaza R_Z2 (treapta 0-100 la care pulsul sta 125-137 la 85 rpm). Nu creste procent_headline (acesta masoara doar alergarea continua)."
+    "cod": "S1.9",
+    "fisier_plan": "planuri/S1.9.json",
+    "data_planificata": "2026-10-21",
+    "titlu": "Proba + 4×(2'30 alergat / 3' mers)",
+    "durata_planificata_s": 2445,
+    "alergare_planificata_s": 660,
+    "bloc_continuu_planificat_s": 150,
+    "procent_headline_dupa_executie_corecta": 3.2,
+    "nota": "Aceeasi lungime de bloc (150 s), dar 4 blocuri in loc de 5 si mers de 3 minute. Procentul urca putin (de la 145 s la 150 s): obiectivul sesiunii e sa duca toate cele 4 blocuri la capat, cu pornire sub 130. Data e orientativa (minim o zi libera).",
+    "tip_activitate": "alergare"
   },
   "echipament": {
     "incaltaminte": [],
@@ -524,27 +515,73 @@
     "factor_echivalenta_alergare": 0.7,
     "factor_echivalenta_nota": "estimare a proiectului: 1 min spinning Z2 ≈ 0,7 min alergare usoara ca stimul aerob. NU se adauga la progresul de alergare continua.",
     "totaluri": {
-      "sesiuni": 0,
-      "timp_total_s": 0,
-      "timp_total_h": 0.0,
-      "relative_effort_total": 0,
-      "echivalent_alergare_min": 0.0
+      "sesiuni": 1,
+      "timp_total_s": 3409,
+      "timp_total_h": 0.95,
+      "relative_effort_total": 25,
+      "echivalent_alergare_min": 39.8
     },
-    "ultima_sesiune": null,
-    "sesiuni": [],
+    "ultima_sesiune": {
+      "nr": 1,
+      "strava_id": "20650259427",
+      "data": "2026-10-19",
+      "ora_start": "19:28",
+      "sesiune_plan": "SP1",
+      "distanta_km": null,
+      "timp_in_miscare_s": 3409,
+      "puls_mediu": 123.2,
+      "puls_max": 140,
+      "puls_max_pct_din_195": 71.8,
+      "relative_effort": 25,
+      "cadenta_medie_rpm": null,
+      "rezistenta_z2": null,
+      "calorii": 396,
+      "echivalent_alergare_min": 39.8,
+      "observatii": "Prima sesiune pe YESOUL S3. Puls mediu 123, maxim 140 (o singura data), niciodata peste alerta de 150. Estimat din serie ~75-80% in Z2, ~20% Z1 (incalzire, racire), Z3 doar cateva secunde. Bicicleta nu a trimis date la ceas: distanta 0, fara cadenta si fara treapta R. 56:49 din 60 planificate."
+    },
+    "sesiuni": [
+      {
+        "nr": 1,
+        "strava_id": "20650259427",
+        "data": "2026-10-19",
+        "ora_start": "19:28",
+        "sesiune_plan": "SP1",
+        "distanta_km": null,
+        "timp_in_miscare_s": 3409,
+        "puls_mediu": 123.2,
+        "puls_max": 140,
+        "puls_max_pct_din_195": 71.8,
+        "relative_effort": 25,
+        "cadenta_medie_rpm": null,
+        "rezistenta_z2": null,
+        "calorii": 396,
+        "echivalent_alergare_min": 39.8,
+        "observatii": "Prima sesiune pe YESOUL S3. Puls mediu 123, maxim 140 (o singura data), niciodata peste alerta de 150. Estimat din serie ~75-80% in Z2, ~20% Z1 (incalzire, racire), Z3 doar cateva secunde. Bicicleta nu a trimis date la ceas: distanta 0, fara cadenta si fara treapta R. 56:49 din 60 planificate."
+      }
+    ],
     "tendinte": {
-      "etichete_date": [],
-      "puls_mediu": [],
-      "cadenta_medie_rpm": [],
-      "rezistenta_z2": [],
-      "relative_effort": []
+      "etichete_date": [
+        "2026-10-19"
+      ],
+      "puls_mediu": [
+        123.2
+      ],
+      "cadenta_medie_rpm": [
+        null
+      ],
+      "rezistenta_z2": [
+        null
+      ],
+      "relative_effort": [
+        25
+      ]
     },
     "urmatoarea_sesiune": {
-      "cod": "SP1",
+      "cod": "SP2",
       "tip_activitate": "spinning",
       "fisier_plan": "planuri/SP1.json",
-      "data_planificata": "2026-10-20",
-      "inlocuieste": "S1.9",
+      "data_planificata": "2026-10-22",
+      "inlocuieste": "S1.9 sau sesiunea de alergare urmatoare, cand nu poti iesi",
       "titlu": "Calibrare R + 4×(6' Z2 / 2' usor) + 3' cadenta rapida",
       "durata_planificata_s": 3600,
       "lucru_z2_planificat_s": 1440,
@@ -558,22 +595,22 @@
       ],
       "alerta_puls": 150,
       "echivalent_alergare_min": 16.8,
-      "nota": "Prima sesiune pe YESOUL S3. Calibreaza R_Z2 (treapta 0-100 la care pulsul sta 125-137 la 85 rpm). Nu creste procent_headline (acesta masoara doar alergarea continua)."
+      "nota": "Aceeasi structura ca SP1, de data asta cu bicicleta conectata prin Bluetooth ca sa avem cadenta. Calibreaza R_Z2 (treapta 0-100 la care pulsul sta 125-137 la 85 rpm). Nu creste procent_headline (acesta masoara doar alergarea continua)."
     }
   },
   "volum_aerob_combinat": {
     "alergare_s": 22805,
-    "spinning_s": 0,
-    "total_s": 22805,
-    "total_h": 6.33,
-    "relative_effort_total": 301,
-    "spinning_pct": 0.0,
-    "sesiuni_total": 10
+    "spinning_s": 3409,
+    "total_s": 26214,
+    "total_h": 7.28,
+    "relative_effort_total": 326,
+    "spinning_pct": 13.0,
+    "sesiuni_total": 11
   },
   "urmatoarea_sesiune_alergare": {
     "cod": "S1.9",
     "fisier_plan": "planuri/S1.9.json",
-    "data_planificata": "2026-10-20",
+    "data_planificata": "2026-10-21",
     "titlu": "Proba + 4×(2'30 alergat / 3' mers)",
     "durata_planificata_s": 2445,
     "alergare_planificata_s": 660,
