@@ -1,7 +1,6 @@
 # alina
 
-Vreau sa îmi faci un text care poate fi citi de AI cam in jumătate de oră. Scopul este că o persona de 35 să îi fie prezentat un model de învățare pt adulți. Nu vreau introducere vreau sa intri direct in subiect iar limba să fie română. Titlul să fie "Metode de învățare la adulți" vreau caut cele mai cunoscute cărți și publicații de specialitate și să faci o cercetare amănunțită a subiectului să construiești un plan extrem de ușor de înțeles și să îl adaptezi pt a fi ușor de citit de in tool AI. 
-
-Vreau sa îmi faci al doilea text care poate fi citi de AI cam in jumătate de oră. Scopul este de fi explicat in limba română necesitate apariția standardelor și un istoric ușor de reținut al apariție lor. Caută cursul aplicacand și tehnicile de învățare pentru adulți. Vreau sa te referi la standardele ISO ce sunt ele cum au apărut acorda 20% din continua și standardului iso9001.
-
-General: scopul ambelor cursuri este pregătirea pt un interviu, nu menționa asta in text și evită introducerile inutile ele consuma cuvinte. 
+Vreau sa ma ajuti la un interviu, vreua tancand cot de toate inforamtiile de cum invata adultii sa ma pregatesti de urmatorul interviu ale caro detale le gasesti in cele ce urmeaza.
+Ai poza atasata cu bibliografia pentru interviu, cu cerintele postului, srcinile postuluidar si ciscustante
+Analuizaza bine toate si vreau sa imi pregatesti o setie de 10 cursuri usor de parcur si de intelesc din bibilografie care sa apore cerintele si sarcile postului.
+Alian este un biolog cu cursuri de Chimis si practica in laborator.
