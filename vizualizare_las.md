@@ -1,7 +1,7 @@
 
 Vreau sa faci unrmatoarele inbunatatiri:
-- la unnel sonde am las-uri pe bucati aceste trebuie "lipite" vreau o optiune sa mi se deschida o fereastra si sa pot lipi logurile, vreau sa am si optiune ca daca vreau sa pot moficica unlui dintre loguri in stanga sau in drepta adica sa le mofifice valorile pentru a se potrivi, vreau si buton de potrivire automata
-- la topurile / markeri sa aduci urmtoarele inbunatatori:
-      - sa apara si ele pe "ghost" curve daa sunt si ele selectate, si al fel ca in petrel daca ptin de marginele curbei ghost sau de topui sa pot face: extend respective Squize pe anumite bucati si in intregime
-      - sa mot modifica valoarea topul pe log cu click drepata si drag and drop
-      - in panorul din drepata unde sunt sondele si logurile fa-l ca si cel de "input" din Petrel incare sa pot vizualiza toputi (sa pot vizulae toate sau numai cele selectate) loguri, deviatii si etc
+-la fereasta cu lipere lasuri vreau sa am si o iconita langa calculator 
+-la fereasta cu lipere lasuri vreau ca Factor k sa il pot modifica din fereastra cu logir cu drag and drop fa logurilor din fereasta iar factorul K si Decalaj Δ sa se moficife automot
+-mai vreau optiuena ca pot lipi orce tip de las cu orce aslt tip de las vreau un buton in fereastra care sa deblocheze optiunea si sa selecte din lista orce 2 las-uricare sa poatefi lipite
+
+Sonde în proiect - iconite de extend sa fie mai mari pentru ca din greseal ating ulte optiuni din gresela
