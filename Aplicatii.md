@@ -5,4 +5,5 @@ astefein modeul cand este afisata meniul in timopul alergarii:
 - redu cu 10% si inaltime casuti cu timp si textul instructiunilor
 În bara float de jos mai vreau un meniu cu Nutriție, in care sa am posibilitatea că pt zilele lucrătoare la finalul fiecărei săptămâni să îmi fac in plan de mic dejun diminta acasă și prânz să îl am la munca. 
 Mai vreau un plan de spinning bike in fiecare zi lucrătoare de dimineață înainte de munca de maxim o jumătate de oră. 
-La spinning bine vreau sa mai verific daca calculul caloriilor este bine făcut. 
+La spinning bine vreau sa mai verific daca calculul caloriilor este bine făcut.
+In bara floating de jos ami vreu si o optiune cu nutritie: care sa deschida o feresta unde pentru zilel lucratoaresa pot sa intoduc meniuri pentru micul dejun dar si pt pranz, desemena pentru zilele lucratoare vreau un plan de spinning bike pe care sa il fac dimineate de maxim 30 minute
