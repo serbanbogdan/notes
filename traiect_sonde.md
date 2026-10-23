@@ -15,3 +15,4 @@ Ce date o sa iti furnizar au:
 
 Vreau ca la modifcare fiecari valori programul sa caulculeze automt noua traiectori sa nu nu mai stea sa apas butonul calcuelaza, si deasemena vre buton de "undo" si de "forward"
 Vreau ca sonda finala sa poate fi exportata astefel incat sa poate fim importata cu toate date coordonare deviatii etc in softearul SLB - Petrel
+Foloseste culorile si tamplaturile Romgaz pe design dar optimizeaza pentru cerintele de mai sus.
