@@ -7,6 +7,7 @@ Ce date o sa iti furnizar au:
 - kop de la adancime
 - tinetele pot fi multiple
 - grosima (ianltiam stratul tinta)
+- un dog leg severty defaut luat din literatura de specialitae sdar pe care sa il pot si eu modifica
 - "sacul sondei" dinstata pe care sonda sa o mai parcurga de la baza inferioara a stratului pana la talpa sondei (valoare in MD)
 - sa am optiune de "j" sau "s" sahape
 - sa am optiune sa introduc si constructia sonde coloale, tubing, packer valve
