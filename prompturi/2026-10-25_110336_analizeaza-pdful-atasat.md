@@ -1,0 +1,1 @@
+Analizează pdful atașat
