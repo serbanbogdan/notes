@@ -1,6 +1,4 @@
-Fisier cu prompturi
-
-Esti un inginer software si vreau sa imi construiesti un program html prin care sa imi organizez echipa, au detaliile in promptul ce urmeaaza.
+Vreau sa imi construiesti un program html prin care sa imi organizez echipa, au detaliile in promptul ce urmeaaza.
 
 Inginerul alege sa construiasca  aplciatii tinad cosnt de urmatoarele conditii:
 - vreau sa cosntruiesti 2 echipe multidisciplinare formaete din cel putin urmatorii menbri (daca crezi ca trebuie mai multi poti sa adaugi):
@@ -19,22 +17,30 @@ Inginerul alege sa construiasca  aplciatii tinad cosnt de urmatoarele conditii:
   
 
 Echipa:
-- Bogdan seful echipe (la nevoie - verifica fiecare proiect)
-- Cami (Agnita, Deleni)
-- Adriana (Cristur)
-- Andrea (Filitelnic)
-- Sile (Medias)
-- Cristi (Danes, Roman)
+- Bogdan seful echipe (la nevoie - verifica fiecare proiect) [0505]
+- Cami (Agnita, Deleni) [2222]
+- Adriana (Cristur) [3333]
+- Andrea (Filitelnic) [1111]
+- Sile (Medias) [4444]
+- Cristi (Danes, Roman) [5555]
 
 Nu stiu exact cum sa arate prima pagina deacea vreau sa analizei intregul text si sa faci designul dupa ce ai toate informatiile, dar stiu ca vreau un buton "Calendar" care sa afiseze pe toata interfat bwoserului un calendar cu sarcile echipei, sa se poata selecta fiecare mebru ale ecipei, sa existe posibilitae de afisare pe an luni sapramnai chiar si zile.
+Vreau ca la inceput cand deschizi pagina sa ai optiunea sa telogezi alegi userl sunt toate disponibile doar ca daca vrei sa intri terbuie sa introduci si o parola (este notata pentru fiecare user mai sus in paranteze [],) in setati useer poate sa isi schimbe parola din setari. o data ales user browserul menoreza si nu mai ce logar pana la o eventuala delogara a userului. 
 
 Ce am:
+- o sa-ti livrez un fisier cu toate sectiile si zacamnitele aferente feicaruia
 - date care acopera in mare parte ultimii 2 ani
 - cateva fisiere .csv cu avize si acorduri ANRMPSG ca au temene si la unele trebuie intocmie diferite documetaii de prelungire sau conforamare
 - fisier cu temene pentru anumite valori estimate si finale pentru care trebuie intocmite "Proiecte tehnice pentru valori finale"
 - mai jos este detaliata structura fisierelor enumerat emai sus
 - anumie date trebuie introduce manual
 - fiecare mebrul al echipe meneregeraza anuminte sonde ale unor zacaminte apartinand geografic anumitoe sectii care sunt: Medias, Deleni, Filitelnic, Danes, Agnita, Cristur si Roman. Mai sus in dreptul fiecruli menbru al echipei in parenteze este trecuta sectia pentru care ei raspund (in fisierul XXXXXXXXXXXXXXXXXX.csv ai o structura fiecari sectie si care sunt zacamntele fiecari sectii.
+
+
+
+
+
+
 
 Pe parcusrs aplicatia doresc sa se maturizes si sa fei mul mai complexa, dar in faza actuala o sa o testam si sa o folosim pentru trasnmiter la timp a documentaiiloe catre ANRMPSG.
 Ce trebuie trimis:
