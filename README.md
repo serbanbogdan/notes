@@ -34,9 +34,22 @@ Ce am:
 - fisier cu temene pentru anumite valori estimate si finale pentru care trebuie intocmite "Proiecte tehnice pentru valori finale"
 - mai jos este detaliata structura fisierelor enumerat emai sus
 - anumie date trebuie introduce manual
-- fiecare mebrul al echipe meneregeraza anuminte sonde ale unor zacaminte apartinand geografic anumitoe sectii care sunt: Medias, Deleni, Filitelnic, Danes, Agnita, Cristur si Roman. Mai sus in dreptul fiecruli menbru al echipei in parenteze este trecuta sectia pentru care ei raspund (in fisierul XXXXXXXXXXXXXXXXXX.csv ai o structura fiecari sectie si care sunt zacamntele fiecari sectii.
+- fiecare mebrul al echipe meneregeraza anuminte sonde ale unor zacaminte apartinand geografic anumitoe sectii care sunt: Medias, Deleni, Filitelnic, Danes, Agnita, Cristur si Roman. Mai sus in dreptul fiecruli menbru al echipei in parenteze este trecuta sectia pentru care ei raspund (in fisierul sectie-zacamant.csv ai o structura fiecari sectie si care sunt zacamntele fiecari sectii.
+- mai ai un fisier numit: tarife.csv in care ai in fisier ( în conformitate cu prevederile Ordinului A.N.R.M.P.S.G. nr.410)
+    - numele sondei, tipul avizului, dacata la carea valoareafa initiala a a fost trimisa catre Serviul Peimtre, daca la care s-a primit aviz sau aocrd (poate sa nu fie daca nu s-a primit), Valaorea estiamta, vaaloarea finala, diferenta dintre acesta, timpul ramas in zile (aici vreau sa calcuelazi 180 zile de la data intrgistrari al serviucl Perimetre), regularizareala valoara finala (doar da e cazul) diferatan intre regalrizare si valoare afianal, si observatii
 
 
+Ce vreau:
+- ca pentru fiecare mbru al echipee meblul sau seflul echipe sa poata trasa termine si sa ii pune tasker cu termen pe care sa le poata respecta
+- vreau ca fiecare mebur sa aiba si o rublica ca face a facut saptaman curenta, incluziv seful echipe, acest raport sa fie cumulta pe echip saptamantal, iar seful ecipei sa poarta edita la final raportil, acest raport sa aiba o parte fixa si una fleximabila (la cea felximbial introduce ce a facut extra fat de partea fixa, parte afixa are urmatorul contunut (in rapostul catre sef daca unul lipseste nu pui 0 nu afiseszi total campul:
+      - Proiecte ANRMPSG:
+      - Date program:
+      - Comenzi emise:
+      - Studii in lucru:
+- pentru tarife ANRMPSG cele din fisierul tarife.csv
+  - vreau sa fie pusi intro foram usor de vazu si sa poata fi edita si acualziata acest fisier care sa fie staocat si intro forma .csv si in folserul in care se gaseste fisierul html al progarmului
+  - automatat responsabilul de sonda din distrimutia pe colegi sa apara in calendar penttu termenul de 180 de la Data inregistrare(serviciul perimetre) dar si cu o luna iante sa expire cel 180 zile cu mentiu de solicitate cost filan si trimitere doc/
+  - costul se cere de la Servicul TEIZ pentru exploatare expermitntala si de restul de la Servoicul Reactivare sonde.
 
 
 
