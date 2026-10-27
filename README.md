@@ -51,6 +51,7 @@ Ce vreau:
   - automatat responsabilul de sonda din distrimutia pe colegi sa apara in calendar penttu termenul de 180 de la Data inregistrare(serviciul perimetre) dar si cu o luna iante sa expire cel 180 zile cu mentiu de solicitate cost filan si trimitere doc/
   - costul se cere de la Servicul TEIZ pentru exploatare expermitntala si de restul de la Servoicul Reactivare sonde.
 
+Nu vreau sa oferi inforamtii sensibile despre colegi!
 
 
 
