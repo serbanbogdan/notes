@@ -73,4 +73,6 @@ Ce trebuie trimis:
     - Documentatie pentru prelungirea conservarii unei sonde (PCON) fata de data expiraraii trebuie trimisa cu 4 saptamani inainte
     - Documentatie pentru exploatere definitiva (ED) fata de data expiraraii trebuie trimisa cu 4 saptamani inainte, dar cu 6 saptamani inaite se solicita si "Program de cercetare" de la Serviciul TEIZ
     - Informare pentru situatii cunosculte cum sunt unele conservari pe care ANRMPSG le care  (INF)
-    - Documentatie pentru 
+    - Documentatie pentru
+ 
+cand se trece aizuld primit pt sondele convertite in injecti sa fie notificat seful si user aferetne sondei sa trimite si Notificare de "casare partiala" catre serviciul Mecano Energetic
