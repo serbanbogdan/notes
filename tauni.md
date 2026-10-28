@@ -13,4 +13,10 @@ pentru zacamintele:
 au in share drivul local Romgaz la adresa: "\\10.11.1.13\bkpdate\Geologic\Renuntare Concesiune - Date" au fost pregatite urmatorele date:
 - dosare fiecarei sonde scante in format pdf
 - un opis la fiecarul dosar scanat
-- si acolo unde exista si datele pregatite de Servicul Geologi 
+- si acolo unde exista si datele pregatite de Servicul Geologi in trecut pentru Reuntarea la concesiu (poate ajuta pentru actualele documetatii)
+
+Petru zacamintele: 
+• RETIS
+• RUSI
+care din evidentele noastre sunt deja predate ANRMPSG dosare am atasajt mailului adresele de inaintere a dosarelor
+
