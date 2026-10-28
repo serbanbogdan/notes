@@ -1,1 +1,16 @@
-Vreau sa imi faci un prgram html intr-un singur fisier al carui scop este ca dupa ce ii aleg un folder el sa imi faca o evidenta pe folderul respectiv al tutro folderle si sifiserelor din intr-un mode preofesion astfel icnat est esa pot anexa lista ca si o anexa la un domecunt
+in vederea predari pachetului de date pentru zăcămintele la care se dorește renunțarea la concesiune pentru zacacamintele sucursalei Medias va punem la dispozitie urmatoarele date:
+pentru zacamintele:
+• AGNITA
+• BAIA
+• BOARTA
+• CADACIU
+• DRAGOMIRESTI
+• LOAMNES
+• RETIS
+• RUSI
+• SASCHIZ
+• VULCAN
+au in share drivul local Romgaz la adresa: "\\10.11.1.13\bkpdate\Geologic\Renuntare Concesiune - Date" au fost pregatite urmatorele date:
+- dosare fiecarei sonde scante in format pdf
+- un opis la fiecarul dosar scanat
+- si acolo unde exista si datele pregatite de Servicul Geologi 
