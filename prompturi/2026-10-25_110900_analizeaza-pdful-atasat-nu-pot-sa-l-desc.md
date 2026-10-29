@@ -1,6 +1,3 @@
-La tarife perioada de 180 zile sa decurada dela momentul incare sa trimis documentaie de explatare definita pentru acesta perioada de expermitneal
-in fisierul experrimetale.csv ai
-sondele aflate acum in exploatare experimntala, daca in din care e valabil avizul si daca la cre exprira (care este si data la care trebuei sa se trimtia docmuntarie pt exploatere definitaiva, exploatare definitava nu cot la tarife)
-
-La raportul fina sa am optiuen de trimis care trimtie partial ce am facut si unul de validat cand am terminat tot si seful poate considera raportul final
-Vreau o ptiune prin care fiecare usier sa poata sa introduca in cebele vsc de conservare prelungire aabanodanre si tarife noi optiune care sa intre sin taskuri cu datele aferente sa fie introduce putien data
+La tarife perioada de 180 zile sa decurada dela momentul incare sa trimis documentaie de explatare definita pentru acesta perioada de expermitneal in tablul cu experinttale apare dar prevua sa mpodifci si in cel cu Tarife
+In experimnetale.csv au adugatr si numarul avizului si data (col C) sin in de data exprirarii in moentul in care se trimite exploatare defintiva.
+la conservare sa avem si un tab cu data in care a fost  trimise prelungirea sau inforamrea. cant s-a trimis prelungirea sa intre o nou intrare in care sa putem introduce nr avizului si alta data cand vor fi disponibile
