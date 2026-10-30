@@ -1,6 +1,6 @@
 As vrea că toate informatii le să poate fi salvate într-un singur fișier json care să servească ca backup care sa salvezi incluziv fișierele csv.
 
-Vreau sa îmi faci aceași program să fie ușor vizualizat și de pe mobile (deci o varianta mobila) doar pt userul Bogdan și fără parola și care ia ia datele de pa github din "" ia aplicați vreau sa o faci pwa și să o pui pe servalul Oracle și vreau să o faci sa apară și în famse.ro cu linkul că și celelalte și acces prin tailscale. Vreau o iconița cu o faliei și ceva roci. Să faci asta ai acces la proiectul "Oracle Cloud" dar și la server prin Chrome care are deschis "" 
+Vreau sa îmi faci aceași program să fie ușor vizualizat și de pe mobile (deci o varianta mobila) doar pt userul Bogdan și fără parola și care ia ia datele de pa github din folderul "" de unde iei ultimul fișier json încărcat, ia aplicați vreau sa o faci pwa și să o pui pe servalul Oracle și vreau să o faci sa apară și în famse.ro cu linkul că și celelalte și acces prin tailscale. Vreau o iconița cu o faliei și ceva roci. Să faci asta ai acces la proiectul "Oracle Cloud" dar și la server prin Chrome care are deschis "" 
 
 vreau un buton care deschide o fereastrea in care in momnetul in care priemesc un aviz de la ANRMPSG (prin serviciul Periemtre) programelul face urmatorul lucru: 
   - fisierul contine numele sondei in demunimere si careodata dupa "-" tipul avizulul
