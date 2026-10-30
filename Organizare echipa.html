@@ -2074,6 +2074,8 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     var r = { sonda: '', tip: '', nr: '', data: '' };
     if (!parti.length) return r;
     if (parti.length >= 2 && /^\d{2}\.\d{2}\.\d{4}$/.test(parti[parti.length - 1])) r.data = parti.pop();
+    var ult = parti.length >= 2 ? /^(\d{1,5}\s*-\s*[A-Za-z]{1,3})\s*[\u2215\/]\s*(\d{2}\.\d{2}\.\d{4})$/.exec(parti[parti.length - 1]) : null;
+    if (ult) { parti[parti.length - 1] = ult[1]; r.data = ult[2]; }
     if (parti.length >= 2 && RX_NR.test(parti[parti.length - 1])) { r.nr = parti.pop().replace(/\s+/g, ''); }
     r.sonda = parti[0] || '';
     r.tip = parti.slice(1).join(' - ');
@@ -2083,8 +2085,12 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   // numele fișierelor din folderul de avize nu conțin diacritice
   function curataParte(s) { return curataSpatii(fara(String(s || '')).replace(INTERZISE, ' ').replace(/[^\x20-\x7e]/g, '')); }
   function construiesteNume(sonda, tip, nr, data) {
-    var p = [curataParte(sonda)]; if (curataParte(tip)) p.push(curataParte(tip)); if (curataParte(nr)) p.push(curataParte(nr).replace(/\s+/g, ''));
-    if (curataParte(nr) && /^\d{2}\.\d{2}\.\d{4}$/.test(String(data || '').trim())) p.push(String(data).trim());
+    var p = [curataParte(sonda)]; if (curataParte(tip)) p.push(curataParte(tip)); if (curataParte(nr)) {
+      var n = curataParte(nr).replace(/\s+/g, '');
+      // „/” nu are voie în nume de fișier Windows: se folosește „∕” (U+2215), care arată la fel: 662-C∕12.10.2026
+      if (/^\d{2}\.\d{2}\.\d{4}$/.test(String(data || '').trim())) n += '\u2215' + String(data).trim();
+      p.push(n);
+    }
     return p.join(' - ') + '.pdf';
   }
 
@@ -2979,7 +2985,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   'use strict';
   var B = window.Baza, M = window.Potrivire, T = window.Tarife, A = window.Avize, C = window.Conservare, E = window.Experimentale, R = window.Rapoarte, D = window.Depozit;
 
-  var VERSIUNE = '1.7', DATA_VERSIUNE = '30.10.2026';
+  var VERSIUNE = '1.8', DATA_VERSIUNE = '30.10.2026';
   var SEF = 'bogdan';
   var MEMBRI_IMPLICIT = [
     { id: 'bogdan', nume: 'Bogdan', rol: 'sef', sectii: [] },
@@ -3022,7 +3028,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   var STARI_SARCINA = { de_facut: 'De făcut', in_lucru: 'În lucru', astept: 'Aștept răspuns', finalizata: 'Finalizată' };
   var SURSE_ASTEPT = ['Serviciul TEIZ', 'Serviciul Reactivare Sonde', 'Serviciul Foraj', 'Serviciul Perimetre', 'Prestator', 'Alt serviciu'];
   var LIMITA_IN_LUCRU = 3;
-  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"1JzTACjbywh63COOFlnxVA==","h":"D6bH0U7Bq/7/tyIMR1BRpOsjOiKpcsdz8dkCTA7VHL0="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"Qcf+mkJVAYXBWtsGVNol6g==","h":"ren0rymzHHNW4PsKudcuogYjvfkE5fLZzknN7ZkwZjA="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"RV+rja6V0N/yDyHLAZIM/A==","h":"JcasKzYE96XlkhKLd3cLPJkAIzdN8LnOrtYWjmcLWC0="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"ZVRPg7HPsH8qzOXUFdCgHQ==","h":"6BRBYK/LcVxgi27sI/MFQmquYvNXRh2V7kTk3SWmRBQ="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"zdVj8WFRav0wFb+HaWqWNg==","h":"IIcWaMUjZL7xCLZAC+6TnytBwsI6iKOLIXmDU4Fd9ug="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"5buvjsDVhDIwdIo+qEkQfA==","h":"8m7Pc9F/7PI2GW1YJNA0lSJsFHLdRTqSYsuAMaSxz+s="}};
+  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"RdDbgpNQ/1Unr/4gbwWWOA==","h":"YhP3zNJ5GdOAiS36gHLscjDT6EEXdvYPadBv6dMEaS4="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"2Bp959HHhLI/hjfGWQJDbQ==","h":"fKwSstUi9gDv2bechsV2EkCKrmCHBebmCaKbk1G7N14="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"oEjQa+wBSjT6LG+rr4tagg==","h":"lEVVVIZkVHIZMQnVFBpPVFwE9NMqEtJ/QYgeW/OEKMs="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"cfSs8u5cQFwahau36Q8Wlw==","h":"tCcJD90p5lutNqbMETkvrNj8W/L2brQdo2RxaOFmklU="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"4w+PQCukrA5gAXluJY3m6A==","h":"bwdbYuJAili04Gob283n696q8L5N5EC3nX62s48x3oc="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"w8hSJQeuycYl6GcA+TSMtQ==","h":"d3zYouXTxiFGxz1UDX5HXJwwti+H98S0HFaPuIZsqMo="}};
   var SECTIE_ZACAMANT_IMPLICIT = "Sectia,Zacamantul Comercial\nAGNITA,AGNITA\nAGNITA,ALTANA\nAGNITA,BARCUT\nAGNITA,BIRGHIS\nAGNITA,BRADENI\nAGNITA,CHIRPAR\nAGNITA,DAIA_TELINA\nAGNITA,ILIMBAV\nAGNITA,NETUS\nAGNITA,NOCRICH\nAGNITA,NOCRICH_VEST\nAGNITA,NOUL_SASESC\nAGNITA,RETIS\nAGNITA,SASAUSI\nAGNITA,VULCAN\nCRISTUR,BRADESTI\nCRISTUR,CADACIU\nCRISTUR,CECHESTI\nCRISTUR,CHEDEA\nCRISTUR,CHEDEA_EST\nCRISTUR,CRISTUR_NORD\nCRISTUR,CRISTUR_SUD\nCRISTUR,CUSMED\nCRISTUR,ELISENI_SACEL\nCRISTUR,FELICENI\nCRISTUR,LUPENI\nCRISTUR,MEDISORUL_MARE\nCRISTUR,PORUMBENII_MICI\nCRISTUR,SIMONESTI\nCRISTUR,SOIMUSU_MARE\nCRISTUR,TARCESTI\nDANES,ALMA\nDANES,BEIA\nDANES,BUNESTI\nDANES,CLOASTERF\nDANES,CRIS\nDANES,HODOS\nDANES,JIBERT\nDANES,NADES_PROD_SELEUS\nDANES,PROD_SELEUS\nDANES,SASCHIZ\nDANES,SIGHISOARA\nDELENII,ADAMUS\nDELENII,BAZNA\nDELENII,BAZNA_I\nDELENII,BOIAN\nDELENII,CETATEA_DE_BALTA\nDELENII,DELENII_HARANGLAB\nDELENII,IDICIU\nDELENII,VELT\nFILITELNIC,CIBU\nFILITELNIC,FILITELNIC\nFILITELNIC,LASLAU_NORD\nFILITELNIC,LASLAUL_MARE\nFILITELNIC,PIPEA\nMEDIAS,ALAMOR\nMEDIAS,ARMENI\nMEDIAS,AXENTE_SEVER\nMEDIAS,BOARTA\nMEDIAS,BOGATU_ROMAN\nMEDIAS,COPSA_MICA\nMEDIAS,LOAMNES\nMEDIAS,PETIS\nMEDIAS,RUSI\nMEDIAS,SADINCA\nMEDIAS,SANCEL\nMEDIAS,SOALA\nMEDIAS,TAPU\nMEDIAS,TAUNI\nMEDIAS,VISA\nROMAN,BACAU\nROMAN,BAIA\nROMAN,BALUSESTI\nROMAN,BERBICENI\nROMAN,COMANESTI\nROMAN,DAVIDENI\nROMAN,DAVIDENI_VEST\nROMAN,DRACENI\nROMAN,DRAGOMIRESTI\nROMAN,DUSESTI\nROMAN,FRASIN_GURA_HUMORULUI\nROMAN,GAICEANA\nROMAN,GLAVANESTI\nROMAN,HERLA\nROMAN,HURUIESTI_NEGULESTI_MALDARESTI\nROMAN,MALDARESTI\nROMAN,MARGINENI\nROMAN,MIRCESTI\nROMAN,MIRONU\nROMAN,NEGULESTI\nROMAN,OCHENI\nROMAN,PADURENI\nROMAN,PALTIN\nROMAN,PALTINOASA\nROMAN,PARAVA\nROMAN,POCOLENI\nROMAN,ROMAN\nROMAN,ROMANI\nROMAN,TARGU_NEAMT\nROMAN,TAZLAUL_MARE\nROMAN,TODIRESTI\nROMAN,VALEA_MOLDOVEI\nROMAN,VALEA_SEACA\nROMAN,VALEA_SEACA_EST\nROMAN,VARVATA\n";
   var FIS = { tarife: 'tarife.csv', zac: 'sectie_zacamant.csv', avize: 'avize_acorduri.csv', cons: 'conservare.csv', exp: 'experimentale.csv', date: '_date' };
   var LS = 'org-echipa:';
@@ -4610,7 +4616,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     var an0 = String(B.dinZi(S.azi).y);
     var m = modal({
       titlu: 'Aviz primit de la ANRMPSG', lat: true, fix: true,
-      corp: '<p class="nota" style="margin-top:0">Alege PDF-urile primite prin Serviciul Perimetre. Numele fișierului trebuie să înceapă cu sonda (ex. <b>12 Păltinoasa - prelungire.pdf</b>). Programul citește din PDF numărul avizului și tipul; tu corectezi ce nu e bine. La salvare, fișierul ajunge în folderul anului curent, cu numele <b>nr și nume sondă - tip - număr aviz - data avizului</b>.</p>' +
+      corp: '<p class="nota" style="margin-top:0">Alege PDF-urile primite prin Serviciul Perimetre. Numele fișierului trebuie să înceapă cu sonda (ex. <b>12 Păltinoasa - prelungire.pdf</b>). Programul citește din PDF numărul avizului și tipul; tu corectezi ce nu e bine. La salvare, fișierul ajunge în folderul anului curent, cu numele <b>nr și nume sondă - tip - număr aviz∕data avizului</b>.</p>' +
         '<div class="rand-flex" style="gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem"><label class="btn principal" style="cursor:pointer">Alege PDF-uri<input id="ap-fis" type="file" accept="application/pdf,.pdf" multiple style="display:none"></label>' +
         '<button class="btn" data-ap="radacina">Folderul de avize…</button><button class="btn" data-ap="scan">Scanează folderul de avize</button><span class="nota" id="ap-stare-folder"></span></div>' +
         '<div id="ap-zona" class="ap-zona" tabindex="0">sau trage aici fișierele PDF</div><div id="ap-lista"></div>',
