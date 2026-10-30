@@ -17,3 +17,6 @@ La fereastra cu cu primit aviz reau sa faci urmatoarele inbunatatiri:
 - cand apas salveaza in folder acum imi apre o fereastra care sa selectez folderi vreu sa se se lveze automit in dolfere sbabile fara sa mai caut eu
 - o data crearta o noua categoeir sa fie memortaa
 - exis aviz abandonare, acord abandoanree, 
+
+
+https://docs.google.com/forms/d/e/1FAIpQLSd0D5Nkxm3FwQGRRCLtoWUA9YaGIQb1iGTMv09sENGE-o_uoA/viewform
