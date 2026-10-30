@@ -2055,8 +2055,8 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
 (function (root) {
   'use strict';
 
-  var TIPURI = ['prelungire conservare', 'conservare', 'exploatare experimentală', 'prelungire exploatare experimentală', 'exploatare definitivă',
-    'aviz abandonare', 'acord abandonare', 'ridicare abandonare', 'ardere la coș', 'săpare'];
+  var TIPURI = ['prelungire conservare', 'conservare', 'exploatare experimentala', 'prelungire exploatare experimentala', 'exploatare definitiva',
+    'aviz abandonare', 'acord abandonare', 'ridicare abandonare', 'ardere la cos', 'sapare'];
   var SUFIXE = ['C', 'AB', 'AC', 'R', 'S'];
 
   function fara(s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, ''); }
@@ -2071,17 +2071,20 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   function parseNumeFisier(nume) {
     var baza = String(nume || '').replace(/\.pdf$/i, '');
     var parti = baza.split(/\s+-\s+/).map(curataSpatii).filter(Boolean);
-    var r = { sonda: '', tip: '', nr: '' };
+    var r = { sonda: '', tip: '', nr: '', data: '' };
     if (!parti.length) return r;
+    if (parti.length >= 2 && /^\d{2}\.\d{2}\.\d{4}$/.test(parti[parti.length - 1])) r.data = parti.pop();
     if (parti.length >= 2 && RX_NR.test(parti[parti.length - 1])) { r.nr = parti.pop().replace(/\s+/g, ''); }
     r.sonda = parti[0] || '';
     r.tip = parti.slice(1).join(' - ');
     return r;
   }
   var INTERZISE = /[\\\/:*?"<>|]/g;
-  function curataParte(s) { return curataSpatii(String(s || '').replace(INTERZISE, ' ')); }
-  function construiesteNume(sonda, tip, nr) {
+  // numele fișierelor din folderul de avize nu conțin diacritice
+  function curataParte(s) { return curataSpatii(fara(String(s || '')).replace(INTERZISE, ' ').replace(/[^\x20-\x7e]/g, '')); }
+  function construiesteNume(sonda, tip, nr, data) {
     var p = [curataParte(sonda)]; if (curataParte(tip)) p.push(curataParte(tip)); if (curataParte(nr)) p.push(curataParte(nr).replace(/\s+/g, ''));
+    if (curataParte(nr) && /^\d{2}\.\d{2}\.\d{4}$/.test(String(data || '').trim())) p.push(String(data).trim());
     return p.join(' - ') + '.pdf';
   }
 
@@ -2124,13 +2127,13 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     var reg = [
       [/ridicar\w*\s+abandon/, 'ridicare abandonare'],
       [/abandon/, 'abandonare'],
-      [/arder/, 'ardere la coș'],
+      [/arder/, 'ardere la cos'],
       [/pre[lt]u?ngir\w*[^]{0,60}conser/, 'prelungire conservare'],
-      [/pre[lt]u?ngir\w*[^]{0,80}experiment/, 'prelungire exploatare experimentală'],
-      [/trecerea[^]{0,60}experiment/, 'exploatare experimentală'],
-      [/trecerea[^]{0,60}exploatare\s+definitiv/, 'exploatare definitivă'],
+      [/pre[lt]u?ngir\w*[^]{0,80}experiment/, 'prelungire exploatare experimentala'],
+      [/trecerea[^]{0,60}experiment/, 'exploatare experimentala'],
+      [/trecerea[^]{0,60}exploatare\s+definitiv/, 'exploatare definitiva'],
       [/conservar/, 'conservare'],
-      [/s[iaeil]parea\s+sondei|s[iaeil]parea\s+sond/, 'săpare']
+      [/s[iaeil]parea\s+sondei|s[iaeil]parea\s+sond/, 'sapare']
     ];
     for (var k = 0; k < reg.length; k++) if (reg[k][0].test(f)) return reg[k][1];
     return '';
@@ -2976,7 +2979,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   'use strict';
   var B = window.Baza, M = window.Potrivire, T = window.Tarife, A = window.Avize, C = window.Conservare, E = window.Experimentale, R = window.Rapoarte, D = window.Depozit;
 
-  var VERSIUNE = '1.5', DATA_VERSIUNE = '30.10.2026';
+  var VERSIUNE = '1.7', DATA_VERSIUNE = '30.10.2026';
   var SEF = 'bogdan';
   var MEMBRI_IMPLICIT = [
     { id: 'bogdan', nume: 'Bogdan', rol: 'sef', sectii: [] },
@@ -3019,7 +3022,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   var STARI_SARCINA = { de_facut: 'De făcut', in_lucru: 'În lucru', astept: 'Aștept răspuns', finalizata: 'Finalizată' };
   var SURSE_ASTEPT = ['Serviciul TEIZ', 'Serviciul Reactivare Sonde', 'Serviciul Foraj', 'Serviciul Perimetre', 'Prestator', 'Alt serviciu'];
   var LIMITA_IN_LUCRU = 3;
-  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"t25vvs4G48yj9gpmUFBW0Q==","h":"ZlPY3bEPyGIM3z0OMett0qi7Y0RsrEkxFaZTm/nMtwY="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"wudwXbvVrFixmBtBg8kTyQ==","h":"d4pAIxrzbsrstMQ8ZlNTCDjcUbTKECBiFY6CZ9gMGLc="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"DBQqHtfSCfa+oXamOMkERQ==","h":"rOHSt2CklTWV+VIkPkR6FJbfv4kuwjIX6iJxHKGB3hU="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"gR4dsWA8vUfZT/sTjppgHA==","h":"wMMUJG8FjaEXngWVSB0yGzJG4ZeP1qPdoc86vqRt/mI="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"3P6ELaCP4g+fj7qQbPCZ3A==","h":"9yuAChC2QjwtpxH/UBzk0jgVhNqNQBhUP5CpNHSkFHo="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"pZ2FdRQ1Ms7amq23hb6b7Q==","h":"n5pXGdL1/5xLDFaogx6ACCLfgUtW7Pp/lo8HTnAGDas="}};
+  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"1JzTACjbywh63COOFlnxVA==","h":"D6bH0U7Bq/7/tyIMR1BRpOsjOiKpcsdz8dkCTA7VHL0="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"Qcf+mkJVAYXBWtsGVNol6g==","h":"ren0rymzHHNW4PsKudcuogYjvfkE5fLZzknN7ZkwZjA="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"RV+rja6V0N/yDyHLAZIM/A==","h":"JcasKzYE96XlkhKLd3cLPJkAIzdN8LnOrtYWjmcLWC0="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"ZVRPg7HPsH8qzOXUFdCgHQ==","h":"6BRBYK/LcVxgi27sI/MFQmquYvNXRh2V7kTk3SWmRBQ="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"zdVj8WFRav0wFb+HaWqWNg==","h":"IIcWaMUjZL7xCLZAC+6TnytBwsI6iKOLIXmDU4Fd9ug="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"5buvjsDVhDIwdIo+qEkQfA==","h":"8m7Pc9F/7PI2GW1YJNA0lSJsFHLdRTqSYsuAMaSxz+s="}};
   var SECTIE_ZACAMANT_IMPLICIT = "Sectia,Zacamantul Comercial\nAGNITA,AGNITA\nAGNITA,ALTANA\nAGNITA,BARCUT\nAGNITA,BIRGHIS\nAGNITA,BRADENI\nAGNITA,CHIRPAR\nAGNITA,DAIA_TELINA\nAGNITA,ILIMBAV\nAGNITA,NETUS\nAGNITA,NOCRICH\nAGNITA,NOCRICH_VEST\nAGNITA,NOUL_SASESC\nAGNITA,RETIS\nAGNITA,SASAUSI\nAGNITA,VULCAN\nCRISTUR,BRADESTI\nCRISTUR,CADACIU\nCRISTUR,CECHESTI\nCRISTUR,CHEDEA\nCRISTUR,CHEDEA_EST\nCRISTUR,CRISTUR_NORD\nCRISTUR,CRISTUR_SUD\nCRISTUR,CUSMED\nCRISTUR,ELISENI_SACEL\nCRISTUR,FELICENI\nCRISTUR,LUPENI\nCRISTUR,MEDISORUL_MARE\nCRISTUR,PORUMBENII_MICI\nCRISTUR,SIMONESTI\nCRISTUR,SOIMUSU_MARE\nCRISTUR,TARCESTI\nDANES,ALMA\nDANES,BEIA\nDANES,BUNESTI\nDANES,CLOASTERF\nDANES,CRIS\nDANES,HODOS\nDANES,JIBERT\nDANES,NADES_PROD_SELEUS\nDANES,PROD_SELEUS\nDANES,SASCHIZ\nDANES,SIGHISOARA\nDELENII,ADAMUS\nDELENII,BAZNA\nDELENII,BAZNA_I\nDELENII,BOIAN\nDELENII,CETATEA_DE_BALTA\nDELENII,DELENII_HARANGLAB\nDELENII,IDICIU\nDELENII,VELT\nFILITELNIC,CIBU\nFILITELNIC,FILITELNIC\nFILITELNIC,LASLAU_NORD\nFILITELNIC,LASLAUL_MARE\nFILITELNIC,PIPEA\nMEDIAS,ALAMOR\nMEDIAS,ARMENI\nMEDIAS,AXENTE_SEVER\nMEDIAS,BOARTA\nMEDIAS,BOGATU_ROMAN\nMEDIAS,COPSA_MICA\nMEDIAS,LOAMNES\nMEDIAS,PETIS\nMEDIAS,RUSI\nMEDIAS,SADINCA\nMEDIAS,SANCEL\nMEDIAS,SOALA\nMEDIAS,TAPU\nMEDIAS,TAUNI\nMEDIAS,VISA\nROMAN,BACAU\nROMAN,BAIA\nROMAN,BALUSESTI\nROMAN,BERBICENI\nROMAN,COMANESTI\nROMAN,DAVIDENI\nROMAN,DAVIDENI_VEST\nROMAN,DRACENI\nROMAN,DRAGOMIRESTI\nROMAN,DUSESTI\nROMAN,FRASIN_GURA_HUMORULUI\nROMAN,GAICEANA\nROMAN,GLAVANESTI\nROMAN,HERLA\nROMAN,HURUIESTI_NEGULESTI_MALDARESTI\nROMAN,MALDARESTI\nROMAN,MARGINENI\nROMAN,MIRCESTI\nROMAN,MIRONU\nROMAN,NEGULESTI\nROMAN,OCHENI\nROMAN,PADURENI\nROMAN,PALTIN\nROMAN,PALTINOASA\nROMAN,PARAVA\nROMAN,POCOLENI\nROMAN,ROMAN\nROMAN,ROMANI\nROMAN,TARGU_NEAMT\nROMAN,TAZLAUL_MARE\nROMAN,TODIRESTI\nROMAN,VALEA_MOLDOVEI\nROMAN,VALEA_SEACA\nROMAN,VALEA_SEACA_EST\nROMAN,VARVATA\n";
   var FIS = { tarife: 'tarife.csv', zac: 'sectie_zacamant.csv', avize: 'avize_acorduri.csv', cons: 'conservare.csv', exp: 'experimentale.csv', date: '_date' };
   var LS = 'org-echipa:';
@@ -4529,7 +4532,12 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     if (p !== 'granted') return null;
     S.pdf.root = h; return h;
   }
+  // browserul nu poate deschide un folder dintr-o cale scrisă de program; copiem calea în clipboard, să o lipești (Ctrl+V) în bara de adrese a ferestrei
+  async function copiazaCaleAvize() {
+    try { await navigator.clipboard.writeText(CALE_AVIZE); toast('Calea folderului de avize a fost copiată: în fereastra care se deschide apasă Ctrl+V în bara de adrese, Enter, apoi „Select Folder” și „Edit files”.', 'bine'); } catch (e) { }
+  }
   async function pdfAlegeRadacina() {
+    await copiazaCaleAvize();
     var h = await window.showDirectoryPicker({ id: 'avize-anrmpsg', mode: 'readwrite' });
     await IO.salveazaHandleCheie('avize', h);
     S.pdf.root = h; return h;
@@ -4602,7 +4610,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     var an0 = String(B.dinZi(S.azi).y);
     var m = modal({
       titlu: 'Aviz primit de la ANRMPSG', lat: true, fix: true,
-      corp: '<p class="nota" style="margin-top:0">Alege PDF-urile primite prin Serviciul Perimetre. Numele fișierului trebuie să înceapă cu sonda (ex. <b>12 Păltinoasa - prelungire.pdf</b>). Programul citește din PDF numărul avizului și tipul; tu corectezi ce nu e bine. La salvare, fișierul ajunge în folderul anului curent, cu numele <b>nr și nume sondă - tip - număr aviz</b>.</p>' +
+      corp: '<p class="nota" style="margin-top:0">Alege PDF-urile primite prin Serviciul Perimetre. Numele fișierului trebuie să înceapă cu sonda (ex. <b>12 Păltinoasa - prelungire.pdf</b>). Programul citește din PDF numărul avizului și tipul; tu corectezi ce nu e bine. La salvare, fișierul ajunge în folderul anului curent, cu numele <b>nr și nume sondă - tip - număr aviz - data avizului</b>.</p>' +
         '<div class="rand-flex" style="gap:.6rem;flex-wrap:wrap;margin-bottom:.6rem"><label class="btn principal" style="cursor:pointer">Alege PDF-uri<input id="ap-fis" type="file" accept="application/pdf,.pdf" multiple style="display:none"></label>' +
         '<button class="btn" data-ap="radacina">Folderul de avize…</button><button class="btn" data-ap="scan">Scanează folderul de avize</button><span class="nota" id="ap-stare-folder"></span></div>' +
         '<div id="ap-zona" class="ap-zona" tabindex="0">sau trage aici fișierele PDF</div><div id="ap-lista"></div>',
@@ -4613,8 +4621,9 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
       var t = el.querySelector('#ap-stare-folder');
       IO.handleSalvatCheie('avize').then(function (h) { t.textContent = h ? (S.pdf.root ? '✔ ' : '') + 'Folder de avize: „' + h.name + '”' + (S.pdf.root ? ' (acces permis, salvarea se face automat în folderul anului)' : ' (la prima salvare browserul poate cere o dată permisiunea)') + (pdfIndex().length ? ' · ' + plural(pdfIndex().length, 'PDF indexat', 'PDF-uri indexate') : '') : 'Alege o singură dată folderul de avize (butonul „Folderul de avize…”); apoi se ține minte și salvările se fac fără alte ferestre.'; });
     }
-    IO.handleSalvatCheie('avize').then(function (h) { if (h) return pdfRadacina(true); }).catch(function () { }).then(stareFolder);
-    function numeTinta(f) { return AP.construiesteNume(f.sonda, f.tip, f.nr); }
+    // folder ales deja → doar cere accesul; altfel deschide direct alegerea folderului (o singură dată), cu calea copiată în clipboard
+    IO.handleSalvatCheie('avize').then(function (h) { if (h) return pdfRadacina(true); return pdfAlegeRadacina(); }).catch(function (x) { if (x && x.name !== 'AbortError') toast(x.message || String(x), 'eroare'); }).then(stareFolder);
+    function numeTinta(f) { return AP.construiesteNume(f.sonda, f.tip, f.nr, f.data); }
     function card(f) {
       var sug = avizeCunoscute(f.sonda);
       return '<div class="ap-card" data-id="' + f.id + '"><div class="ap-nume"><b>' + esc(f.file.name) + '</b> <span class="pastila ' + (f.stare === 'ok' ? 'st-finalizat' : f.stare === 'eroare' ? 'st-depasit' : 'st-atentie') + '">' + esc(f.mesajStare) + '</span></div>' +
@@ -4674,6 +4683,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
         var f = fisiere.filter(function (x) { return String(x.id) === b.dataset.id; })[0]; if (!f || f.salvare) return;
         var sonda = AP.construiesteNume(f.sonda, '', '').replace(/\.pdf$/, '');
         if (!sonda.trim() || !String(f.nr).trim()) { toast('Completează sonda și numărul avizului.', 'eroare'); return; }
+        if (String(f.data).trim() && !/^\d{2}\.\d{2}\.\d{4}$/.test(String(f.data).trim())) { toast('Data avizului trebuie să fie de forma 29.10.2026 (sau lasă câmpul gol).', 'eroare'); return; }
         if (!/^\d{4}$/.test(String(f.an).trim())) { toast('Folderul anului trebuie să fie de forma 2026.', 'eroare'); return; }
         f.salvare = true; b.disabled = true;
         try {
