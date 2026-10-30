@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src https://organizare.famse.ro; form-action 'none'; base-uri 'none'">
 <meta name="color-scheme" content="light">
 <title>Organizare</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%22http://www.w3.org/2000/svg%22%20viewBox=%220%200%2064%2064%22%3E%3Crect%20width=%2264%22%20height=%2264%22%20rx=%2212%22%20fill=%22%23203d88%22/%3E%3Crect%20x=%2212%22%20y=%2216%22%20width=%2240%22%20height=%2236%22%20rx=%225%22%20fill=%22%23fff%22/%3E%3Crect%20x=%2212%22%20y=%2216%22%20width=%2240%22%20height=%2210%22%20rx=%225%22%20fill=%22%2354c8e8%22/%3E%3Crect%20x=%2220%22%20y=%2210%22%20width=%224%22%20height=%2212%22%20rx=%222%22%20fill=%22%23fff%22/%3E%3Crect%20x=%2240%22%20y=%2210%22%20width=%224%22%20height=%2212%22%20rx=%222%22%20fill=%22%23fff%22/%3E%3Cpath%20d=%22M21%2039l7%207%2015-15%22%20fill=%22none%22%20stroke=%22%2300bc70%22%20stroke-width=%225.5%22%20stroke-linecap=%22round%22%20stroke-linejoin=%22round%22/%3E%3C/svg%3E">
@@ -453,6 +453,32 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
 .btn-calendar { white-space: nowrap; padding: .5em .8em; }
 .bara .dreapta { gap: .5rem; }
 .bara nav button { padding: 0 .65rem; white-space: nowrap; }
+
+/* ---------- varianta mobilă (PWA, doar citire) ---------- */
+body.mobil .bara [data-a="evidenta"], body.mobil .bara [data-a="aviz-primit"], body.mobil #stare-salvare, body.mobil [data-a="pdf-scan"], body.mobil [data-a="export-tarife"] { display: none !important; }
+@media (max-width: 760px) {
+  html { font-size: 15px; }
+  body.mobil .bara { position: sticky; top: 0; z-index: 20; padding: .45rem .7rem; gap: .3rem .6rem; }
+  body.mobil .bara .titlu span { display: none; }
+  body.mobil .bara .dreapta { margin-left: auto; gap: .4rem; }
+  body.mobil .btn-calendar { padding: .45rem .7rem; }
+  body.mobil .btn-utilizator { padding: .45rem .6rem; }
+  body.mobil main { padding: .8rem .7rem 4rem; overflow-x: hidden; }
+  body.mobil .doua-coloane, body.mobil .raport-grila, body.mobil .kanban { grid-template-columns: minmax(0, 1fr); }
+  body.mobil section, body.mobil .sectiune, body.mobil .bloc { min-width: 0; max-width: 100%; }
+  body.mobil table { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  body.mobil .modal, body.mobil .modal.lat { width: 100%; max-width: 100%; margin: 0; max-height: 92vh; border-radius: 14px 14px 0 0; }
+  body.mobil .fundal-modal { align-items: flex-end; }
+  body.mobil .grila { grid-template-columns: minmax(0, 1fr) !important; }
+  body.mobil input, body.mobil select, body.mobil textarea { font-size: 16px; max-width: 100%; }
+  body.mobil .rand-flex { flex-wrap: wrap; }
+  body.mobil button, body.mobil .btn { min-height: 40px; }
+}
+body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"],[data-a="tar-termen-sterge"],[data-a="tar-stare"],[data-a="tar-stare-sterge"],[data-a="tar-reia"],[data-a="tar-email"],[data-a="tar-doc-azi"],[data-a="tar-cost-azi"],[data-a="tarif-nou"],[data-a="aviz-nou"],[data-a="sterge-tarif"],[data-a="sterge-aviz"],[data-a="propuneri"],[data-a="confirma-propunere"],[data-a="exp-azi"],[data-a="cons-azi"],[data-a="prel-primit"],[data-a="sarcina-noua"],[data-a="sarcina-din-tarif"],[data-a="sarcina-trecut"],[data-a="import-avize"],[data-a="zac-adauga"],[data-a="rap-adauga"],[data-a="rap-sterge"],[data-a="rap-trimite"],[data-a="rap-finalizeaza"],[data-a="rap-valideaza-sef"],[data-a="rap-invalideaza-sef"],[data-a="rap-redeschide"],[data-a="rap-edit-membru"],[data-a="rap-editeaza"],[data-a="ignora-extern"],[data-a="activ-noua"],[data-a="activ-edit"],[data-a="activ-sterge"],[data-a="backup-complet"],[data-a="backup-restaureaza"],[data-a="reset-parola"],[data-a="alias-adauga"],[data-a="alias-sterge"],[data-a="zi-libera-adauga"],[data-a="zi-libera-sterge"],[data-a="inlocuire-adauga"],[data-a="inlocuire-sterge"],[data-a="aviz-primit"],form[data-f="parola"]) { display: none !important; }
+@media (max-width: 760px) {
+  body.mobil .rm { grid-template-columns: minmax(0, 1fr) !important; gap: .4rem; }
+  body.mobil .rm .rand-flex { justify-content: flex-start !important; }
+}
 
 </style>
 </head>
@@ -2985,7 +3011,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   'use strict';
   var B = window.Baza, M = window.Potrivire, T = window.Tarife, A = window.Avize, C = window.Conservare, E = window.Experimentale, R = window.Rapoarte, D = window.Depozit;
 
-  var VERSIUNE = '1.9', DATA_VERSIUNE = '30.10.2026';
+  var VERSIUNE = '2.0', DATA_VERSIUNE = '30.10.2026';
   var SEF = 'bogdan';
   var MEMBRI_IMPLICIT = [
     { id: 'bogdan', nume: 'Bogdan', rol: 'sef', sectii: [] },
@@ -3028,10 +3054,12 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   var STARI_SARCINA = { de_facut: 'De făcut', in_lucru: 'În lucru', astept: 'Aștept răspuns', finalizata: 'Finalizată' };
   var SURSE_ASTEPT = ['Serviciul TEIZ', 'Serviciul Reactivare Sonde', 'Serviciul Foraj', 'Serviciul Perimetre', 'Prestator', 'Alt serviciu'];
   var LIMITA_IN_LUCRU = 3;
-  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"99ONWh3OrofwGn+AA70SZQ==","h":"XdeeaUEK+d4prGVoU+Mz0FXmt+DFdOyhty79pCjjrUY="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"GsoD13UQul9IeMs4Bqa0+A==","h":"htt3zWvgSNO8uo2BQ0M1IPsosOie5Y5TI4htJfOK7I0="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"HwPjGpHdTCC+cc9W0EvI4Q==","h":"C13oAjx9/O4CusSMpSOiUcyd1vZuGyCllCCRR5sI8O8="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"wT6Z+i+zrUo/5hVNI4iK+w==","h":"VTUKCmHZK6b6Rqh2NFqe/T668gjtK7491XS3/pmHQmc="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"zKmc6JIkjHNlJ867GzwQtg==","h":"7RcpHD/cvlSmFPq+ep3b8sp7EGnO4tmAJgG9ee5m/fI="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"hw8IaP052Iq3w057dKndQA==","h":"EqteOthUhpZ/003fw14U6rCC5iihCz02zD1DNPROlm8="}};
+  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"dlReHrluGNX1XeYaMhLcKw==","h":"bmAL/SEDfvMw9eMFwm01LJXyb/B/9xjOcWFU1+wrA0E="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"lvj3j/yn4f4L2PCa2GkKaw==","h":"Bz2zcWX59ypI7wZp8S+WVgqocf7RrrnZnCoPoxQ6b58="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"XyaKVGmHRxsIjetpd0b/HA==","h":"I5edYGrq0nd58+MGdN3zqrBF44qD89fquJ0rmjC4NUU="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"TcfmkvFLcS8/E3WG502XSg==","h":"zM0eOZDVyqj/bnqbLkKJ61pMvpgJoOuyrrfE1LkjyqI="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"rnaYv+t+dDFHlzm9dkXLvQ==","h":"SEfu/Sqj7iuohsACeWLzmnP1XhDc1S9qxuizXTv5Zi8="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"2OzjcwC/kHFlAEHyn1mw2w==","h":"otYqyuDG0uFZ/+0dWQYNgk3RuEyslNlO5qy/jASHxNE="}};
   var SECTIE_ZACAMANT_IMPLICIT = "Sectia,Zacamantul Comercial\nAGNITA,AGNITA\nAGNITA,ALTANA\nAGNITA,BARCUT\nAGNITA,BIRGHIS\nAGNITA,BRADENI\nAGNITA,CHIRPAR\nAGNITA,DAIA_TELINA\nAGNITA,ILIMBAV\nAGNITA,NETUS\nAGNITA,NOCRICH\nAGNITA,NOCRICH_VEST\nAGNITA,NOUL_SASESC\nAGNITA,RETIS\nAGNITA,SASAUSI\nAGNITA,VULCAN\nCRISTUR,BRADESTI\nCRISTUR,CADACIU\nCRISTUR,CECHESTI\nCRISTUR,CHEDEA\nCRISTUR,CHEDEA_EST\nCRISTUR,CRISTUR_NORD\nCRISTUR,CRISTUR_SUD\nCRISTUR,CUSMED\nCRISTUR,ELISENI_SACEL\nCRISTUR,FELICENI\nCRISTUR,LUPENI\nCRISTUR,MEDISORUL_MARE\nCRISTUR,PORUMBENII_MICI\nCRISTUR,SIMONESTI\nCRISTUR,SOIMUSU_MARE\nCRISTUR,TARCESTI\nDANES,ALMA\nDANES,BEIA\nDANES,BUNESTI\nDANES,CLOASTERF\nDANES,CRIS\nDANES,HODOS\nDANES,JIBERT\nDANES,NADES_PROD_SELEUS\nDANES,PROD_SELEUS\nDANES,SASCHIZ\nDANES,SIGHISOARA\nDELENII,ADAMUS\nDELENII,BAZNA\nDELENII,BAZNA_I\nDELENII,BOIAN\nDELENII,CETATEA_DE_BALTA\nDELENII,DELENII_HARANGLAB\nDELENII,IDICIU\nDELENII,VELT\nFILITELNIC,CIBU\nFILITELNIC,FILITELNIC\nFILITELNIC,LASLAU_NORD\nFILITELNIC,LASLAUL_MARE\nFILITELNIC,PIPEA\nMEDIAS,ALAMOR\nMEDIAS,ARMENI\nMEDIAS,AXENTE_SEVER\nMEDIAS,BOARTA\nMEDIAS,BOGATU_ROMAN\nMEDIAS,COPSA_MICA\nMEDIAS,LOAMNES\nMEDIAS,PETIS\nMEDIAS,RUSI\nMEDIAS,SADINCA\nMEDIAS,SANCEL\nMEDIAS,SOALA\nMEDIAS,TAPU\nMEDIAS,TAUNI\nMEDIAS,VISA\nROMAN,BACAU\nROMAN,BAIA\nROMAN,BALUSESTI\nROMAN,BERBICENI\nROMAN,COMANESTI\nROMAN,DAVIDENI\nROMAN,DAVIDENI_VEST\nROMAN,DRACENI\nROMAN,DRAGOMIRESTI\nROMAN,DUSESTI\nROMAN,FRASIN_GURA_HUMORULUI\nROMAN,GAICEANA\nROMAN,GLAVANESTI\nROMAN,HERLA\nROMAN,HURUIESTI_NEGULESTI_MALDARESTI\nROMAN,MALDARESTI\nROMAN,MARGINENI\nROMAN,MIRCESTI\nROMAN,MIRONU\nROMAN,NEGULESTI\nROMAN,OCHENI\nROMAN,PADURENI\nROMAN,PALTIN\nROMAN,PALTINOASA\nROMAN,PARAVA\nROMAN,POCOLENI\nROMAN,ROMAN\nROMAN,ROMANI\nROMAN,TARGU_NEAMT\nROMAN,TAZLAUL_MARE\nROMAN,TODIRESTI\nROMAN,VALEA_MOLDOVEI\nROMAN,VALEA_SEACA\nROMAN,VALEA_SEACA_EST\nROMAN,VARVATA\n";
   var FIS = { tarife: 'tarife.csv', zac: 'sectie_zacamant.csv', avize: 'avize_acorduri.csv', cons: 'conservare.csv', exp: 'experimentale.csv', date: '_date' };
   var LS = 'org-echipa:';
+  // varianta mobilă (PWA): citire din backup-ul JSON de pe GitHub, doar pentru Bogdan, fără parolă, fără scriere
+  var MOBIL = /*@MOBIL@*/false;
   var INTERVAL_VERIFICARE = 30000;
 
   var S = {
@@ -3145,8 +3173,81 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     }
   });
 
+
+  // ---------- varianta mobilă: folder virtual construit din backup-ul JSON ----------
+  var FV = {}; // cale -> {b: Uint8Array, lm: ms}
+  function eroareCitire() { var e = new Error('Varianta mobilă este doar pentru citire; modifică datele în programul de pe calculator.'); e.name = 'NotAllowedError'; return Promise.reject(e); }
+  function negasit() { var e = new Error('negăsit'); e.name = 'NotFoundError'; return Promise.reject(e); }
+  function DirV(nume, pre) { this.kind = 'directory'; this.name = nume; this.pre = pre; }
+  DirV.prototype.getDirectoryHandle = function (n, o) {
+    var p = this.pre + n + '/', are = Object.keys(FV).some(function (c) { return c.indexOf(p) === 0; });
+    return are || (o && o.create) ? Promise.resolve(new DirV(n, p)) : negasit();
+  };
+  DirV.prototype.getFileHandle = function (n, o) {
+    var c = this.pre + n;
+    if (!FV[c]) return o && o.create ? eroareCitire() : negasit();
+    return Promise.resolve(fisierV(c, n));
+  };
+  function fisierV(c, n) {
+    return { kind: 'file', name: n, getFile: function () { var f = FV[c]; return f ? Promise.resolve(new File([f.b], n, { lastModified: f.lm })) : negasit(); }, createWritable: eroareCitire };
+  }
+  DirV.prototype.removeEntry = eroareCitire;
+  DirV.prototype.entries = function () {
+    var self = this, nume = {}, i = 0;
+    Object.keys(FV).forEach(function (c) { if (c.indexOf(self.pre) !== 0) return; var r = c.slice(self.pre.length), k = r.indexOf('/'); nume[k < 0 ? r : r.slice(0, k)] = k >= 0; });
+    var chei = Object.keys(nume).sort();
+    return { next: function () {
+      if (i >= chei.length) return Promise.resolve({ done: true });
+      var n = chei[i++], h = nume[n] ? new DirV(n, self.pre + n + '/') : fisierV(self.pre + n, n);
+      return Promise.resolve({ done: false, value: [n, h] });
+    } };
+  };
+  function umpleFV(o) {
+    var nou = {};
+    (o.fisiere || []).forEach(function (x) {
+      var b = x.codare === 'base64' ? b64LaBytesM(x.continut) : new TextEncoder().encode(x.continut);
+      nou[x.cale] = { b: b, lm: new Date(x.modificat || o.creat).getTime() || 0 };
+    });
+    Object.keys(FV).forEach(function (k) { delete FV[k]; });
+    Object.keys(nou).forEach(function (k) { FV[k] = nou[k]; });
+    S.mobilInfo = { nume: o.nume || '', creat: o.creat || '', de: o.de || '', sursa: o.sursa || 'retea', vazut: new Date() };
+  }
+  function b64LaBytesM(t) { var o = atob(t), u = new Uint8Array(o.length), i; for (i = 0; i < o.length; i++) u[i] = o.charCodeAt(i); return u; }
+  async function iaDateMobil() {
+    var o = null;
+    try {
+      var r = await fetch('api/date', { cache: 'no-store' });
+      if (!r.ok) throw new Error('Serverul a răspuns ' + r.status + (r.status === 404 ? ' (nu există încă niciun backup în GitHub)' : '') + '.');
+      o = await r.json(); o.sursa = 'retea';
+      try { localStorage.setItem(LS + 'mobil-date', JSON.stringify(o)); } catch (e) { }
+    } catch (e) {
+      var c = null; try { c = JSON.parse(localStorage.getItem(LS + 'mobil-date')); } catch (x) { }
+      if (!c) throw e;
+      c.sursa = 'cache'; o = c;
+    }
+    return o;
+  }
+  async function pornesteMobil() {
+    S.azi = B.azi(); S.doarCitire = true; S.ocupat = true; S.etapa = 'pornire';
+    document.body.classList.add('mobil');
+    incarcaZacDinText(SECTIE_ZACAMANT_IMPLICIT);
+    var marime = ls('marime'); if (marime) document.documentElement.style.setProperty('--marime', marime + 'px');
+    redeseneaza();
+    try {
+      umpleFV(await iaDateMobil());
+      S.folder = new DirV('organizare', '');
+      await incarcaTot(true);
+      var bogdan = membru('bogdan'); if (!bogdan) throw new Error('În backup nu există echipa (setările programului).');
+      intraEfectiv('bogdan', true);
+      S.doarCitire = true;
+    } catch (e) { S.etapa = 'eroare-mobil'; S.eroareMobil = e.message; }
+    S.ocupat = false; redeseneaza(); pornesteVerificarea();
+  }
+  async function reiaMobil() { S.etapa = 'pornire'; await pornesteMobil(); }
+
   // ---------- folderul programului ----------
   async function pornire() {
+    if (MOBIL) return pornesteMobil();
     S.azi = B.azi();
     incarcaZacDinText(SECTIE_ZACAMANT_IMPLICIT);
     var marime = ls('marime'); if (marime) document.documentElement.style.setProperty('--marime', marime + 'px');
@@ -3448,6 +3549,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   // ---------- salvarea datelor proprii (_date/<eu>.json) ----------
   var programeazaSalvare = debounce(function () { salveazaPropriu(); }, 700);
   function aiModificat() {
+    if (MOBIL) return;
     try { ls('nescrise:' + S.eu, S.dep.exportaNescrise()); } catch (e) { }
     setSalvare('salvez', 'Se salvează…');
     programeazaSalvare();
@@ -3455,7 +3557,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   function setSalvare(stare, mesaj) { S.salvare.stare = stare; S.salvare.mesaj = mesaj; var el = $('#stare-salvare'); if (el) { el.className = 'stare-salvare ' + stare; el.querySelector('.txt').textContent = mesaj; el.title = mesaj; } }
   var reincercare = null, salvareInCurs = null;
   async function salveazaPropriu() {
-    if (!S.eu || !S.folder) return;
+    if (MOBIL || !S.eu || !S.folder) return;
     if (salvareInCurs) { await salvareInCurs.catch(function () { }); }
     if (!S.dep.areNescrise()) { if (!S.tar.patches.length && !S.av.patches.length) setSalvare('ok', 'Salvat la ' + acumText()); return; }
     salvareInCurs = (async function () {
@@ -3485,7 +3587,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     } finally { salvareInCurs = null; }
   }
   function scrie(id, campuri) {
-    if (S.doarCitire) { toast('Folosești o copie veche a programului; modificările nu se salvează. Deschide programul din folderul echipei.', 'eroare'); return []; }
+    if (S.doarCitire) { toast(MOBIL ? 'Varianta mobilă este doar pentru citire; modifică datele în programul de pe calculator.' : 'Folosești o copie veche a programului; modificările nu se salvează. Deschide programul din folderul echipei.', 'eroare'); return []; }
     var c = S.dep.scrie(id, campuri);
     if (c.length) { aiModificat(); if (id === 'setari:echipa') aplicaSetariGlobale(); }
     return c;
@@ -3661,6 +3763,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     if (!S.folder || verificareInCurs) return;
     verificareInCurs = true;
     try {
+      if (MOBIL) { var om = await iaDateMobil(); var vechi = S.mobilInfo && S.mobilInfo.nume; umpleFV(om); if (om.nume && vechi && om.nume !== vechi) toast('Date noi: backup din ' + dataOra(om.creat) + '.', 'schimbare'); }
       var aziNou = B.azi();
       var schimbat = aziNou !== S.azi;
       S.azi = aziNou;
@@ -3732,6 +3835,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     S.f.acasaResp = 'toti';
   }
   function iesi() {
+    if (MOBIL) { toast('Varianta mobilă este doar pentru Bogdan, fără parolă.'); return; }
     ls('sesiune', null);
     S.eu = null; S.dep.setUtilizator(null); S.etapa = 'login'; S.meniu = false; S.panou = null; S.vedere = 'acasa';
     if (window.Calendar) Calendar.inchide();
@@ -3790,6 +3894,8 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
       '<div class="versiune">Versiunea ' + VERSIUNE + ' din ' + DATA_VERSIUNE + '</div></div><div class="pornire-dreapta">';
     if (S.etapa === 'nesuportat') {
       st += '<div class="panou-folder"><h2>Deschide programul în Chrome sau Edge</h2><p>Acest browser nu poate lucra cu folderele de pe calculator. Programul funcționează în <b>Google Chrome</b> sau <b>Microsoft Edge</b>: clic dreapta pe fișier → „Deschide cu” → Chrome / Edge.</p></div>';
+    } else if (S.etapa === 'eroare-mobil') {
+      st += '<div class="panou-folder"><h2>Nu am putut citi datele</h2><p>' + esc(S.eroareMobil || '') + '</p><p class="nota">Datele vin din ultimul fișier de backup încărcat în GitHub (folderul „organizare SG”). Verifică conexiunea la Tailscale și că există un backup.</p><div><button class="btn principal" data-a="mobil-reia">Încearcă din nou</button></div></div>';
     } else if (S.etapa === 'pornire' || S.ocupat) {
       st += '<p class="gol">Se citesc datele din folder…</p>';
     } else if (S.etapa === 'folder' || S.etapa === 'permisiune') {
@@ -3877,10 +3983,11 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     var mele = deschiseTarife(eu);
     var dep = mele.filter(function (a) { return a.stare === 'depasit'; }).length;
     if (dep) al.push('<div class="alerta urgent"><span class="ic">!</span><span class="text">' + (dep === 1 ? 'Un termen de 180 de zile a trecut' : dep + ' termene de 180 de zile au trecut') + ' fără valoarea finală în fișierul de tarife.</span><button class="btn mic" data-a="vedere" data-v="tarife" data-stare="depasit">Vezi</button></div>');
-    if (S.doarCitire) al.unshift('<div class="alerta urgent"><span class="ic">!</span><span class="text">Folosești o copie veche a programului (versiunea ' + VERSIUNE + '); în folderul echipei există o versiune mai nouă. Poți citi, dar modificările nu se salvează. Deschide programul din folderul echipei.</span></div>');
+    if (MOBIL) al.unshift('<div class="alerta"><span class="ic">i</span><span class="text">Date din backup-ul de la <b>' + esc(S.mobilInfo ? dataOra(S.mobilInfo.creat) : '—') + '</b>' + (S.mobilInfo && S.mobilInfo.sursa === 'cache' ? ' (copie păstrată pe telefon: nu am putut contacta serverul)' : '') + '. Varianta mobilă este doar pentru citire.</span><button class="btn mic" data-a="reciteste">Reîncarcă</button></div>');
+    else if (S.doarCitire) al.unshift('<div class="alerta urgent"><span class="ic">!</span><span class="text">Folosești o copie veche a programului (versiunea ' + VERSIUNE + '); în folderul echipei există o versiune mai nouă. Poți citi, dar modificările nu se salvează. Deschide programul din folderul echipei.</span></div>');
     var faraData = S.tar.analize.filter(function (a) { return a.stare === 'fara_data' && (a.responsabil === eu); });
     if (faraData.length) al.push('<div class="alerta"><span class="ic">✎</span><span class="text">' + (faraData.length === 1 ? 'Un rând de tarife nu are' : faraData.length + ' rânduri de tarife nu au') + ' data înregistrării la Serviciul Perimetre: ' + esc(faraData.map(function (a) { return a.sonda; }).join(', ')) + '. Fără ea termenul nu se poate calcula.</span><button class="btn mic" data-a="tarif" data-cheie="' + esc(faraData[0].cheie) + '">Completează</button></div>');
-    if (versiuneParola(eu) === 'implicit' && !S.ascundeParola) al.push('<div class="alerta"><span class="ic">🔑</span><span class="text">Folosești încă parola inițială. Îți recomandăm să o schimbi din Setări.</span><button class="btn mic" data-a="vedere" data-v="setari">Schimbă parola</button><button class="btn mic simplu" data-a="ascunde-parola">Mai târziu</button></div>');
+    if (!MOBIL && versiuneParola(eu) === 'implicit' && !S.ascundeParola) al.push('<div class="alerta"><span class="ic">🔑</span><span class="text">Folosești încă parola inițială. Îți recomandăm să o schimbi din Setări.</span><button class="btn mic" data-a="vedere" data-v="setari">Schimbă parola</button><button class="btn mic simplu" data-a="ascunde-parola">Mai târziu</button></div>');
     var rap = S.dep.get('raport:' + W.cheie + ':' + eu);
     if (B.ziSapt(S.azi) >= 3 && (!rap || !R.esteValidat(rap.stare))) al.push('<div class="alerta"><span class="ic">✍</span><span class="text">Raportul pentru săptămâna ' + W.nr + ' ' + (rap && rap.stare === 'partial' ? 'a fost trimis doar parțial; validează-l când ai terminat.' : (R.areContinut(raportEfectiv(W.cheie, eu)) ? 'este încă ciornă.' : 'nu este completat.')) + '</span><button class="btn mic" data-a="vedere" data-v="raport">Completează</button></div>');
     Object.keys(S.eroriDate).forEach(function (k) { al.push('<div class="alerta urgent"><span class="ic">!</span><span class="text">' + esc(S.eroriDate[k]) + '</span></div>'); });
@@ -5364,6 +5471,16 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
     }
     return { format: FORMAT_BACKUP, versiune: 1, program: VERSIUNE, creat: new Date().toISOString(), de: S.eu, fisiere: fis };
   }
+  // trimiterea în GitHub (folderul „organizare SG”) se face prin serverul Oracle, care are accesul; pe calculator nu se păstrează nicio cheie
+  var URL_GITHUB = 'https://organizare.famse.ro/api/incarca-backup';
+  async function trimiteBackupGithub(nume, bytes) {
+    var r;
+    try { r = await fetch(URL_GITHUB, { method: 'POST', headers: { 'X-Nume': nume, 'Content-Type': 'application/json' }, body: bytes }); }
+    catch (e) { throw new Error('Nu pot ajunge la serverul organizare.famse.ro. Verifică dacă Tailscale este pornit pe calculator.'); }
+    var j = await r.json().catch(function () { return {}; });
+    if (!r.ok || !j.ok) throw new Error(j.eroare || ('serverul a răspuns ' + r.status));
+    return j.nume;
+  }
   function bytesBackup(obj) { return new TextEncoder().encode(JSON.stringify(obj, null, 1)); }
   async function backupComplet() {
     if (!esteSef(S.eu)) { toast('Backup-ul complet îl face doar șeful echipei.', 'eroare'); return; }
@@ -5375,9 +5492,17 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
         titlu: 'Backup complet salvat',
         corp: '<p style="margin:0 0 .6rem">Un singur fișier cu <b>' + plural(nrCsv, 'fișier CSV', 'fișiere CSV') + '</b> și datele a <b>' + plural(nrDate, 'coleg', 'colegi') + '</b> (' + Math.round(bytes.length / 1024) + ' KB).</p>' +
           '<p style="margin:0 0 .6rem">Salvat în folderul programului: <code class="cale">_backup/complet/' + esc(nume) + '</code></p>' +
-          '<p class="nota" style="margin:0">Fișierul conține și parolele colegilor, dar doar sub formă criptată (nu pot fi citite). Păstrează-l într-un loc sigur. Se păstrează ultimele 30 de backup-uri.</p>',
-        subsol: '<button class="btn" data-descarca>Descarcă o copie în altă parte</button><button class="btn principal" data-inchide>Gata</button>'
+          '<p id="bk-gh" class="nota" style="margin:0 0 .6rem" role="status"></p><p class="nota" style="margin:0">Fișierul conține și parolele colegilor, dar doar sub formă criptată (nu pot fi citite). Păstrează-l într-un loc sigur. Se păstrează ultimele 30 de backup-uri. „Trimite în GitHub” îl pune direct în folderul „organizare SG” (prin serverul Oracle, deci calculatorul trebuie să fie conectat la Tailscale).</p>',
+        subsol: '<label class="nota" style="margin-right:auto"><input type="checkbox" id="bk-auto"' + (ls('backup-gh-auto') ? ' checked' : '') + '> trimite automat în GitHub la fiecare backup</label><button class="btn" data-gh>Trimite în GitHub</button><button class="btn" data-descarca>Descarcă o copie în altă parte</button><button class="btn principal" data-inchide>Gata</button>'
       });
+      var trimite = async function () {
+        var b = m.el.querySelector('[data-gh]'), st = m.el.querySelector('#bk-gh'); b.disabled = true; st.textContent = 'Se trimite în GitHub…'; st.style.color = '';
+        try { var n = await trimiteBackupGithub(nume, bytes); st.textContent = 'Trimis în GitHub, folderul „organizare SG”: ' + n; st.style.color = 'var(--verde-text, #0a7a4b)'; b.textContent = 'Trimis ✓'; }
+        catch (e) { st.textContent = e.message; st.style.color = 'var(--rosu, #b3261e)'; b.disabled = false; }
+      };
+      m.el.querySelector('[data-gh]').onclick = trimite;
+      m.el.querySelector('#bk-auto').onchange = function (ev) { ls('backup-gh-auto', ev.target.checked ? 1 : null); };
+      if (ls('backup-gh-auto')) trimite();
       m.el.querySelector('[data-descarca]').onclick = function () {
         var url = URL.createObjectURL(new Blob([bytes], { type: 'application/json' })), a = document.createElement('a');
         a.href = url; a.download = nume; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
@@ -5464,7 +5589,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
         S.panou = null; redeseneaza(); var c = $('#continut'); if (c) c.focus({ preventScroll: true }); window.scrollTo(0, 0); break;
       case 'meniu': S.meniu = !S.meniu; redeseneaza(); break;
       case 'iesi': iesi(); break;
-      case 'reciteste': S.meniu = false; await incarcaTot(true); redeseneaza(); toast('Datele au fost recitite din folder.', 'bine'); break;
+      case 'reciteste': S.meniu = false; if (MOBIL) { try { umpleFV(await iaDateMobil()); } catch (e) { toast('Nu am putut reîncărca: ' + e.message, 'eroare'); break; } } await incarcaTot(true); redeseneaza(); toast('Datele au fost recitite din folder.', 'bine'); break;
       case 'schimba-folder': await IO.uitaHandle(); alegeFolder(); break;
       case 'calendar': deschideCalendar(); break;
       case 'sarcina-noua': modalSarcina(null); break;
@@ -5515,6 +5640,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
       case 'evidenta': modalEvidenta(d.tip); break;
       case 'aviz-primit': modalAvizPrimit(); break;
       case 'pdf-scan': pdfScaneaza(); break;
+      case 'mobil-reia': reiaMobil(); break;
       case 'backup-complet': backupComplet(); break;
       case 'backup-restaureaza': restaureazaBackup(); break;
       case 'pdf-deschide': pdfDeschide(d.cale); break;
