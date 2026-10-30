@@ -11,3 +11,9 @@ vreau un buton care deschide o fereastrea in care in momnetul in care priemesc u
 
 Vreau sa faci un buton ca la cerere sa scanezi toate fisierele din linkul de mai jos si daca gaseste sonde si avizul corespunzator pe care îl iei de la finalul numelui fișierelor pdf sa o putem deschide in program adcia la apsa pe avizul sonde sa se deschida in alta tab avizul pdf.
 "\\10.11.1.13\bkpdate\Geologic\Serviciul Geologic\Avize si Acorduri  ANRM"
+
+La fereastra cu cu primit aviz reau sa faci urmatoarele inbunatatiri:
+- sa pot edita si numele sondei chiar daca ii ia automat
+- cand apas salveaza in folder acum imi apre o fereastra care sa selectez folderi vreu sa se se lveze automit in dolfere sbabile fara sa mai caut eu
+- o data crearta o noua categoeir sa fie memortaa
+- exis aviz abandonare, acord abandoanree, 
