@@ -2985,7 +2985,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   'use strict';
   var B = window.Baza, M = window.Potrivire, T = window.Tarife, A = window.Avize, C = window.Conservare, E = window.Experimentale, R = window.Rapoarte, D = window.Depozit;
 
-  var VERSIUNE = '1.8', DATA_VERSIUNE = '30.10.2026';
+  var VERSIUNE = '1.9', DATA_VERSIUNE = '30.10.2026';
   var SEF = 'bogdan';
   var MEMBRI_IMPLICIT = [
     { id: 'bogdan', nume: 'Bogdan', rol: 'sef', sectii: [] },
@@ -3028,7 +3028,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   var STARI_SARCINA = { de_facut: 'De făcut', in_lucru: 'În lucru', astept: 'Aștept răspuns', finalizata: 'Finalizată' };
   var SURSE_ASTEPT = ['Serviciul TEIZ', 'Serviciul Reactivare Sonde', 'Serviciul Foraj', 'Serviciul Perimetre', 'Prestator', 'Alt serviciu'];
   var LIMITA_IN_LUCRU = 3;
-  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"RdDbgpNQ/1Unr/4gbwWWOA==","h":"YhP3zNJ5GdOAiS36gHLscjDT6EEXdvYPadBv6dMEaS4="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"2Bp959HHhLI/hjfGWQJDbQ==","h":"fKwSstUi9gDv2bechsV2EkCKrmCHBebmCaKbk1G7N14="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"oEjQa+wBSjT6LG+rr4tagg==","h":"lEVVVIZkVHIZMQnVFBpPVFwE9NMqEtJ/QYgeW/OEKMs="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"cfSs8u5cQFwahau36Q8Wlw==","h":"tCcJD90p5lutNqbMETkvrNj8W/L2brQdo2RxaOFmklU="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"4w+PQCukrA5gAXluJY3m6A==","h":"bwdbYuJAili04Gob283n696q8L5N5EC3nX62s48x3oc="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"w8hSJQeuycYl6GcA+TSMtQ==","h":"d3zYouXTxiFGxz1UDX5HXJwwti+H98S0HFaPuIZsqMo="}};
+  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"99ONWh3OrofwGn+AA70SZQ==","h":"XdeeaUEK+d4prGVoU+Mz0FXmt+DFdOyhty79pCjjrUY="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"GsoD13UQul9IeMs4Bqa0+A==","h":"htt3zWvgSNO8uo2BQ0M1IPsosOie5Y5TI4htJfOK7I0="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"HwPjGpHdTCC+cc9W0EvI4Q==","h":"C13oAjx9/O4CusSMpSOiUcyd1vZuGyCllCCRR5sI8O8="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"wT6Z+i+zrUo/5hVNI4iK+w==","h":"VTUKCmHZK6b6Rqh2NFqe/T668gjtK7491XS3/pmHQmc="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"zKmc6JIkjHNlJ867GzwQtg==","h":"7RcpHD/cvlSmFPq+ep3b8sp7EGnO4tmAJgG9ee5m/fI="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"hw8IaP052Iq3w057dKndQA==","h":"EqteOthUhpZ/003fw14U6rCC5iihCz02zD1DNPROlm8="}};
   var SECTIE_ZACAMANT_IMPLICIT = "Sectia,Zacamantul Comercial\nAGNITA,AGNITA\nAGNITA,ALTANA\nAGNITA,BARCUT\nAGNITA,BIRGHIS\nAGNITA,BRADENI\nAGNITA,CHIRPAR\nAGNITA,DAIA_TELINA\nAGNITA,ILIMBAV\nAGNITA,NETUS\nAGNITA,NOCRICH\nAGNITA,NOCRICH_VEST\nAGNITA,NOUL_SASESC\nAGNITA,RETIS\nAGNITA,SASAUSI\nAGNITA,VULCAN\nCRISTUR,BRADESTI\nCRISTUR,CADACIU\nCRISTUR,CECHESTI\nCRISTUR,CHEDEA\nCRISTUR,CHEDEA_EST\nCRISTUR,CRISTUR_NORD\nCRISTUR,CRISTUR_SUD\nCRISTUR,CUSMED\nCRISTUR,ELISENI_SACEL\nCRISTUR,FELICENI\nCRISTUR,LUPENI\nCRISTUR,MEDISORUL_MARE\nCRISTUR,PORUMBENII_MICI\nCRISTUR,SIMONESTI\nCRISTUR,SOIMUSU_MARE\nCRISTUR,TARCESTI\nDANES,ALMA\nDANES,BEIA\nDANES,BUNESTI\nDANES,CLOASTERF\nDANES,CRIS\nDANES,HODOS\nDANES,JIBERT\nDANES,NADES_PROD_SELEUS\nDANES,PROD_SELEUS\nDANES,SASCHIZ\nDANES,SIGHISOARA\nDELENII,ADAMUS\nDELENII,BAZNA\nDELENII,BAZNA_I\nDELENII,BOIAN\nDELENII,CETATEA_DE_BALTA\nDELENII,DELENII_HARANGLAB\nDELENII,IDICIU\nDELENII,VELT\nFILITELNIC,CIBU\nFILITELNIC,FILITELNIC\nFILITELNIC,LASLAU_NORD\nFILITELNIC,LASLAUL_MARE\nFILITELNIC,PIPEA\nMEDIAS,ALAMOR\nMEDIAS,ARMENI\nMEDIAS,AXENTE_SEVER\nMEDIAS,BOARTA\nMEDIAS,BOGATU_ROMAN\nMEDIAS,COPSA_MICA\nMEDIAS,LOAMNES\nMEDIAS,PETIS\nMEDIAS,RUSI\nMEDIAS,SADINCA\nMEDIAS,SANCEL\nMEDIAS,SOALA\nMEDIAS,TAPU\nMEDIAS,TAUNI\nMEDIAS,VISA\nROMAN,BACAU\nROMAN,BAIA\nROMAN,BALUSESTI\nROMAN,BERBICENI\nROMAN,COMANESTI\nROMAN,DAVIDENI\nROMAN,DAVIDENI_VEST\nROMAN,DRACENI\nROMAN,DRAGOMIRESTI\nROMAN,DUSESTI\nROMAN,FRASIN_GURA_HUMORULUI\nROMAN,GAICEANA\nROMAN,GLAVANESTI\nROMAN,HERLA\nROMAN,HURUIESTI_NEGULESTI_MALDARESTI\nROMAN,MALDARESTI\nROMAN,MARGINENI\nROMAN,MIRCESTI\nROMAN,MIRONU\nROMAN,NEGULESTI\nROMAN,OCHENI\nROMAN,PADURENI\nROMAN,PALTIN\nROMAN,PALTINOASA\nROMAN,PARAVA\nROMAN,POCOLENI\nROMAN,ROMAN\nROMAN,ROMANI\nROMAN,TARGU_NEAMT\nROMAN,TAZLAUL_MARE\nROMAN,TODIRESTI\nROMAN,VALEA_MOLDOVEI\nROMAN,VALEA_SEACA\nROMAN,VALEA_SEACA_EST\nROMAN,VARVATA\n";
   var FIS = { tarife: 'tarife.csv', zac: 'sectie_zacamant.csv', avize: 'avize_acorduri.csv', cons: 'conservare.csv', exp: 'experimentale.csv', date: '_date' };
   var LS = 'org-echipa:';
@@ -5343,6 +5343,82 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
   }
 
   // ---------- Setări și ajutor ----------
+
+  // ---------- backup complet într-un singur fișier JSON (CSV-uri + datele fiecărui coleg) ----------
+  var CSV_BACKUP = [FIS.tarife, FIS.zac, FIS.avize, FIS.cons, FIS.exp];
+  var FORMAT_BACKUP = 'organizare-echipa-backup';
+  function bytesLaB64(b) { var o = '', i; for (i = 0; i < b.length; i += 8192) o += String.fromCharCode.apply(null, b.subarray(i, i + 8192)); return btoa(o); }
+  function b64LaBytes(t) { var o = atob(t), u = new Uint8Array(o.length), i; for (i = 0; i < o.length; i++) u[i] = o.charCodeAt(i); return u; }
+  function caleBackupValida(c) { return CSV_BACKUP.indexOf(c) >= 0 || /^_date\/[A-Za-z0-9_.\- ]+\.json$/.test(c); }
+  async function construiesteBackup() {
+    var fis = [], i, f;
+    for (i = 0; i < CSV_BACKUP.length; i++) {
+      f = await IO.citeste(S.folder, CSV_BACKUP[i]);
+      if (f) fis.push({ cale: CSV_BACKUP[i], codare: 'base64', modificat: new Date(f.lastModified).toISOString(), continut: bytesLaB64(f.bytes) });
+    }
+    var d = await IO.dir(S.folder, FIS.date, true), l = await IO.lista(d);
+    l = l.filter(function (x) { return x.tip === 'file' && /\.json$/i.test(x.nume); }).sort(function (a, b) { return a.nume < b.nume ? -1 : 1; });
+    for (i = 0; i < l.length; i++) {
+      f = await IO.citeste(d, l[i].nume);
+      if (f) fis.push({ cale: FIS.date + '/' + l[i].nume, codare: 'utf-8', modificat: new Date(f.lastModified).toISOString(), continut: text(f.bytes) });
+    }
+    return { format: FORMAT_BACKUP, versiune: 1, program: VERSIUNE, creat: new Date().toISOString(), de: S.eu, fisiere: fis };
+  }
+  function bytesBackup(obj) { return new TextEncoder().encode(JSON.stringify(obj, null, 1)); }
+  async function backupComplet() {
+    if (!esteSef(S.eu)) { toast('Backup-ul complet îl face doar șeful echipei.', 'eroare'); return; }
+    try {
+      var obj = await construiesteBackup(), bytes = bytesBackup(obj);
+      var nume = await IO.copieSiguranta(S.folder, 'complet', 'Backup complet.json', bytes, '', 30);
+      var nrCsv = obj.fisiere.filter(function (x) { return x.codare === 'base64'; }).length, nrDate = obj.fisiere.length - nrCsv;
+      var m = modal({
+        titlu: 'Backup complet salvat',
+        corp: '<p style="margin:0 0 .6rem">Un singur fișier cu <b>' + plural(nrCsv, 'fișier CSV', 'fișiere CSV') + '</b> și datele a <b>' + plural(nrDate, 'coleg', 'colegi') + '</b> (' + Math.round(bytes.length / 1024) + ' KB).</p>' +
+          '<p style="margin:0 0 .6rem">Salvat în folderul programului: <code class="cale">_backup/complet/' + esc(nume) + '</code></p>' +
+          '<p class="nota" style="margin:0">Fișierul conține și parolele colegilor, dar doar sub formă criptată (nu pot fi citite). Păstrează-l într-un loc sigur. Se păstrează ultimele 30 de backup-uri.</p>',
+        subsol: '<button class="btn" data-descarca>Descarcă o copie în altă parte</button><button class="btn principal" data-inchide>Gata</button>'
+      });
+      m.el.querySelector('[data-descarca]').onclick = function () {
+        var url = URL.createObjectURL(new Blob([bytes], { type: 'application/json' })), a = document.createElement('a');
+        a.href = url; a.download = nume; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+      };
+    } catch (e) { toast('Backup-ul nu s-a putut face: ' + e.message, 'eroare'); }
+  }
+  function restaureazaBackup() {
+    if (!esteSef(S.eu)) { toast('Restaurarea o face doar șeful echipei.', 'eroare'); return; }
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json';
+    inp.onchange = async function () {
+      var fisier = inp.files && inp.files[0]; if (!fisier) return;
+      var obj;
+      try { obj = JSON.parse(text(new Uint8Array(await fisier.arrayBuffer()))); } catch (e) { toast('Fișierul nu este un JSON valid.', 'eroare'); return; }
+      if (!obj || obj.format !== FORMAT_BACKUP || !Array.isArray(obj.fisiere)) { toast('Acesta nu este un backup făcut de acest program.', 'eroare'); return; }
+      var rele = [];
+      obj.fisiere.forEach(function (x) {
+        if (!x || !caleBackupValida(x.cale) || typeof x.continut !== 'string') { rele.push(String(x && x.cale)); return; }
+        if (x.cale.indexOf(FIS.date + '/') === 0) { try { JSON.parse(x.continut); } catch (e) { rele.push(x.cale); } }
+        else if (x.codare !== 'base64') rele.push(x.cale);
+      });
+      if (rele.length || !obj.fisiere.length) { toast('Backup deteriorat sau neconform' + (rele.length ? ' (' + rele.slice(0, 3).join(', ') + ')' : '') + '. Nu am restaurat nimic.', 'eroare'); return; }
+      var lista = obj.fisiere.map(function (x) { return '<li><code class="cale">' + esc(x.cale) + '</code></li>'; }).join('');
+      var ok = await confirma('Backup din <b>' + esc(dataOra(obj.creat)) + '</b> (făcut de ' + esc(numeM(obj.de) || obj.de || '—') + ', program v' + esc(obj.program || '?') + ').<br>Se vor <b>înlocui</b> aceste fișiere din folderul programului:<ul style="margin:.4rem 0">' + lista + '</ul>Înainte de înlocuire, fiecare fișier actual se copiază în <code class="cale">_backup/restaurare</code>. Datele făcute după backup se pierd (rămân doar în copiile de siguranță).', { da: 'Restaurează', titlu: 'Restaurare din backup', periculos: true });
+      if (!ok) return;
+      try {
+        for (var i = 0; i < obj.fisiere.length; i++) {
+          var x = obj.fisiere[i], sub = x.cale.indexOf('/') >= 0, nume = sub ? x.cale.split('/')[1] : x.cale;
+          var d = sub ? await IO.dir(S.folder, FIS.date, true) : S.folder;
+          var bytes = x.codare === 'base64' ? b64LaBytes(x.continut) : new TextEncoder().encode(x.continut);
+          var cur = await IO.citeste(d, nume);
+          if (cur) await IO.copieSiguranta(S.folder, 'restaurare', nume, cur.bytes, S.eu, 0);
+          await IO.scrie(d, nume, bytes);
+          var dupa = await IO.citeste(d, nume);
+          if (!dupa || dupa.size !== bytes.length) throw new Error('Verificarea ' + x.cale + ' a eșuat (dimensiune diferită după scriere).');
+        }
+        toast('Restaurat: ' + plural(obj.fisiere.length, 'fișier', 'fișiere') + '. Programul se reîncarcă.', 'bine');
+        setTimeout(function () { location.reload(); }, 1500);
+      } catch (e) { toast('Restaurarea s-a oprit: ' + e.message + ' Fișierele înlocuite până acum au copii în _backup/restaurare.', 'eroare'); }
+    };
+    inp.click();
+  }
   function vSetari() {
     var dataSalv = S.salvare.ultima ? dataOra(S.salvare.ultima.toISOString()) : '—';
     var h = '<div class="antet-pagina"><h1>Setări</h1></div><div class="doua-coloane"><div class="stiva">' +
@@ -5350,6 +5426,7 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
       '<section class="sectiune"><header><h2>Afișare</h2></header><div class="rand-flex"><span>Mărimea textului</span><button class="btn mic" data-a="marime" data-d="-1">A−</button><button class="btn mic" data-a="marime" data-d="0">normal</button><button class="btn mic" data-a="marime" data-d="1">A+</button></div></section>' +
       '<section class="sectiune"><header><h2>Deconectare</h2></header><p style="margin:0 0 .6rem">Pe acest calculator ești conectat ca <b>' + esc(numeM(S.eu)) + '</b> până apeși butonul de mai jos.</p><button class="btn atentie" data-a="iesi">Deconectare</button></section></div><div class="stiva">' +
       '<section class="sectiune liniste"><header><h2>Folderul programului</h2></header><dl class="fapte"><dt>Folder</dt><dd>' + esc(S.folder ? S.folder.name : '—') + '</dd><dt>Calea fișierului</dt><dd>' + esc(IO.caleaPaginii() || '—') + '</dd><dt>Tarife</dt><dd>' + (S.tar.model ? esc(FIS.tarife) + ', ' + plural(S.tar.model.randuri.length, 'rând', 'rânduri') : 'lipsă') + '</dd><dt>Avize și acorduri</dt><dd>' + plural(S.av.analize.length, 'act', 'acte') + '</dd><dt>Fișierele echipei</dt><dd>' + (Object.keys(S.semnDate).length ? Object.keys(S.semnDate).map(function (a) { return esc(numeM(a)); }).join(', ') : '<span class="nota">încă niciunul (se creează la prima salvare)</span>') + '</dd><dt>Ultima salvare</dt><dd>' + dataSalv + '</dd></dl><div class="rand-flex" style="margin-top:.7rem"><button class="btn" data-a="reciteste">Recitește acum</button><button class="btn simplu" data-a="schimba-folder">Alege alt folder</button></div></section>' +
+      (esteSef(S.eu) ? '<section class="sectiune"><header><h2>Backup complet</h2></header><p style="margin:0 0 .6rem">Un singur fișier JSON cu toate datele programului: cele 5 fișiere CSV și fișierele de date ale colegilor (sarcini, rapoarte, setări, parole criptate).</p><div class="rand-flex"><button class="btn principal" data-a="backup-complet">Fă backup acum</button><button class="btn" data-a="backup-restaureaza">Restaurează din backup…</button></div></section>' : '') +
       '<section class="sectiune liniste"><header><h2>Despre</h2></header><p style="margin:0">Organizare, versiunea ' + VERSIUNE + ' din ' + DATA_VERSIUNE + '. Programul nu are server: fiecare coleg își scrie datele în fișierul lui din <code class="cale">' + FIS.date + '</code>, iar programul le îmbină la citire. Copii de siguranță: <code class="cale">_backup</code>.</p></section></div></div>';
     return h;
   }
@@ -5438,6 +5515,8 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
       case 'evidenta': modalEvidenta(d.tip); break;
       case 'aviz-primit': modalAvizPrimit(); break;
       case 'pdf-scan': pdfScaneaza(); break;
+      case 'backup-complet': backupComplet(); break;
+      case 'backup-restaureaza': restaureazaBackup(); break;
       case 'pdf-deschide': pdfDeschide(d.cale); break;
       case 'cons-filtru': S.f.consStare = d.v; redeseneaza(); break;
       case 'cons-tab': S.f.consTab = d.v; redeseneaza(); break;
