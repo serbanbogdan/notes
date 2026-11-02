@@ -452,7 +452,8 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
 .ap-jos{margin-top:.5rem;align-items:center;flex-wrap:wrap}
 .btn-calendar { white-space: nowrap; padding: .5em .8em; }
 .bara .dreapta { gap: .5rem; }
-.bara nav button { padding: 0 .65rem; white-space: nowrap; }
+.bara nav button { padding: 0 .55rem; white-space: nowrap; }
+@media (max-width: 1500px) { .bara .btn-calendar { padding-left: .55rem; padding-right: .55rem; } .bara .stare-salvare.ok .txt, .bara .stare-salvare.salvez .txt { display: none; } }
 
 /* ---------- varianta mobilă (PWA, doar citire) ---------- */
 body.mobil .bara [data-a="evidenta"], body.mobil .bara [data-a="aviz-primit"], body.mobil #stare-salvare, body.mobil [data-a="pdf-scan"], body.mobil [data-a="export-tarife"] { display: none !important; }
@@ -1975,6 +1976,17 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     }
     return { antet: rows[0], antetQ: q[0] || [], randuri: randuri, map: map, codare: dec.codare, bom: dec.bom, sep: p.sep || ',', eol: p.eol || '\r\n' };
   }
+  function scrie(model) {
+    var rows = [model.antet].concat(model.randuri.map(function (r) { return r.c; }));
+    var q = [model.antetQ || []].concat(model.randuri.map(function (r) { return r.q || []; }));
+    return B.scrieCSV(rows, { sep: model.sep || ',', eol: model.eol || '\r\n', quoted: q, finalEol: true });
+  }
+  function setVal(model, r, k, v) {
+    var i = model.map[k]; if (i == null || i < 0) return;
+    while (r.c.length <= i) r.c.push('');
+    r.c[i] = v == null ? '' : String(v);
+    if (r.q) r.q[i] = false;
+  }
   function val(model, r, k) { var i = model.map[k]; return i >= 0 && i < r.c.length ? String(r.c[i]) : ''; }
 
   // „74-Ab/22.02.2024” → {nr: '74-Ab', data: zi}
@@ -2115,9 +2127,26 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     return ev;
   }
 
+  // sarcini automate: documentele care trebuie obținute de la serviciile conexe (pentru proiectul final)
+  function sarciniDocumente(analize) {
+    var ev = [];
+    analize.forEach(function (a) {
+      if (a.stare !== 'colectare') return;
+      a.cereLipsa.forEach(function (k) {
+        var nume = DOCURI.filter(function (d) { return d[0] === k; })[0][1];
+        ev.push({
+          id: 'aband-doc:' + a.cheie + ':' + k, tip: 'aband_doc', abandonare: true, z: a.termen, responsabil: a.responsabil, cheie: a.cheie, sonda: a.sonda,
+          titlu: 'Obține de la servicii: ' + nume + ' — ' + a.sonda,
+          detaliu: 'necesar pentru proiectul final de abandonare' + (a.termen != null ? ' (proiectul se înaintează până la ' + B.fmtData(a.termen) + ')' : ''), gata: false, stare: a.alerta || 'in_termen'
+        });
+      });
+    });
+    return ev;
+  }
+
   var api = {
     NUME_FISIER: NUME_FISIER, STARI: STARI, DOCURI: DOCURI, ANI_TERMEN: ANI_TERMEN, ZILE_ATENTIE: ZILE_ATENTIE,
-    citeste: citeste, modelGol: modelGol, val: val, parseAct: parseAct, parseDoc: parseDoc, cheiUnice: cheiUnice, analizeaza: analizeaza,
+    citeste: citeste, modelGol: modelGol, scrie: scrie, setVal: setVal, val: val, sarciniDocumente: sarciniDocumente, parseAct: parseAct, parseDoc: parseDoc, cheiUnice: cheiUnice, analizeaza: analizeaza,
     statistici: statistici, elementeCalendar: elementeCalendar
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Abandonare = api;
@@ -2474,6 +2503,210 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   };
   if (typeof module !== 'undefined' && module.exports) module.exports = root.AvizePdf;
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
+
+// ===== sonde.js =====
+// Baza de date unitară pe sondă: toate fișierele CSV (tarife, experimentale, conservare, abandonare, sectie_zacamant)
+// și arhiva PDF a avizelor sunt citite împreună. Fiecare sondă are o singură fișă cu tot ce se știe despre ea,
+// iar neconcordanțele dintre fișiere (date diferite, sonde lipsă dintr-un fișier, denumiri diferite) sunt semnalate.
+(function (root) {
+  'use strict';
+  var B = root.Baza || (typeof require !== 'undefined' ? require('./core.js') : null);
+  var M = root.Potrivire || (typeof require !== 'undefined' ? require('./matcher.js') : null);
+
+  var SURSE = {
+    tar: { nume: 'tarife.csv', titlu: 'Tarife ANRMPSG' },
+    exp: { nume: 'experimentale.csv', titlu: 'Exploatare experimentală' },
+    cons: { nume: 'conservare.csv', titlu: 'Conservare' },
+    aband: { nume: 'abandonare.csv', titlu: 'Abandonare' }
+  };
+  var STRICAT = /[?�]/;
+  var ZILE_TOLERANTA = 7; // înregistrarea la Serviciul Perimetre și înaintarea la ANRM se fac de obicei la 1–4 zile una de alta
+  var CUVINTE_IN_PLUS = { ACORD: 1, AVIZ: 1, ABANDONARE: 1, CONSERVARE: 1, SONDA: 1, SONDEI: 1 };
+
+  // tipul unui rând din tarife.csv
+  function tipTarif(tip) {
+    var t = M.norm(tip).replace(/ /g, '');
+    if (/ABANDON/.test(t)) return /AVIZ/.test(t) ? 'aviz_ab' : 'acord_ab';
+    if (/CONSERV/.test(t)) return 'cons';
+    if (t.indexOf('EXPERIMENTAL') >= 0 || /EX(PL)?EXP/.test(t)) return 'exp';
+    if (/S[A?]PARE/.test(t)) return 'sapare';
+    if (/INJECT/.test(t)) return 'injectie';
+    return 'alt';
+  }
+  var NUME_TIP = { acord_ab: 'acord de abandonare', aviz_ab: 'aviz de abandonare', cons: 'aviz de conservare', exp: 'aviz de exploatare experimentală', sapare: 'săpare sondă', injectie: 'injecție ape reziduale', alt: 'alt aviz' };
+
+  function numeCurat(text) {
+    var p = M.parseSonda(text);
+    var t = p.tokens.filter(function (x) { return !CUVINTE_IN_PLUS[x]; });
+    var w = M.norm(text).split(' ').filter(Boolean), inainte = p.numar ? w.indexOf(p.numar.split(' ')[0]) : 0;
+    return { numar: p.numar, nume: t.join(' '), lipit: t.join(''), inPlus: p.tokens.length !== t.length || inainte > 0 };
+  }
+  // distanța Levenshtein în care „?” și „�” (litere pierdute din Excel) se potrivesc cu orice literă
+  function distanta(a, b) {
+    var m = a.length, n = b.length, d = [], i, j;
+    for (i = 0; i <= m; i++) { d[i] = [i]; }
+    for (j = 0; j <= n; j++) d[0][j] = j;
+    for (i = 1; i <= m; i++) for (j = 1; j <= n; j++) {
+      var eg = a[i - 1] === b[j - 1] || STRICAT.test(a[i - 1]) || STRICAT.test(b[j - 1]);
+      d[i][j] = Math.min(d[i - 1][j] + 1, d[i][j - 1] + 1, d[i - 1][j - 1] + (eg ? 0 : 1));
+    }
+    return d[m][n];
+  }
+  function numeAsemanatoare(a, b) {
+    if (a === b) return true;
+    if (!a || !b) return false;
+    var prag = Math.max(1, Math.floor(Math.min(a.length, b.length) / 5));
+    return distanta(a, b) <= prag;
+  }
+  function sugestiiZacamant(lipit, zacaminte) {
+    if (!lipit) return [];
+    var v = [];
+    zacaminte.forEach(function (z) {
+      var t = String(z).replace(/_/g, '');
+      if (t.indexOf(lipit) === 0 || (lipit.length >= 4 && distanta(lipit, t.slice(0, lipit.length + 1)) <= 1) || distanta(lipit, t) <= 2) if (v.indexOf(z) < 0) v.push(z);
+    });
+    return v.slice(0, 4);
+  }
+  function zacSigur(pot) { return pot && pot.zacaminte && pot.zacaminte.length === 1 && pot.nivel !== 'aproximativ' && pot.nivel !== 'partial' && pot.nivel !== 'nepotrivit' ? pot.zacaminte[0] : ''; }
+
+  // surse: {tar: [analize], exp, cons, aband, pdf: [elemente index]}; ctx: {potrivitor, azi}
+  function unifica(surse, ctx) {
+    var sonde = [];
+    function gaseste(numar, lipit, zac) {
+      for (var i = 0; i < sonde.length; i++) {
+        var s = sonde[i];
+        if (s.numar !== numar) continue;
+        if (zac && s.zac && zac === s.zac) return s;
+        if (zac && s.zac && zac !== s.zac && !numeAsemanatoare(lipit, s.lipit)) continue;
+        if (s.lipituri.some(function (l) { return numeAsemanatoare(lipit, l); })) return s;
+      }
+      return null;
+    }
+    function adauga(sursa, a) {
+      if (!a.sonda) return;
+      var c = numeCurat(a.sonda);
+      if (!c.numar && !c.lipit) return;
+      var pot = ctx.potrivitor ? ctx.potrivitor(a.sonda) : null;
+      var zac = zacSigur(pot);
+      var s = gaseste(c.numar, c.lipit, zac);
+      if (!s) {
+        s = { cheie: '', numar: c.numar, lipit: c.lipit, lipituri: [], zac: zac, pot: pot, variante: [], tar: [], exp: [], cons: [], aband: [], pdf: [], probleme: [] };
+        sonde.push(s);
+      }
+      if (s.lipituri.indexOf(c.lipit) < 0) s.lipituri.push(c.lipit);
+      if (!s.zac && zac) { s.zac = zac; s.pot = pot; }
+      var v = a.sonda.replace(/\s+/g, ' ').trim();
+      if (!s.variante.some(function (x) { return x.text === v; })) s.variante.push({ text: v, sursa: sursa, strica: STRICAT.test(v), inPlus: c.inPlus });
+      s[sursa].push(a);
+    }
+    ['aband', 'cons', 'exp', 'tar'].forEach(function (k) { (surse[k] || []).forEach(function (a) { adauga(k, a); }); });
+    // PDF-urile din arhivă se leagă doar de sondele existente (arhiva are și sonde vechi, fără evidență)
+    (surse.pdf || []).forEach(function (x) {
+      var c = numeCurat(x.sonda); if (!c.numar) return;
+      var s = gaseste(c.numar, c.lipit, '');
+      if (s) s.pdf.push(x);
+    });
+    sonde.forEach(function (s) { completeaza(s, ctx); });
+    sonde.sort(function (x, y) { return x.nume.localeCompare(y.nume, 'ro', { numeric: true }); });
+    return sonde;
+  }
+
+  function completeaza(s, ctx) {
+    // denumirea afișată: din fișierele îngrijite (abandonare, conservare, experimentale), fără litere pierdute
+    var bune = s.variante.filter(function (v) { return !v.strica && !v.inPlus; });
+    s.nume = (bune[0] || s.variante[0]).text;
+    s.cheie = (s.numar || '-') + ' ' + s.lipit;
+    s.zacamant = s.zac || '';
+    s.sectia = s.pot && s.pot.sectia && s.zac ? s.pot.sectia : '';
+    var toate = [].concat(s.aband, s.cons, s.exp, s.tar);
+    s.responsabil = (toate.filter(function (a) { return a.responsabil; })[0] || {}).responsabil || '';
+    s.etichete = [];
+    if (s.aband.length) s.etichete.push('aband');
+    if (s.cons.length) s.etichete.push('cons');
+    if (s.exp.length) s.etichete.push('exp');
+    if (s.tar.length) s.etichete.push('tar');
+    verifica(s, ctx);
+  }
+
+  function pb(s, nivel, cod, text) { s.probleme.push({ nivel: nivel, cod: cod, text: text }); }
+  function d(z) { return B.fmtData(z); }
+
+  function verifica(s, ctx) {
+    var tar = s.tar.map(function (a) { return { a: a, t: tipTarif(a.tip) }; });
+    var tarAcord = tar.filter(function (x) { return x.t === 'acord_ab'; }), tarAvizAb = tar.filter(function (x) { return x.t === 'aviz_ab'; });
+    var tarCons = tar.filter(function (x) { return x.t === 'cons'; }), tarExp = tar.filter(function (x) { return x.t === 'exp'; });
+    // 1. denumiri diferite pentru aceeași sondă
+    var reale = s.variante.filter(function (v) { return !v.strica; });
+    var distincte = {}; reale.forEach(function (v) { distincte[numeCurat(v.text).lipit] = v; });
+    if (Object.keys(distincte).length > 1) pb(s, 'atentie', 'denumiri', 'Denumiri diferite pentru aceeași sondă: ' + Object.keys(distincte).map(function (k) { var v = distincte[k]; return '„' + v.text + '” (' + SURSE[v.sursa].nume + ')'; }).join(', ') + ' — verifică și folosește aceeași denumire');
+    s.variante.filter(function (v) { return v.inPlus; }).forEach(function (v) { pb(s, 'info', 'text_in_plus', 'În ' + SURSE[v.sursa].nume + ' sonda este scrisă „' + v.text + '” (cu text în plus în coloana Sonda)'); });
+    // 2. sonda nu este în sectie_zacamant.csv
+    if (!s.zac) {
+      var sug = sugestiiZacamant(s.lipit.replace(/^BIS/, ''), ctx.zacaminte || []);
+      pb(s, 'atentie', 'fara_zacamant', 'Zăcământul sondei nu este recunoscut în sectie_zacamant.csv — responsabilul nu se poate stabili automat' + (sug.length ? ' (seamănă cu: ' + sug.join(', ') + ')' : ''));
+    }
+    // 3. abandonare ↔ tarife (acord de abandonare)
+    var ab = s.aband[0];
+    if (ab) {
+      if ((ab.anrm != null || ab.acordNr) && !tarAcord.length) pb(s, 'atentie', 'ab_fara_tarif', 'Sonda este în abandonare.csv (înaintată la ANRM' + (ab.anrm != null ? ' la ' + d(ab.anrm) : '') + '), dar în tarife.csv nu există rândul „Acord abandonare” — tariful ANRMPSG nu este urmărit');
+      tarAcord.forEach(function (x) {
+        if (x.a.reg != null && ab.anrm != null && Math.abs(x.a.reg - ab.anrm) > ZILE_TOLERANTA) pb(s, Math.abs(x.a.reg - ab.anrm) > 30 ? 'atentie' : 'info', 'data_inaintare', 'Data înaintării la ANRM diferă: ' + d(ab.anrm) + ' în abandonare.csv, ' + d(x.a.reg) + ' în tarife.csv (diferență ' + Math.abs(x.a.reg - ab.anrm) + ' zile)');
+        if (x.a.aviz != null && ab.acord != null && Math.abs(x.a.aviz - ab.acord) > ZILE_TOLERANTA) pb(s, Math.abs(x.a.aviz - ab.acord) > 30 ? 'atentie' : 'info', 'data_acord', 'Data acordului de abandonare diferă: ' + d(ab.acord) + ' în abandonare.csv (' + ab.acordNr + '), ' + d(x.a.aviz) + ' în tarife.csv (Data AVIZ)');
+        if (x.a.aviz != null && ab.acord == null && !ab.acordNr) pb(s, 'atentie', 'acord_doar_tarif', 'Acordul apare emis în tarife.csv (' + d(x.a.aviz) + '), dar coloana „Acord abandonare” din abandonare.csv este goală');
+      });
+    } else {
+      tarAcord.forEach(function (x) { pb(s, 'atentie', 'tarif_fara_ab', 'În tarife.csv există „' + x.a.tip + '”' + (x.a.reg != null ? ' din ' + d(x.a.reg) : '') + ', dar sonda nu este în abandonare.csv — documentele de abandonare nu sunt urmărite'); });
+    }
+    tarAvizAb.forEach(function (x) { if (!ab) pb(s, 'atentie', 'aviz_ab_fara_ab', 'În tarife.csv există „' + x.a.tip + '”' + (x.a.reg != null ? ' din ' + d(x.a.reg) : '') + ', dar sonda nu este în abandonare.csv'); });
+    // 4. conservare ↔ tarife
+    tarCons.forEach(function (x) { if (!s.cons.length) pb(s, 'info', 'tarif_cons_fara_cons', 'În tarife.csv există „' + x.a.tip + '”' + (x.a.reg != null ? ' din ' + d(x.a.reg) : '') + ', dar sonda nu este în conservare.csv'); });
+    // 5. experimentale ↔ tarife
+    s.exp.forEach(function (e) { if (!tarExp.length) pb(s, 'atentie', 'exp_fara_tarif', 'Sonda este în experimentale.csv (aviz ' + (e.avizNr || '') + '), dar în tarife.csv nu există rândul pentru avizul de exploatare experimentală'); });
+    tarExp.forEach(function (x) {
+      if (s.exp.length) return;
+      var recent = x.a.reg != null && ctx.azi - x.a.reg <= 365;
+      if (recent) pb(s, 'atentie', 'tarif_exp_fara_exp', 'În tarife.csv există „' + x.a.tip + '” din ' + d(x.a.reg) + ', dar sonda nu este în experimentale.csv — termenul pentru exploatarea definitivă nu este urmărit');
+    });
+    // 6. sonda abandonată care apare încă în conservare / exploatare experimentală
+    if (ab && ab.stare !== 'neinceput') {
+      if (s.cons.length) pb(s, 'atentie', 'ab_si_cons', 'Sonda este în abandonare și apare încă în conservare.csv — scoate-o din conservare dacă abandonarea este decisă');
+      if (s.exp.length) pb(s, 'atentie', 'ab_si_exp', 'Sonda este în abandonare și apare încă în experimentale.csv');
+    }
+    // 7. problemele interne ale fiecărui fișier, aduse pe fișă
+    s.aband.forEach(function (a) { (a.probleme || []).forEach(function (p) { pb(s, 'info', 'ab:' + p.cod, 'abandonare.csv: ' + p.text); }); });
+    s.cons.forEach(function (a) { (a.probleme || []).forEach(function (p) { if (p.cod !== 'nealocat') pb(s, 'info', 'cons:' + p.cod, 'conservare.csv: ' + p.text); }); });
+    s.tar.forEach(function (a) { (a.probleme || []).forEach(function (p) { if (p.cod !== 'diacritice' && p.cod !== 'nealocat') pb(s, 'info', 'tar:' + p.cod, 'tarife.csv (' + a.tip + '): ' + p.text); }); });
+    if (s.variante.some(function (v) { return v.strica; })) pb(s, 'info', 'diacritice', 'tarife.csv: litere pierdute („?”) în denumire — salvează fișierul din Excel ca „CSV UTF-8”');
+    s.nrAtentie = s.probleme.filter(function (p) { return p.nivel === 'atentie'; }).length;
+  }
+
+  // situația sondei pe scurt (pentru tabelul unitar)
+  function situatie(s) {
+    var t = [];
+    var ab = s.aband[0];
+    if (ab) t.push({ k: 'aband', text: 'Abandonare: ' + ({ neinceput: 'neînaintată', asteapta_acord: 'așteaptă acordul', colectare: 'se colectează documente', de_inaintat: 'de înaintat proiectul', asteapta_aviz: 'așteaptă avizul', finalizat: 'finalizată' }[ab.stare] || ab.stare) });
+    s.cons.forEach(function (c) { t.push({ k: 'cons', text: 'Conservare: aviz ' + (c.avizNr || '') + (c.valabil != null ? ' până la ' + d(c.valabil) : '') }); });
+    s.exp.forEach(function (e) { t.push({ k: 'exp', text: 'Exploatare experimentală: aviz ' + (e.avizNr || '') + (e.expira != null ? ' până la ' + d(e.expira) : '') }); });
+    var tarDeschise = s.tar.filter(function (a) { return !a.finalizat; });
+    if (s.tar.length) t.push({ k: 'tar', text: 'Tarife: ' + s.tar.length + (tarDeschise.length ? ' (' + tarDeschise.length + ' deschise)' : ', toate finalizate') });
+    return t;
+  }
+
+  function statistici(sonde) {
+    var o = { total: sonde.length, cuProbleme: 0, atentie: 0, info: 0, pe: { aband: 0, cons: 0, exp: 0, tar: 0 }, multiple: 0, faraZac: 0, coduri: {} };
+    sonde.forEach(function (s) {
+      if (s.probleme.length) o.cuProbleme++;
+      s.probleme.forEach(function (p) { o[p.nivel]++; var c = p.cod.split(':')[0]; o.coduri[c] = (o.coduri[c] || 0) + 1; });
+      s.etichete.forEach(function (e) { o.pe[e]++; });
+      if (s.etichete.length > 1) o.multiple++;
+      if (!s.zac) o.faraZac++;
+    });
+    return o;
+  }
+
+  var api = { SURSE: SURSE, tipTarif: tipTarif, NUME_TIP: NUME_TIP, numeCurat: numeCurat, distanta: distanta, numeAsemanatoare: numeAsemanatoare, unifica: unifica, situatie: situatie, statistici: statistici };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Sonde = api;
+})(typeof window !== 'undefined' ? window : this);
 
 // ===== rapoarte.js =====
 // Raportul săptămânal: partea fixă (4 câmpuri) + partea flexibilă; cumularea pe echipă pentru șef.
@@ -3248,9 +3481,9 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
 // Aplicație fără server: datele stau în folderul programului (CSV + _date/<utilizator>.json).
 (function () {
   'use strict';
-  var B = window.Baza, M = window.Potrivire, T = window.Tarife, A = window.Avize, C = window.Conservare, AB = window.Abandonare, E = window.Experimentale, R = window.Rapoarte, D = window.Depozit;
+  var B = window.Baza, M = window.Potrivire, T = window.Tarife, A = window.Avize, C = window.Conservare, AB = window.Abandonare, SO = window.Sonde, E = window.Experimentale, R = window.Rapoarte, D = window.Depozit;
 
-  var VERSIUNE = '2.2', DATA_VERSIUNE = '02.11.2026';
+  var VERSIUNE = '2.3', DATA_VERSIUNE = '02.11.2026';
   var SEF = 'bogdan';
   var MEMBRI_IMPLICIT = [
     { id: 'bogdan', nume: 'Bogdan', rol: 'sef', sectii: [] },
@@ -3293,7 +3526,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   var STARI_SARCINA = { de_facut: 'De făcut', in_lucru: 'În lucru', astept: 'Aștept răspuns', finalizata: 'Finalizată' };
   var SURSE_ASTEPT = ['Serviciul TEIZ', 'Serviciul Reactivare Sonde', 'Serviciul Foraj', 'Serviciul Perimetre', 'Prestator', 'Alt serviciu'];
   var LIMITA_IN_LUCRU = 3;
-  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"xTAAe2tenFVLDEIdRmwgBg==","h":"Fi9Ue8n7REuvABjWvXbW33DnVoR9EZsMT4HEJo72OeQ="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"V9KvjxE2qMeWD8Vw26FNfw==","h":"1+g55CW3PxobV6r+CVUrdA20xCadayiEGt7zGOBNr/g="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"uOxT4BIQo5x+ICTgbzlNPw==","h":"VURlJKuMkMb56PnBj1tTE/tWjNCgM1VPLm43mXf7G8c="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"hvcjTwzLTJGZLBts1FGdGQ==","h":"pQH6C90P+zakrxrU+m6Ib+58ssGs/ld1beM5PzcGK1E="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"SgU6qB1Ryco0hETcevhU4A==","h":"nXDgGsltpgcEsV//SC0i4hhh39vMdpMLbtcY1+XM2Uw="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"feyK4YrRdjYTASXhUmc11Q==","h":"a6xGRQTtYhGQpwGIYx534ZQBbYNVhi4H1b7cZzfPT74="}};
+  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"ini2wYR+haNUjcexdOcjuw==","h":"CMMQoNlDCD+ErSR5bqj9oNVydPjmZZAgio3X2X34djw="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"FvRowrlJSJ0roaBDoBPPLw==","h":"XpDaRPGMmusyhkSFQ8sHdN6D5niNJHd8I0F3ximoNwk="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"Eb3CQYzkqElwWnMLLM3SgA==","h":"Q8eN3nbkACo1NGk3e8doIsqbJN4a+WxGXEzRnG8EgeU="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"TsqLL3qdIJLl8l4sFwWu5g==","h":"p8NABmyoV/61Qqes2+/00ALDLw9Y9a2O97jxX5uywQo="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"ZU+yFfzEgam6d3szjXR/nQ==","h":"i9fSUIzmw304uHS9PyxVliszSKWxKiikXWcvASkxNfI="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"UKz2z36GRFZ2uaKp/4b8qA==","h":"37MAZ7sP1XN6pAcwChkFdTlu4om9t2qVIHmfpHN0Xbw="}};
   var SECTIE_ZACAMANT_IMPLICIT = "Sectia,Zacamantul Comercial\nAGNITA,AGNITA\nAGNITA,ALTANA\nAGNITA,BARCUT\nAGNITA,BIRGHIS\nAGNITA,BRADENI\nAGNITA,CHIRPAR\nAGNITA,DAIA_TELINA\nAGNITA,ILIMBAV\nAGNITA,NETUS\nAGNITA,NOCRICH\nAGNITA,NOCRICH_VEST\nAGNITA,NOUL_SASESC\nAGNITA,RETIS\nAGNITA,SASAUSI\nAGNITA,VULCAN\nCRISTUR,BRADESTI\nCRISTUR,CADACIU\nCRISTUR,CECHESTI\nCRISTUR,CHEDEA\nCRISTUR,CHEDEA_EST\nCRISTUR,CRISTUR_NORD\nCRISTUR,CRISTUR_SUD\nCRISTUR,CUSMED\nCRISTUR,ELISENI_SACEL\nCRISTUR,FELICENI\nCRISTUR,LUPENI\nCRISTUR,MEDISORUL_MARE\nCRISTUR,PORUMBENII_MICI\nCRISTUR,SIMONESTI\nCRISTUR,SOIMUSU_MARE\nCRISTUR,TARCESTI\nDANES,ALMA\nDANES,BEIA\nDANES,BUNESTI\nDANES,CLOASTERF\nDANES,CRIS\nDANES,HODOS\nDANES,JIBERT\nDANES,NADES_PROD_SELEUS\nDANES,PROD_SELEUS\nDANES,SASCHIZ\nDANES,SIGHISOARA\nDELENII,ADAMUS\nDELENII,BAZNA\nDELENII,BAZNA_I\nDELENII,BOIAN\nDELENII,CETATEA_DE_BALTA\nDELENII,DELENII_HARANGLAB\nDELENII,IDICIU\nDELENII,VELT\nFILITELNIC,CIBU\nFILITELNIC,FILITELNIC\nFILITELNIC,LASLAU_NORD\nFILITELNIC,LASLAUL_MARE\nFILITELNIC,PIPEA\nMEDIAS,ALAMOR\nMEDIAS,ARMENI\nMEDIAS,AXENTE_SEVER\nMEDIAS,BOARTA\nMEDIAS,BOGATU_ROMAN\nMEDIAS,COPSA_MICA\nMEDIAS,LOAMNES\nMEDIAS,PETIS\nMEDIAS,RUSI\nMEDIAS,SADINCA\nMEDIAS,SANCEL\nMEDIAS,SOALA\nMEDIAS,TAPU\nMEDIAS,TAUNI\nMEDIAS,VISA\nROMAN,BACAU\nROMAN,BAIA\nROMAN,BALUSESTI\nROMAN,BERBICENI\nROMAN,COMANESTI\nROMAN,DAVIDENI\nROMAN,DAVIDENI_VEST\nROMAN,DRACENI\nROMAN,DRAGOMIRESTI\nROMAN,DUSESTI\nROMAN,FRASIN_GURA_HUMORULUI\nROMAN,GAICEANA\nROMAN,GLAVANESTI\nROMAN,HERLA\nROMAN,HURUIESTI_NEGULESTI_MALDARESTI\nROMAN,MALDARESTI\nROMAN,MARGINENI\nROMAN,MIRCESTI\nROMAN,MIRONU\nROMAN,NEGULESTI\nROMAN,OCHENI\nROMAN,PADURENI\nROMAN,PALTIN\nROMAN,PALTINOASA\nROMAN,PARAVA\nROMAN,POCOLENI\nROMAN,ROMAN\nROMAN,ROMANI\nROMAN,TARGU_NEAMT\nROMAN,TAZLAUL_MARE\nROMAN,TODIRESTI\nROMAN,VALEA_MOLDOVEI\nROMAN,VALEA_SEACA\nROMAN,VALEA_SEACA_EST\nROMAN,VARVATA\n";
   var FIS = { tarife: 'tarife.csv', zac: 'sectie_zacamant.csv', avize: 'avize_acorduri.csv', cons: 'conservare.csv', exp: 'experimentale.csv', aband: 'abandonare.csv', date: '_date' };
   var LS = 'org-echipa:';
@@ -3312,7 +3545,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     aband: { model: null, semn: null, analize: [], eroare: null, citit: null },
     semnDate: {}, eroriDate: {},
     salvare: { stare: 'ok', mesaj: '', ultima: null },
-    f: { tarStare: 'deschise', tarResp: 'toti', tarCauta: '', tarSort: 'termen', tarDir: 1, sarResp: null, sarStare: 'deschise', sarCat: '', sarCauta: '', sarMod: 'lista', avStare: 'toate', avCauta: '', avTab: 'registru', abStare: 'deschise', abCauta: '', abTab: 'sonde', arhTip: '', arhAn: '', arhCauta: '', sarSapt: null, raportSapt: null, raportTab: 'meu', raportLuna: null, raportFaraNume: true, acasaResp: 'toti' },
+    f: { tarStare: 'deschise', tarResp: 'toti', tarCauta: '', tarSort: 'termen', tarDir: 1, sarResp: null, sarStare: 'deschise', sarCat: '', sarCauta: '', sarMod: 'lista', avStare: 'toate', avCauta: '', sondeTab: 'toate', sondeFiltru: 'toate', sondeCauta: '', sarAuto: 'toate', abStare: 'deschise', abCauta: '', abTab: 'sonde', arhTip: '', arhAn: '', arhCauta: '', sarSapt: null, raportSapt: null, raportTab: 'meu', raportLuna: null, raportFaraNume: true, acasaResp: 'toti' },
     loginSel: null, loginEroare: '', ocupat: false, deRedesenat: false, meniu: false, panou: null
   };
   window.__app = S; // pentru teste
@@ -4176,7 +4409,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     return n;
   }
   function baraSus() {
-    var tabs = [['acasa', 'Acasă'], ['sarcini', 'Sarcini'], ['tarife', 'Tarife ANRMPSG'], ['experimentale', 'Experimentale'], ['avize', 'Avize, acorduri'], ['conservare', 'Conservare'], ['abandonari', 'Abandonări'], ['raport', 'Raport']];
+    var tabs = [['acasa', 'Acasă'], ['sarcini', 'Sarcini'], ['sonde', 'Sonde'], ['tarife', 'Tarife'], ['experimentale', 'Experimentale'], ['avize', 'Avize'], ['conservare', 'Conservare'], ['abandonari', 'Abandonări'], ['raport', 'Raport']];
     if (esteSef()) tabs.push(['echipa', 'Echipa']);
     var urg = nrUrgenteMele();
     return '<header class="bara"><div class="titlu"><b>Organizare</b><span>Serviciul Geologic</span></div><nav aria-label="Secțiuni">' +
@@ -4197,6 +4430,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       case 'avize': return vAvize();
       case 'conservare': return vConservare();
       case 'abandonari': return vAbandonari();
+      case 'sonde': return vSonde();
       case 'experimentale': return vExperimentale();
       case 'raport': return vRaport();
       case 'echipa': return esteSef() ? vEchipa() : vAcasa();
@@ -4455,11 +4689,14 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       if (f.sarCauta) { var q = M.norm(f.sarCauta); if (M.norm(s.titlu + ' ' + (s.sonda || '') + ' ' + (s.descriere || '')).indexOf(q) < 0) return false; }
       return true;
     });
-    var h = '<div class="antet-pagina"><h1>Sarcini</h1><span class="detalii">' + plural(lista.length, 'sarcină', 'sarcini') + '</span><span class="spatiu"></span><button class="btn principal" data-a="sarcina-noua">+ Sarcină nouă</button></div>';
+    var aut = f.sarStare !== 'finalizate' && !f.sarCat && f.sarAuto !== 'manuale', nrAut = aut ? listaAutomate(resp).length : 0;
+    if (f.sarAuto === 'automate') lista = [];
+    var h = '<div class="antet-pagina"><h1>Sarcini</h1><span class="detalii">' + plural(lista.length, 'sarcină scrisă', 'sarcini scrise') + (aut ? ' · ' + plural(nrAut, 'sarcină automată', 'sarcini automate') + ' din fișiere' : '') + '</span><span class="spatiu"></span><button class="btn principal" data-a="sarcina-noua">+ Sarcină nouă</button></div>';
     h += '<div class="filtre"><span class="grup-btn" role="group" aria-label="Mod de afișare"><button data-a="sar-mod" data-v="lista" aria-pressed="' + (f.sarMod === 'lista') + '">Listă</button><button data-a="sar-mod" data-v="panou" aria-pressed="' + (f.sarMod === 'panou') + '">Panou</button><button data-a="sar-mod" data-v="zile" aria-pressed="' + (f.sarMod === 'zile') + '">Pe zile</button></span>' +
       '<label class="vizual-ascuns" for="sar-resp">Responsabil</label><select id="sar-resp" data-i="sar-resp" style="width:auto"><option value="toti">Toată echipa</option>' + membri().map(function (m) { return '<option value="' + m.id + '"' + (resp === m.id ? ' selected' : '') + '>' + esc(m.nume) + (m.id === S.eu ? ' (eu)' : '') + '</option>'; }).join('') + '</select>' +
       '<label class="vizual-ascuns" for="sar-stare">Stare</label><select id="sar-stare" data-i="sar-stare" style="width:auto"><option value="deschise"' + (f.sarStare === 'deschise' ? ' selected' : '') + '>Deschise</option><option value="finalizate"' + (f.sarStare === 'finalizate' ? ' selected' : '') + '>Finalizate</option><option value="toate"' + (f.sarStare === 'toate' ? ' selected' : '') + '>Toate</option></select>' +
       '<label class="vizual-ascuns" for="sar-cat">Categorie</label><select id="sar-cat" data-i="sar-cat" style="width:auto"><option value="">Toate categoriile</option>' + listaCateg().map(function (c) { return '<option value="' + esc(c.k) + '"' + (f.sarCat === c.k ? ' selected' : '') + '>' + esc(c.t) + '</option>'; }).join('') + '</select>' +
+      '<label class="vizual-ascuns" for="sar-auto">Sursa sarcinilor</label><select id="sar-auto" data-i="sar-auto" style="width:auto"><option value="toate"' + (f.sarAuto === 'toate' ? ' selected' : '') + '>Scrise + automate</option><option value="manuale"' + (f.sarAuto === 'manuale' ? ' selected' : '') + '>Doar scrise</option><option value="automate"' + (f.sarAuto === 'automate' ? ' selected' : '') + '>Doar automate (din fișiere)</option></select>' +
       '<input type="search" class="cautare" data-i="sar-cauta" placeholder="Caută (titlu, sondă)" value="' + esc(f.sarCauta) + '" aria-label="Caută în sarcini"></div>' + campRapid('sarcini');
     if (f.sarMod === 'zile') {
       h += vSarciniPeZile(lista, resp);
@@ -4474,8 +4711,9 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
         }).join('') + '</div>';
       }).join('') + '</div><p class="nota">Trage o sarcină dintr-o coloană în alta ca să-i schimbi starea. Ține cel mult ' + LIMITA_IN_LUCRU + ' sarcini „în lucru” deodată: schimbarea des între lucrări costă timp.</p>';
     } else {
-      h += '<section class="sectiune">' + (f.sarStare === 'finalizate' ? lista.sort(function (a, b) { return String(b.finalizatLa || '').localeCompare(String(a.finalizatLa || '')); }).map(function (s) { return randSarcina(s, resp === 'toti'); }).join('') || '<p class="gol">Nicio sarcină finalizată.</p>' : listaSarciniGrupate(lista, resp === 'toti')) + '</section>';
+      h += '<section class="sectiune">' + (f.sarStare === 'finalizate' ? lista.sort(function (a, b) { return String(b.finalizatLa || '').localeCompare(String(a.finalizatLa || '')); }).map(function (s) { return randSarcina(s, resp === 'toti'); }).join('') || '<p class="gol">Nicio sarcină finalizată.</p>' : (f.sarAuto === 'automate' ? '<p class="nota">Sunt afișate doar sarcinile automate.</p>' : listaSarciniGrupate(lista, resp === 'toti'))) + '</section>';
     }
+    if (aut && f.sarMod !== 'zile') h += sectiuneAutomate(resp);
     return h;
   }
   function saptSarcini() { return S.f.sarSapt || B.saptISO(S.azi).cheie; }
@@ -4649,7 +4887,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   function deseneazaPanou() {
     var root = $('#panou-root');
     if (!S.panou) { root.innerHTML = ''; return; }
-    var html = S.panou.tip === 'tarif' ? panouTarif(S.panou.cheie) : S.panou.tip === 'conservare' ? panouConservare(S.panou.cheie) : S.panou.tip === 'abandonare' ? panouAbandonare(S.panou.cheie) : S.panou.tip === 'experimentala' ? panouExperimentala(S.panou.cheie) : panouAviz(S.panou.cheie);
+    var html = S.panou.tip === 'tarif' ? panouTarif(S.panou.cheie) : S.panou.tip === 'conservare' ? panouConservare(S.panou.cheie) : S.panou.tip === 'abandonare' ? panouAbandonare(S.panou.cheie) : S.panou.tip === 'sonda' ? panouSonda(S.panou.cheie) : S.panou.tip === 'experimentala' ? panouExperimentala(S.panou.cheie) : panouAviz(S.panou.cheie);
     if (!html) { S.panou = null; root.innerHTML = ''; return; }
     var focusId = document.activeElement && document.activeElement.closest('#panou-root') ? document.activeElement.id : null;
     root.innerHTML = html;
@@ -4856,32 +5094,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
 
   // ---------- Avize și acorduri ----------
   function vAvize() {
-    var arh = S.f.avTab === 'arhiva', html = arh ? '<div class="antet-pagina"><h1>Avize și acorduri ANRMPSG</h1><span class="detalii">arhiva PDF a avizelor și acordurilor primite</span><span class="spatiu"></span><button class="btn" data-a="aviz-primit">Aviz primit (PDF)</button><button class="btn" data-a="pdf-scan" title="Citește numele PDF-urilor din folderul de avize și le grupează pe categorii">Scanează folderul de avize</button></div>' : vAvizeRegistru();
-    var tabs = '<div class="filtre" role="tablist">' + [['registru', 'Registru (termene)'], ['arhiva', 'Arhivă PDF — categorii și statistici']].map(function (x) { return '<button class="filtru-stare" role="tab" data-a="av-tab" data-v="' + x[0] + '" aria-pressed="' + ((arh ? 'arhiva' : 'registru') === x[0]) + '">' + x[1] + (x[0] === 'arhiva' ? ' <b>' + pdfIndex().length + '</b>' : '') + '</button>'; }).join('') + '</div>';
-    var i = html.indexOf('</div>') + 6;
-    return html.slice(0, i) + tabs + (arh ? vArhiva() : html.slice(i));
-  }
-  function vAvizeRegistru() {
-    var st = S.av, f = S.f;
-    var h = '<div class="antet-pagina"><h1>Avize și acorduri ANRMPSG</h1><span class="detalii">valabilitate și documentații de prelungire / conformare</span><span class="spatiu"></span><button class="btn" data-a="aviz-primit">Aviz primit (PDF)</button><button class="btn" data-a="pdf-scan" title="Citește numele PDF-urilor din folderul de avize și leagă fiecare aviz de fișierul lui">Scanează folderul de avize</button><button class="btn" data-a="import-avize">Importă din CSV</button><button class="btn principal" data-a="aviz-nou">+ Aviz / acord</button></div>';
-    var nr = {}; st.analize.forEach(function (a) { nr[a.stare] = (nr[a.stare] || 0) + 1; });
-    var filtre = [['toate', 'Toate', st.analize.length], ['expirat', 'Expirate', nr.expirat || 0, 1], ['depasit', 'Termen depășit', nr.depasit || 0, 1], ['atentie', 'Atenție', nr.atentie || 0, 1], ['in_termen', 'În termen', nr.in_termen || 0], ['depus', 'Depuse', nr.depus || 0], ['fara_data', 'Fără dată', nr.fara_data || 0]];
-    h += '<div class="filtre">' + filtre.map(function (x) { return '<button class="filtru-stare' + (x[3] ? ' portocaliu' : '') + '" data-a="av-stare" data-v="' + x[0] + '" aria-pressed="' + (f.avStare === x[0]) + '">' + x[1] + ' <b>' + x[2] + '</b></button>'; }).join('') + '<input type="search" class="cautare" data-i="av-cauta" placeholder="Caută" value="' + esc(f.avCauta) + '" aria-label="Caută în avize"></div>';
-    if (!st.analize.length) {
-      return h + '<section class="sectiune"><p class="gol"><b>Registrul este gol.</b> Importă fișierele CSV cu avizele și acordurile (butonul „Importă din CSV” — programul recunoaște singur coloanele, iar tu confirmi) sau adaugă unul câte unul. Datele se păstrează în <code class="cale">' + A.NUME_FISIER + '</code>, în folderul programului.</p></section>';
-    }
-    var lista = st.analize.filter(function (a) {
-      if (f.avStare !== 'toate' && a.stare !== f.avStare) return false;
-      if (f.avCauta && M.norm(a.sonda + ' ' + a.tip + ' ' + a.nr + ' ' + a.obs).indexOf(M.norm(f.avCauta)) < 0) return false;
-      return true;
-    }).sort(function (x, y) { return (x.termenDoc != null ? x.termenDoc : (x.valabil != null ? x.valabil : 9e9)) - (y.termenDoc != null ? y.termenDoc : (y.valabil != null ? y.valabil : 9e9)); });
-    h += '<div class="tabel-cadru"><table class="tabel"><thead><tr><th>Stare</th><th>Sonda</th><th>Act</th><th>Emis</th><th>Valabil până la</th><th>Documentație</th><th>Termen documentație</th><th>Depusă</th><th>Responsabil</th><th>Obs.</th></tr></thead><tbody>' +
-      lista.map(function (a) {
-        return '<tr data-a="aviz" data-cheie="' + esc(a.cheie) + '" class="' + (a.stare === 'depus' ? 'gri' : '') + '"><td><span class="pastila st-' + a.stare + '">' + esc(A.STARI[a.stare]) + '</span>' + (a.zileRamase != null && a.stare !== 'depus' ? '<span class="sub">' + (a.zileRamase < 0 ? nrZile(a.zileRamase) + ' depășit' : 'mai sunt ' + nrZile(a.zileRamase)) + '</span>' : '') + '</td><td><b>' + esc(a.sonda) + '</b><span class="sub">' + esc(a.sectia ? 'secția ' + numeSectie(a.sectia) : 'secție negăsită') + '</span></td><td>' + esc(a.tip) + (a.nr ? '<span class="sub">nr. ' + esc(a.nr) + ' ' + butonPdf(a.sonda, a.nr) + '</span>' : '') + '</td><td>' + B.fmtData(a.emis) + '</td><td>' + B.fmtData(a.valabil) + '</td><td>' + esc(a.doc || '—') + '</td><td>' + B.fmtData(a.termenDoc) + (a.termenAuto ? ' <span class="nota">(auto)</span>' : '') + '</td><td>' + B.fmtData(a.depus) + '</td><td>' + (a.responsabilId ? badge(a.responsabilId, true) + ' ' + esc(numeM(a.responsabilId)) : '<span class="avertizare">nealocat</span>') + '</td><td>' + esc(a.obs) + '</td></tr>';
-      }).join('') + (lista.length ? '' : '<tr><td colspan="10" class="gol">Niciun act pentru filtrul ales.</td></tr>') + '</tbody></table></div>';
-    var set = S.dep.get('setari:echipa') || {};
-    h += '<div class="subsol-tabel"><span>' + A.NUME_FISIER + ': ' + plural(st.model.randuri.length, 'act', 'acte') + '</span><span>PDF-uri legate de avize: ' + plural(pdfIndex().length, 'fișier indexat', 'fișiere indexate') + (S.pdf.scanat ? ' (scanat la ' + dataOra(new Date(S.pdf.scanat)) + ')' : ' — apasă „Scanează folderul de avize”') + '</span><span>Termenul documentației, dacă nu e completat: valabilitate − ' + (set.zileAvize == null ? 60 : set.zileAvize) + ' de zile (se schimbă din pagina Echipa).</span></div>';
-    return h;
+    return '<div class="antet-pagina"><h1>Avize și acorduri ANRMPSG</h1><span class="detalii">arhiva PDF a avizelor și acordurilor primite, pe categorii</span><span class="spatiu"></span><button class="btn" data-a="aviz-primit">Aviz primit (PDF)</button><button class="btn" data-a="pdf-scan" title="Citește numele PDF-urilor din folderul de avize și le grupează pe categorii">Scanează folderul de avize</button></div>' + vArhiva();
   }
   // ---------- Avize / acorduri ANRMPSG în PDF: primire, extragere, salvare pe ani, scanare și deschidere ----------
   var AP = window.AvizePdf;
@@ -5323,6 +5536,142 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     }
     analizeazaTarife(); redeseneaza();
   }
+  // ---------- Sonde: baza de date unitară (toate fișierele împreună) ----------
+  function sondeUnice() {
+    return SO.unifica({ tar: S.tar.analize, exp: S.exp.analize, cons: S.cons.analize, aband: S.aband.analize, pdf: pdfIndex() }, { potrivitor: S.potrivitor, azi: S.azi, zacaminte: (S.zac || []).map(function (z) { return z.zacamant; }) });
+  }
+  // legătura dintre un eveniment / o sarcină automată și sursa ei (fișier + rândul din fișier)
+  function sursaEveniment(ev) {
+    if (ev.abandonare) return 'aband:' + ev.cheie;
+    if (ev.conservare) return 'cons:' + ev.cheie;
+    if (ev.experimentala) return 'exp:' + ev.cheie;
+    if (ev.tip === 'termen' || ev.tip === 'reamintire' || ev.tip === 'revenire' || ev.tip === 'reverificare') return 'tar:' + ev.cheie;
+    return 'av:' + ev.cheie;
+  }
+  function chieiSonda(s) {
+    var o = {};
+    ['tar', 'exp', 'cons', 'aband'].forEach(function (k) { s[k].forEach(function (a) { o[k + ':' + a.cheie] = 1; }); });
+    return o;
+  }
+  function deschideElement(ev) {
+    if (ev.tip === 'sarcina') return modalSarcina(ev.id);
+    if (ev.tip === 'revenire_sarcina') return modalSarcina(ev.sursa.id);
+    if (window.Calendar && Calendar.deschis()) Calendar.inchide();
+    if (ev.tip === 'termen' || ev.tip === 'reamintire' || ev.tip === 'revenire' || ev.tip === 'reverificare') { S.vedere = 'tarife'; S.f.tarStare = 'toate'; deschidePanou('tarif', ev.cheie); }
+    else if (ev.abandonare) { S.vedere = 'abandonari'; deschidePanou('abandonare', ev.cheie); }
+    else if (ev.experimentala) { S.vedere = 'experimentale'; deschidePanou('experimentala', ev.cheie); }
+    else if (ev.conservare) { S.vedere = 'conservare'; deschidePanou('conservare', ev.cheie); }
+    else { S.vedere = 'avize'; deschidePanou('aviz', ev.cheie); }
+  }
+  var ET_SURSA = { aband: 'Abandonare', cons: 'Conservare', exp: 'Experimentală', tar: 'Tarife' };
+  function vSonde() {
+    var f = S.f, toate = sondeUnice(), st = SO.statistici(toate);
+    var h = '<div class="antet-pagina"><h1>Sonde</h1><span class="detalii">baza de date unitară: tarife, experimentale, conservare, abandonare, zăcăminte și avize PDF, citite împreună</span></div>';
+    var tab = f.sondeTab === 'neconcordante' ? 'neconcordante' : 'toate';
+    h += '<div class="filtre" role="tablist">' + [['toate', 'Toate sondele', st.total], ['neconcordante', 'Neconcordanțe între fișiere', st.atentie]].map(function (x) { return '<button class="filtru-stare' + (x[0] === 'neconcordante' && x[2] ? ' portocaliu' : '') + '" role="tab" data-a="sonde-tab" data-v="' + x[0] + '" aria-pressed="' + (tab === x[0]) + '">' + x[1] + ' <b>' + x[2] + '</b></button>'; }).join('') + '</div>';
+    if (tab === 'neconcordante') return h + vNeconcordante(toate, st);
+    var fs = f.sondeFiltru || 'toate';
+    var filtre = [['toate', 'Toate', st.total], ['aband', 'În abandonare', st.pe.aband], ['cons', 'În conservare', st.pe.cons], ['exp', 'Exploatare experimentală', st.pe.exp], ['tar', 'Cu tarife', st.pe.tar], ['multiple', 'În mai multe fișiere', st.multiple], ['semnalari', 'Cu neconcordanțe', toate.filter(function (s) { return s.nrAtentie; }).length, 1], ['fara_zac', 'Fără zăcământ', st.faraZac, st.faraZac ? 1 : 0]];
+    h += '<div class="filtre">' + filtre.map(function (x) { return '<button class="filtru-stare' + (x[3] && x[2] ? ' portocaliu' : '') + '" data-a="sonde-filtru" data-v="' + x[0] + '" aria-pressed="' + (fs === x[0]) + '">' + x[1] + ' <b>' + x[2] + '</b></button>'; }).join('') + '<input type="search" class="cautare" data-i="sonde-cauta" placeholder="Caută sondă, zăcământ, responsabil" value="' + esc(f.sondeCauta || '') + '" aria-label="Caută sonde"></div>';
+    var ev = evenimente().filter(function (e) { return e.tip !== 'sarcina' && e.tip !== 'revenire_sarcina' && !e.gata && e.tip !== 'aviz_exp'; });
+    var lista = toate.filter(function (s) {
+      if (fs === 'multiple') { if (s.etichete.length < 2) return false; }
+      else if (fs === 'semnalari') { if (!s.nrAtentie) return false; }
+      else if (fs === 'fara_zac') { if (s.zac) return false; }
+      else if (fs !== 'toate' && s.etichete.indexOf(fs) < 0) return false;
+      if (f.sondeCauta && M.norm(s.nume + ' ' + s.variante.map(function (v) { return v.text; }).join(' ') + ' ' + s.zacamant + ' ' + (s.responsabil ? numeM(s.responsabil) : '')).indexOf(M.norm(f.sondeCauta)) < 0) return false;
+      return true;
+    });
+    h += '<div class="tabel-cadru"><table class="tabel"><thead><tr><th>Sonda</th><th>Zăcământ / secție</th><th>Responsabil</th><th>Fișiere</th><th>Situație</th><th>Următorul termen</th><th>Semnalări</th></tr></thead><tbody>' +
+      lista.map(function (s) {
+        var ch = chieiSonda(s), urm = ev.filter(function (e) { return ch[sursaEveniment(e)] && e.z != null; }).sort(function (a, b) { return a.z - b.z; })[0];
+        return '<tr data-a="sonda" data-cheie="' + esc(s.cheie) + '"><td><b>' + esc(s.nume) + '</b>' + (s.variante.length > 1 ? '<span class="sub">scrisă și: ' + esc(s.variante.filter(function (v) { return v.text !== s.nume; }).map(function (v) { return v.text; }).join(', ')) + '</span>' : '') + '</td>' +
+          '<td>' + (s.zacamant ? esc(numeZac(s.zacamant)) + '<span class="sub">secția ' + esc(numeSectie(s.sectia)) + '</span>' : '<span class="urgent-mark">nerecunoscut</span>') + '</td>' +
+          '<td>' + (s.responsabil ? badge(s.responsabil, true) + ' ' + esc(numeM(s.responsabil)) : '<span class="nota">nealocat</span>') + '</td>' +
+          '<td>' + s.etichete.map(function (e) { return '<span class="eticheta-cat">' + ET_SURSA[e] + (s[e].length > 1 ? ' ×' + s[e].length : '') + '</span>'; }).join(' ') + (s.pdf.length ? ' <span class="eticheta-cat">PDF ×' + s.pdf.length + '</span>' : '') + '</td>' +
+          '<td>' + SO.situatie(s).map(function (x) { return esc(x.text); }).join('<br>') + '</td>' +
+          '<td>' + (urm ? (urm.z < S.azi ? '<span class="urgent-mark">' + B.fmtData(urm.z) + '</span>' : B.fmtData(urm.z)) + '<span class="sub">' + esc(urm.titlu.split(' — ')[0]) + '</span>' : '<span class="nota">—</span>') + '</td>' +
+          '<td>' + (s.nrAtentie ? '<span class="urgent-mark">' + s.nrAtentie + '</span>' : '') + (s.probleme.length - s.nrAtentie ? ' <span class="nota">+' + (s.probleme.length - s.nrAtentie) + ' minore</span>' : '') + '</td></tr>';
+      }).join('') + (lista.length ? '' : '<tr><td colspan="7" class="gol">Nicio sondă pentru filtrul ales.</td></tr>') + '</tbody></table></div>';
+    h += '<div class="subsol-tabel"><span>' + plural(st.total, 'sondă unică', 'sonde unice') + ' din ' + [FIS.tarife, FIS.exp, FIS.cons, FIS.aband].join(', ') + ' · ' + plural(st.multiple, 'sondă apare', 'sonde apar') + ' în mai multe fișiere</span><span>Aceeași sondă este recunoscută și când e scrisă diferit (diacritice, litere pierdute „?”, majuscule, mici greșeli). Click pe o sondă: fișa ei cu tot ce este în toate fișierele.</span></div>';
+    return h;
+  }
+  var GRUPE_NECONC = [
+    ['data_inaintare', 'Date diferite între abandonare.csv și tarife.csv (înaintarea la ANRM)'], ['data_acord', 'Data acordului diferă între abandonare.csv și tarife.csv'], ['acord_doar_tarif', 'Acord emis doar în tarife.csv'],
+    ['ab_fara_tarif', 'În abandonare.csv, dar fără rândul de tarif „Acord abandonare”'], ['tarif_fara_ab', 'Tarif de acord de abandonare, dar sonda lipsește din abandonare.csv'], ['aviz_ab_fara_ab', 'Tarif de aviz de abandonare, dar sonda lipsește din abandonare.csv'],
+    ['tarif_exp_fara_exp', 'Tarif de exploatare experimentală (ultimele 12 luni), dar sonda lipsește din experimentale.csv'], ['exp_fara_tarif', 'În experimentale.csv, dar fără tarif'], ['ab_si_cons', 'În abandonare și în conservare'], ['ab_si_exp', 'În abandonare și în exploatare experimentală'],
+    ['denumiri', 'Aceeași sondă, scrisă diferit în fișiere'], ['fara_zacamant', 'Zăcământ nerecunoscut în sectie_zacamant.csv']
+  ];
+  function vNeconcordante(toate, st) {
+    var h = '<p class="nota">Verificările compară fișierele între ele. Diferențele de 1–' + 7 + ' zile între data înregistrării la Serviciul Perimetre (tarife.csv) și data înaintării la ANRM (abandonare.csv) sunt normale și nu se semnalează. Corecturile se fac în fișiere (Excel) sau, la abandonări, direct în fișa sondei; programul recitește singur.</p>';
+    GRUPE_NECONC.forEach(function (g) {
+      var l = []; toate.forEach(function (s) { s.probleme.forEach(function (p) { if (p.cod === g[0]) l.push({ s: s, p: p }); }); });
+      if (!l.length) return;
+      h += '<section class="sectiune"><header><h2>' + esc(g[1]) + ' <span class="nota">(' + l.length + ')</span></h2></header>' + l.map(function (x) { return '<div class="sarcina"><span class="pastila st-' + (x.p.nivel === 'atentie' ? 'atentie' : 'in_termen') + '">' + (x.p.nivel === 'atentie' ? 'de verificat' : 'minor') + '</span><span class="corp" data-a="sonda" data-cheie="' + esc(x.s.cheie) + '"><span class="titlu-s">' + esc(x.s.nume) + '</span><span class="meta"><span>' + esc(x.p.text) + '</span></span></span></div>'; }).join('') + '</section>';
+    });
+    var minore = []; toate.forEach(function (s) { s.probleme.forEach(function (p) { if (!GRUPE_NECONC.some(function (g) { return g[0] === p.cod; })) minore.push({ s: s, p: p }); }); });
+    if (minore.length) h += '<details class="sectiune"><summary><b>Semnalări din interiorul fișierelor</b> <span class="nota">(' + minore.length + ': litere pierdute, date de verificat, observații)</span></summary>' + minore.map(function (x) { return '<div class="sarcina"><span class="corp" data-a="sonda" data-cheie="' + esc(x.s.cheie) + '"><span class="titlu-s">' + esc(x.s.nume) + '</span><span class="meta"><span>' + esc(x.p.text) + '</span></span></span></div>'; }).join('') + '</details>';
+    if (!st.atentie && !minore.length) h += '<section class="sectiune"><p class="gol">Nicio neconcordanță între fișiere.</p></section>';
+    return h;
+  }
+  function panouSonda(cheie) {
+    var s = sondeUnice().filter(function (x) { return x.cheie === cheie; })[0];
+    if (!s) return '';
+    var ch = chieiSonda(s);
+    var ev = evenimente().concat(sarciniAutomateExtra()).filter(function (e) { return e.tip !== 'sarcina' && e.tip !== 'revenire_sarcina' && ch[sursaEveniment(e)]; }).sort(function (a, b) { return (a.z == null ? 9e9 : a.z) - (b.z == null ? 9e9 : b.z); });
+    var manuale = sarcini().filter(function (t) { return t.sonda && SO.numeCurat(t.sonda).numar === s.numar && SO.numeAsemanatoare(SO.numeCurat(t.sonda).lipit, s.lipit); });
+    var bloc = function (titlu, corp) { return '<div class="bloc"><h3>' + titlu + '</h3>' + corp + '</div>'; };
+    var rand = function (st, dr) { return '<div class="rm" style="grid-template-columns:1fr auto;gap:.6rem;align-items:start"><span>' + st + '</span><span style="white-space:nowrap">' + dr + '</span></div>'; };
+    var h = '<aside class="panou-lateral" role="dialog" aria-label="Fișa sondei"><header><div style="flex:1"><h2>' + esc(s.nume) + '</h2><div class="detalii">' + (s.zacamant ? 'zăcământul ' + esc(numeZac(s.zacamant)) + ', secția ' + esc(numeSectie(s.sectia)) : 'zăcământ nerecunoscut') + ' · ' + (s.responsabil ? esc(numeM(s.responsabil)) : 'nealocat') + '</div></div><button class="inchide" data-a="inchide-panou" aria-label="Închide">×</button></header><div class="corp-panou">';
+    if (s.probleme.length) h += bloc('Neconcordanțe și semnalări', '<ul style="margin:0;padding-left:1.2em">' + s.probleme.map(function (p) { return '<li' + (p.nivel === 'atentie' ? ' style="color:var(--portocaliu-inchis)"' : '') + '>' + esc(p.text) + '</li>'; }).join('') + '</ul>');
+    s.aband.forEach(function (a) { h += bloc('Abandonare <span class="nota">(' + FIS.aband + ')</span>', rand('<span class="pastila st-' + clsAb(a) + '">' + esc(AB.STARI[a.stare]) + '</span> ' + esc(textAb(a)), '<button class="btn mic" data-a="abandonare" data-cheie="' + esc(a.cheie) + '">Deschide</button>')); });
+    s.cons.forEach(function (a) { h += bloc('Conservare <span class="nota">(' + FIS.cons + ')</span>', rand('<span class="pastila st-' + (a.stare === 'verifica' ? 'atentie' : a.stare) + '">' + esc(C.STARI[a.stare]) + '</span> aviz ' + esc(a.avizText) + ' ' + butonPdf(a.sonda, a.avizNr) + ' — ' + esc(textCons(a)), '<button class="btn mic" data-a="conservare" data-cheie="' + esc(a.cheie) + '">Deschide</button>')); });
+    s.exp.forEach(function (a) { h += bloc('Exploatare experimentală <span class="nota">(' + FIS.exp + ')</span>', rand('<span class="pastila st-' + a.stare + '">' + esc(E.STARI[a.stare]) + '</span> aviz ' + esc(a.avizText || a.avizNr || '') + ' ' + butonPdf(a.sonda, a.avizNr) + (a.expira != null ? ' · expiră ' + B.fmtData(a.expira) : ''), '<button class="btn mic" data-a="experimentala" data-cheie="' + esc(a.cheie) + '">Deschide</button>')); });
+    if (s.tar.length) h += bloc('Tarife ANRMPSG <span class="nota">(' + FIS.tarife + ', ' + s.tar.length + ')</span>', s.tar.map(function (a) { return rand('<b>' + esc(a.tip) + '</b>' + (a.reg != null ? ' · înregistrat ' + B.fmtData(a.reg) : '') + (a.aviz != null ? ' · aviz ' + B.fmtData(a.aviz) : '') + '<span class="sub" style="display:block">' + esc(T.STARI[a.stare] ? T.STARI[a.stare].t : a.stare) + (a.vf != null ? ' · valoare finală ' + B.fmtLei(a.vf) : (a.est != null ? ' · estimat ' + B.fmtLei(a.est) : '')) + '</span>', '<button class="btn mic" data-a="tarif" data-cheie="' + esc(a.cheie) + '">Deschide</button>'); }).join(''));
+    h += bloc('Termene și sarcini automate deschise', ev.filter(function (e) { return !e.gata; }).map(function (e) { return rand(esc(e.titlu.split(' — ')[0]) + (e.detaliu ? '<span class="sub" style="display:block">' + esc(e.detaliu) + '</span>' : ''), e.z != null ? (e.z < S.azi ? '<span class="urgent-mark">' + B.fmtData(e.z) + '</span>' : B.fmtData(e.z)) : '—'); }).join('') || '<p class="nota" style="margin:0">Niciun termen deschis.</p>');
+    if (manuale.length) h += bloc('Sarcini scrise în program', manuale.map(function (t) { return rand('<button class="btn mic simplu" data-a="sarcina" data-id="' + esc(t.id) + '">' + esc(t.titlu) + '</button>', t.stare === 'finalizata' ? 'finalizată' : (termenSarcina(t) != null ? B.fmtData(termenSarcina(t)) : '')); }).join(''));
+    h += bloc('Avize și acorduri PDF <span class="nota">(arhiva scanată)</span>', s.pdf.length ? s.pdf.map(function (x) { return rand(esc(AP.numeCategorie(AP.categorie(x.tip, x.nr))) + (x.nr ? ' ' + esc(x.nr) : '') + (x.data ? ' din ' + esc(x.data) : '') + '<span class="sub" style="display:block">' + esc(x.nume) + '</span>', '<button class="btn mic pdf-leg" data-a="pdf-deschide" data-cale="' + esc(x.cale) + '">PDF</button>'); }).join('') : '<p class="nota" style="margin:0">' + (pdfIndex().length ? 'Niciun PDF găsit pentru această sondă.' : 'Arhiva nu este scanată (Avize, acorduri → Scanează folderul de avize).') + '</p>');
+    h += bloc('Cum apare în fișiere', s.variante.map(function (v) { return rand('„' + esc(v.text) + '”', esc(SO.SURSE[v.sursa].nume)); }).join(''));
+    h += '</div><footer><span class="spatiu"></span><button class="btn" data-a="inchide-panou">Închide</button></footer></aside>';
+    return h;
+  }
+
+  // ---------- sarcini automate (din fișiere), afișate în „Sarcini” alături de cele scrise ----------
+  function sarciniAutomateExtra() { return AB.sarciniDocumente(S.aband.analize); }
+  function sarciniAutomate() {
+    return evenimente().filter(function (e) { return e.tip !== 'sarcina' && e.tip !== 'revenire_sarcina' && e.tip !== 'aviz_exp' && !e.gata; })
+      .concat(sarciniAutomateExtra()).map(function (e) { e.depasit = e.z != null && e.z < S.azi; return e; });
+  }
+  function randAuto(e, cuResp) {
+    var src = sursaEveniment(e).split(':')[0];
+    return '<div class="sarcina automata"><span class="pastila st-' + (e.depasit ? 'depasit' : (e.stare === 'atentie' ? 'atentie' : 'in_termen')) + '" title="Sarcină calculată automat din ' + esc({ aband: FIS.aband, cons: FIS.cons, exp: FIS.exp, tar: FIS.tarife, av: FIS.avize }[src]) + '">automat</span>' +
+      '<span class="corp" data-a="auto-deschide" data-id="' + esc(e.id) + '"><span class="titlu-s">' + esc(e.titlu) + '</span><span class="meta">' + (cuResp ? '<span>' + (e.responsabil ? badge(e.responsabil, true) + ' ' + esc(numeM(e.responsabil)) : 'nealocat') + '</span>' : '') + '<span class="eticheta-cat">' + esc({ aband: 'Abandonare', cons: 'Conservare', exp: 'Experimentale', tar: 'Tarife ANRMPSG', av: 'Avize' }[src]) + '</span>' + (e.detaliu ? '<span>' + esc(e.detaliu) + '</span>' : '') + '</span></span>' +
+      '<span class="termen-s">' + (e.z != null ? (e.depasit ? '<span class="urgent-mark">' + B.fmtData(e.z) + '</span>' : B.fmtData(e.z)) : '—') + '</span></div>';
+  }
+  function listaAutomate(resp) {
+    var f = S.f;
+    var l = sarciniAutomate().filter(function (e) {
+      if (resp !== 'toti' && e.responsabil !== resp) return false;
+      if (f.sarCauta && M.norm(e.titlu + ' ' + (e.detaliu || '')).indexOf(M.norm(f.sarCauta)) < 0) return false;
+      return true;
+    }).sort(function (a, b) { return (a.z == null ? 9e9 : a.z) - (b.z == null ? 9e9 : b.z); });
+    return l;
+  }
+  function sectiuneAutomate(resp) {
+    var l = listaAutomate(resp);
+    var grupe = [['depasite', 'Cu termen trecut'], ['curand', 'În următoarele 3 luni'], ['apoi', 'Mai târziu']];
+    var g = { depasite: [], curand: [], apoi: [] };
+    l.forEach(function (e) { if (e.z != null && e.z < S.azi) g.depasite.push(e); else if (e.z != null && e.z <= S.azi + 90) g.curand.push(e); else g.apoi.push(e); });
+    var h = '<section class="sectiune"><header><h2>Sarcini automate din fișiere <span class="nota">(' + l.length + ')</span></h2><span class="spatiu"></span><span class="nota">calculate din tarife, experimentale, conservare și abandonare; se închid singure când datele sunt completate</span></header>';
+    if (!l.length) return h + '<p class="gol">Nicio sarcină automată deschisă.</p></section>';
+    grupe.forEach(function (x) {
+      if (!g[x[0]].length) return;
+      var lista = g[x[0]];
+      h += (x[0] === 'apoi' ? '<details class="grup-sarcini"><summary class="nota">' + x[1] + ' (' + lista.length + ')</summary>' : '<div class="grup-sarcini ' + x[0] + '"><h3>' + x[1] + ' <span class="nota">(' + lista.length + ')</span></h3>') + lista.map(function (e) { return randAuto(e, resp === 'toti'); }).join('') + (x[0] === 'apoi' ? '</details>' : '</div>');
+    });
+    return h + '</section>';
+  }
+
   // ---------- Abandonări ----------
   async function incarcaAbandonare(forteaza) {
     var s = await IO.semnatura(S.folder, FIS.aband).catch(function () { return S.aband.semn; });
@@ -5432,17 +5781,52 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       '<div class="bloc"><div class="rand-flex"><span class="pastila st-' + clsAb(a) + '">' + esc(AB.STARI[a.stare]) + '</span><b>' + esc(textAb(a)) + '</b></div>' +
       (a.probleme.length ? '<ul style="margin:.4rem 0 0;padding-left:1.2em;color:var(--portocaliu-inchis)">' + a.probleme.map(function (p) { return '<li>' + esc(p.text) + '</li>'; }).join('') + '</ul>' : '') + '</div>' +
       '<div class="bloc"><h3>Parcursul abandonării</h3>' +
-      pas('1. Documentația pentru acord înaintată la ANRM', a.anrm != null ? B.fmtData(a.anrm) : '—') +
-      pas('2. Acord de abandonare', a.acordText ? esc(a.acordText) : '—') +
-      pas('3. Blindă (de la servicii)', docDeta('blinda')) + pas('4. Raport expert (IAT) — informativ', docDeta('iat')) + pas('5. Raport de mediu (de la servicii)', docDeta('mediu')) + pas('6. PV Terenuri (de la servicii)', docDeta('pv')) +
-      pas('7. Proiect final înaintat', a.proiect != null ? B.fmtData(a.proiect) : '—', a.termen != null && a.stare !== 'finalizat' && a.proiect == null ? ' <span class="sub">termen: cel târziu ' + B.fmtData(a.termen) + ' (' + AB.ANI_TERMEN + ' ani de la acord)</span>' : '') +
-      pas('8. Aviz de abandonare', a.avizText ? esc(a.avizText) : '—') +
-      '<p class="nota" style="margin:.3rem 0 0">Pentru a schimba aceste date, modifică ' + AB.NUME_FISIER + ' (Excel); programul îl recitește singur.</p></div>' +
+      campAb(a, 'anrm', '1. Documentația pentru acord înaintată la ANRM', 'data', ed) +
+      campAb(a, 'acord', '2. Acord de abandonare', 'act', ed) +
+      campAb(a, 'blinda', '3. Blindă (de la servicii)', 'doc', ed) + campAb(a, 'iat', '4. Raport expert (IAT) — informativ', 'doc', ed) + campAb(a, 'mediu', '5. Raport de mediu (de la servicii)', 'doc', ed) + campAb(a, 'pv', '6. PV Terenuri (de la servicii)', 'doc', ed) +
+      campAb(a, 'proiect', '7. Proiect final înaintat', 'data', ed, a.termen != null && a.stare !== 'finalizat' && a.proiect == null ? 'termen: cel târziu ' + B.fmtData(a.termen) + ' (' + AB.ANI_TERMEN + ' ani de la acord)' : '') +
+      campAb(a, 'aviz', '8. Aviz de abandonare', 'act', ed) +
+      '<p class="nota" style="margin:.3rem 0 0">' + (ed && !MOBIL ? 'Completează data la care ai primit documentul de la serviciile conexe (sau „Primit, fără dată” = E). Se scrie direct în ' + AB.NUME_FISIER + ' (cu copie de siguranță); acordul și avizul se scriu ca „nr/zz.ll.aaaa”.' : 'Datele se pot completa de responsabilul sondei sau de șef.') + '</p></div>' +
       '<div class="bloc"><h3>Responsabil și notă</h3>' +
       '<div class="camp"><label for="ab-resp">Responsabil</label><select id="ab-resp" data-i="ab-stare" data-camp="responsabil" data-cheie="' + esc(cheie) + '"' + (sef ? '' : ' disabled') + '><option value="">' + (a.responsabilAuto ? 'Automat după secție: ' + esc(numeM(a.responsabilAuto)) : 'Nealocat — alege') + '</option>' + membri().map(function (x) { return '<option value="' + x.id + '"' + (st.responsabil === x.id ? ' selected' : '') + '>' + esc(x.nume) + '</option>'; }).join('') + '</select>' + (!a.responsabil ? '<span class="ajutor">Sonda nu poate fi legată sigur de un zăcământ / o secție — alege responsabilul.</span>' : '') + '</div>' +
       '<div class="camp"><label for="ab-nota">Notă internă</label><textarea id="ab-nota" class="auto" data-i="ab-stare" data-camp="nota" data-cheie="' + esc(cheie) + '"' + (ed ? '' : ' disabled') + '>' + esc(st.nota || '') + '</textarea></div></div>';
     h += '</div><footer><span class="spatiu"></span><button class="btn" data-a="inchide-panou">Închide</button></footer></aside>';
     return h;
+  }
+  function campAb(a, camp, eticheta, fel, ed, nota) {
+    var brut = AB.val(S.aband.model, S.aband.model.randuri.filter(function (r) { return r.cheie === a.cheie; })[0] || { c: [] }, camp).trim();
+    var id = 'abf-' + camp, dis = ed && !MOBIL && !S.doarCitire ? '' : ' disabled';
+    var lipsa = fel === 'doc' ? !a.docuri[camp].primit : !brut;
+    var inp;
+    if (fel === 'act') inp = '<input id="' + id + '" type="text" class="mic-inp" placeholder="ex. 64-Ab/10.08.2025" data-i="ab-csv" data-camp="' + camp + '" data-cheie="' + esc(a.cheie) + '" value="' + esc(brut) + '"' + dis + ' style="width:12rem">';
+    else {
+      var z = B.citesteData(brut).z;
+      inp = '<input id="' + id + '" type="date" data-i="ab-csv" data-camp="' + camp + '" data-cheie="' + esc(a.cheie) + '" value="' + (z != null ? B.isoData(z) : '') + '"' + dis + '>' +
+        (fel === 'doc' && /^E$/i.test(brut) ? ' <span class="nota">primit, fără dată (E)</span>' : '') +
+        (fel === 'doc' && !dis && lipsa ? ' <button class="btn mic" data-a="ab-doc-e" data-camp="' + camp + '" data-cheie="' + esc(a.cheie) + '" title="Documentul a fost primit, dar nu știi data">Primit, fără dată</button>' : '');
+    }
+    if (brut && !dis) inp += ' <button class="btn mic simplu" data-a="ab-doc-sterge" data-camp="' + camp + '" data-cheie="' + esc(a.cheie) + '" title="Golește câmpul în fișier" aria-label="Golește ' + esc(eticheta) + '">×</button>';
+    return '<div class="rm" style="grid-template-columns:1fr auto;align-items:center"><label for="' + id + '">' + esc(eticheta) + (lipsa && fel === 'doc' && AB.DOCURI.filter(function (d) { return d[0] === camp; })[0][2] && a.acord != null ? ' <span class="urgent-mark">lipsește</span>' : '') + (nota ? '<span class="sub" style="display:block">' + esc(nota) + '</span>' : '') + (fel === 'act' ? ' ' + butonPdf(a.sonda, camp === 'acord' ? a.acordNr : a.avizNr) : '') + '</label><span class="rand-flex">' + inp + '</span></div>';
+  }
+  async function scrieAband(cheie, camp, v) {
+    if (MOBIL || S.doarCitire) { toast('Datele nu se pot modifica din această variantă a programului.', 'eroare'); return; }
+    var a = S.aband.analize.filter(function (x) { return x.cheie === cheie; })[0]; if (!a) return;
+    if (!(esteSef() || a.responsabil === S.eu || !a.responsabil)) { toast('Doar responsabilul sondei sau șeful pot modifica.', 'eroare'); return; }
+    v = String(v == null ? '' : v).trim();
+    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) v = B.fmtData(B.dinIso(v));
+    if (camp === 'acord' || camp === 'aviz') { if (v && AB.parseAct(v).data == null) { toast('Scrie numărul și data, ca „64-Ab/10.08.2025”.', 'eroare'); redeseneaza(); return; } }
+    var eticheta = { anrm: 'Data înaintării la ANRM', acord: 'Acord abandonare', blinda: 'Blindă', iat: 'Raport expert (IAT)', mediu: 'Raport de mediu', pv: 'PV Terenuri', proiect: 'Proiect final', aviz: 'Aviz abandonare' }[camp] || camp;
+    setSalvare('salvez', 'Se scrie în ' + FIS.aband + '…');
+    var rez = await modificaCSV(FIS.aband, AB, 'abandonare', function (mo) {
+      var r = mo.randuri.filter(function (x) { return x.cheie === cheie; })[0];
+      if (!r) return { eroare: 'Rândul sondei ' + a.sonda + ' nu mai există în ' + FIS.aband + '.' };
+      AB.setVal(mo, r, camp, v);
+    }, function (m2) { var r = m2.randuri.filter(function (x) { return x.cheie === cheie; })[0]; return !!r && AB.val(m2, r, camp).trim() === v; }, a.sonda + ': ' + eticheta + ' = ' + (v || '(gol)'));
+    if (rez && rez.eroare) { setSalvare('eroare', rez.eroare); toast(rez.eroare, 'eroare'); return; }
+    await incarcaAbandonare(true);
+    setSalvare('ok', 'Salvat la ' + acumText());
+    S.deRedesenat = false; redeseneaza();
+    toast(a.sonda + ': ' + eticheta + (v ? ' = ' + v : ' golit') + ' — scris în ' + FIS.aband + '.', 'bine');
   }
   function seteazaAband(cheie, camp, valoare) {
     var a = S.aband.analize.filter(function (x) { return x.cheie === cheie; })[0]; if (!a) return;
@@ -6094,9 +6478,14 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       case 'exp-azi': seteazaExp(d.cheie, d.camp, B.isoData(S.azi)); break;
       case 'conservare': deschidePanou('conservare', d.cheie); break;
       case 'abandonare': deschidePanou('abandonare', d.cheie); break;
+      case 'sonda': deschidePanou('sonda', d.cheie); break;
+      case 'sonde-tab': S.f.sondeTab = d.v; redeseneaza(); break;
+      case 'sonde-filtru': S.f.sondeFiltru = d.v; redeseneaza(); break;
+      case 'auto-deschide': { var ea = sarciniAutomate().filter(function (x) { return x.id === d.id; })[0]; if (ea) deschideElement(ea); break; }
+      case 'ab-doc-e': scrieAband(d.cheie, d.camp, 'E'); break;
+      case 'ab-doc-sterge': scrieAband(d.cheie, d.camp, ''); break;
       case 'ab-filtru': S.f.abStare = d.v; redeseneaza(); break;
       case 'ab-tab': S.f.abTab = d.v; redeseneaza(); break;
-      case 'av-tab': S.f.avTab = d.v; redeseneaza(); break;
       case 'arh-tip': S.f.arhTip = d.v; redeseneaza(); break;
       case 'arh-an': S.f.arhAn = d.v; redeseneaza(); break;
       case 'cons-azi': seteazaConserv(d.cheie, d.camp, B.isoData(S.azi)); S.deRedesenat = false; redeseneaza(); break;
@@ -6178,8 +6567,8 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       return;
     }
     if (i === 'rapid') { previzRapid(t); return; }
-    if (i === 'tar-cauta' || i === 'sar-cauta' || i === 'av-cauta' || i === 'cons-cauta' || i === 'exp-cauta' || i === 'ab-cauta' || i === 'arh-cauta') {
-      var k = { 'tar-cauta': 'tarCauta', 'sar-cauta': 'sarCauta', 'av-cauta': 'avCauta', 'cons-cauta': 'consCauta', 'exp-cauta': 'expCauta', 'ab-cauta': 'abCauta', 'arh-cauta': 'arhCauta' }[i];
+    if (i === 'tar-cauta' || i === 'sar-cauta' || i === 'av-cauta' || i === 'cons-cauta' || i === 'exp-cauta' || i === 'ab-cauta' || i === 'arh-cauta' || i === 'sonde-cauta') {
+      var k = { 'tar-cauta': 'tarCauta', 'sar-cauta': 'sarCauta', 'av-cauta': 'avCauta', 'cons-cauta': 'consCauta', 'exp-cauta': 'expCauta', 'ab-cauta': 'abCauta', 'arh-cauta': 'arhCauta', 'sonde-cauta': 'sondeCauta' }[i];
       S.f[k] = t.value; cautaTarziu(i, t.selectionStart);
     }
     if (t.classList.contains('auto')) autoInaltime(t);
@@ -6193,6 +6582,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       case 'sar-resp': S.f.sarResp = t.value; redeseneaza(); break;
       case 'sar-stare': S.f.sarStare = t.value; redeseneaza(); break;
       case 'sar-cat': S.f.sarCat = t.value; redeseneaza(); break;
+      case 'sar-auto': S.f.sarAuto = t.value; redeseneaza(); break;
       case 'tar-resp': S.f.tarResp = t.value; redeseneaza(); break;
       case 'celula': {
         var v = t.value.trim();
@@ -6211,6 +6601,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
         if (t.dataset.camp === 'disponibil' && vp && !B.dinIso(vp)) { toast('Data nu este validă.', 'eroare'); break; }
         var cp = {}; cp[t.dataset.camp] = vp || null; scrie('prelung:' + t.dataset.cheie, cp); analizeazaConservare(); S.deRedesenat = false; redeseneaza(); break;
       }
+      case 'ab-csv': scrieAband(t.dataset.cheie, t.dataset.camp, t.value); break;
       case 'ab-stare': { seteazaAband(t.dataset.cheie, t.dataset.camp, t.value.trim()); S.deRedesenat = false; redeseneaza(); break; }
       case 'cons-stare': {
         var vc = t.value.trim();
@@ -6268,15 +6659,8 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       membri: membri,
       eu: function () { return S.eu; },
       numeM: numeM, badge: badge, clsM: clsM, esteSef: esteSef,
-      deschideEveniment: function (ev) {
-        if (ev.tip === 'sarcina') modalSarcina(ev.id);
-        else if (ev.tip === 'revenire_sarcina') modalSarcina(ev.sursa.id);
-        else if (ev.tip === 'termen' || ev.tip === 'reamintire' || ev.tip === 'revenire' || ev.tip === 'reverificare') { Calendar.inchide(); S.vedere = 'tarife'; S.f.tarStare = 'toate'; deschidePanou('tarif', ev.cheie); }
-        else if (ev.experimentala) { Calendar.inchide(); S.vedere = 'experimentale'; deschidePanou('experimentala', ev.cheie); }
-        else if (ev.abandonare) { Calendar.inchide(); S.vedere = 'abandonari'; deschidePanou('abandonare', ev.cheie); }
-        else if (ev.conservare) { Calendar.inchide(); S.vedere = 'conservare'; deschidePanou('conservare', ev.cheie); }
-        else { Calendar.inchide(); S.vedere = 'avize'; deschidePanou('aviz', ev.cheie); }
-      },
+      deschideEveniment: function (ev) { deschideElement(ev); },
+
       bifeaza: function (ev, gata) { if (ev.tip === 'sarcina') { bifeazaSarcina(ev.id, gata); Calendar.redeseneaza(); } },
       poateBifa: function (ev) { return ev.tip === 'sarcina' && poateModificaSarcina(ev.sursa); },
       sarcinaNoua: function (z) { modalSarcina(null, { termen: B.isoData(z) }); },
