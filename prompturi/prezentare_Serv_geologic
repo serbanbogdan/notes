@@ -1,56 +1,13 @@
-6.	Activitati Serviciul Geologic in desfasurare/planificate 
-  a.	Fisurare hidraulica – selectia candidatilor 
-  b.	Coordonare analiza sonde noi/adanciri/side-track. 
-    i.	Poveste 2 Cris side-track cu explorarea
-    ii.	Stadiu sonde noi de forat, ce sunt deja incluse in programul de investitii. Nu trecem prin ele, doar sa pregatiti tabelul.
-  c.	Proceduri operationale in lucru si planificate
-  d.	Zacaminte cu renuntare
-  e.	Viziunea de intensificare activitate de modelare in cadrul serviciului
-  f.	Analiza reperforari
-  g.	Despre implementarea RAS
-  h.	Arhiva carote
-  i.	Arhiva dosare
-
-Vreau sa folosesti templaturile romgaz de prezentare power poit anterior furrnizare pe care le ai si in folderul proiectului sa putem face o prezentare care sa raspunde la toate punctele de mai sus.
-Prezentarea vreau sa fie foarte usor de parcurs si nu cu mult text eu sa furnizez informatii sau fisiere cu unforamtii pentru fiecare punct iar tu le pui intr-o przentare ca sa are acrivitatea extra a serviciul derular in ultima perioada.
-Dar primul slide preau sa il faci cu introdcat activatea recurenta a serviciul Geologic, iar activitaiile recurente sunt:
-    "•	Întocmire model geologic pentru studii de zăcământ.
-    •	Supervizare operațiuni geofizice la sonde sioperatii de perforare
-    •	Întocmire documentatii A.N.R.M.P.S.G.
-    •	Întocmire date program pentru sondele din planul anual de R.K. 
-    •	Urmărire lucrări R.K. și sonde în foraj.
-    •	Emitere comenzi perforare + investigarii in gaura tubata
-    •	Emitere comenzi laborator
-    • Actualizare dosare sonde si carotaje de lucru cu noile informatii"
-
-Mai deprate tratam uramtoarele punccte astefel:
-a. Fisurare hidraulica – selectia candidatilor. se copuca Adrina vreau ca pt acest punct din pdf-ul "Prezentare date fisurare - Suc.Medias.pdf" din paginile:
-  pt Filitelnic 14,16,18,20,22
-  pt Laslau 27
-  pt Nades-Prod-Seleus 34
-pt punctul a faci un slie in care pui tote inforatiile din paginile de mai sus, nu vreau poze multe si multe text vreau sa faci o sinteza
-dupa cre mai vreau un slide in care sa sa precizie ca sin obietivele de mai sus analizare prima sonda ca va fi stimualata va fi 501 FIlitenic si vreau sa folosesti pt acest slide informatii din fisierul "Analiza Justificativa Livrabil_1_Etapa_2_501_Filitelnic_DRAFT_rev3.pdf" pagina 27.
-
-b. Coordonare analiza sonde noi/adanciri/side-track. 
-    i.	Poveste 2 Cris side-track cu explorarea
-Analizaa uneui sidetrack din sonde 2 Cristi in partea dreapta a faliei (de discutat si cu Divizia Exploarea) de analzia se ocupa Cristi Sandoiu pui poza "Sonda2Cris.png"
-
-    ii.	Stadiu sonde noi de forat, ce sunt deja incluse in programul de investitii. Nu trecem prin ele, doar sa pregatiti tabelul.
-Vreau sa iti iei inforamtiile din fisierul "Adanciri + ST.xlsx" si sa faci un singur slide.
-dupa care mai vrea usa mai faci un slide in care sa incorporezi urmatoarele:
-
-  c.	Proceduri operationale in lucru si planificate
-un slide in care enumeri pe scurt fara detalii faptul ca Serviul Geologic are in lucru 1 instructiune de lucru "04IL-18 Documentatii geologice 3.2", 1 instructie de creat "" si inca o procedura la care colaroraeaza cu sediu si celellate suscursale pt a o crea o prcedura "Plata Avize si Acorduri ANRMPSG", pus o instructiuen de lucre ptr supervizare "Perforare Supervizare"
-
- d.	Zacaminte cu renuntare
-Fa un slide din cele 2 pdf-uri "PV Predate renuntare Zacaminte" si "Adresa" nu pre maulte detalii
-
-  e.	Viziunea de intensificare activitate de modelare in cadrul serviciului, vreau sa faci un slide si sa spui ca in momentu lde fata sunt 4 scatii petrel (s-a cerut inlocuirea uneia) dintre ele est veche dar avem in petrel numai 2 licente Petrel, + Una de Rezervoire daracare are functionalitate limitaa pt modelarea, s-a facut si solictia referata pt inca o licenta si s-a si bubetata. vreau ca textul sa il preziti int-ru schema logica cu tot ce am ziu
-
-  f.	Analiza reperforari foloseti date din fisiuerl "Reperforare analiza sonde.xlsx" nu tage concluii vreau sa arati ca e o analiza care pote oferii insiderui importate dar care a fost inceputa dar dataroita priorotoizarilor a fost lasata ca secudnar.
-
-  g.	Despre implementarea RAS - vreausa prezize ca in anul 2024 s-au eleftuat 7 innestigatii de saturatie in gaura libera RAS in 2025 doar 4 iar in 2026 22 de operatii cu (43 Cetatea  de Balta ), am invata unde sa folosic si cum genul de operatii dar sa si strasam investigatrii cu difetite valaori de salinitate (valori de salinita destul de putin pt anumite zacaminte). aici poti atasat poza ras.png
-
-
-  h.	Arhiva carote i.	Arhiva dosare Vreau sa le pui intr-un singur slide si ncare sa spui ca o rearjare reordoanre a arhivei de deosare este necesare ca urmare a unu program de scanne dosare care s-a desfasur care la last in urma dossare care nu sunt complete si in ordine  un slie
-  
+NU vreau sa solosesti iconite pt activitai pastre sa fie mai tehnic
+iar pt slideurile urmaore faci modificarile:
+S2, activitatea este recurenta, elimina iconitel si schimba asezare in magina
+S3. Vreau jos sa precizari ca acestea ou fost obiectivel porpuse de noi spe analiza catre consultatul OPECS
+S4. elina iconitele si mai adauga poza atasata
+S5. elina iconitele 
+S7. elina iconitele si sagetiile intre proces
+S8 elimina iconitel si vreau sa mentione si sa fie vizibil ca pt Zacamintele Bacau si Lupeni nu mai avem dosare de sonda inca avem adresa prin care am inaintt dosare lcate Serv Perimetre care leau predata la ANRM
+S9 elimina iconitele dar refa schema nu prea pare ca se intelege
+S10 elina grafilu progess bar de la stadiu
+S11 Elimina iconite
+S12 Elimina iconite refa reoganiza nu se intelege
+S13 elimna numele si adresa lasa dor servicul geologic
