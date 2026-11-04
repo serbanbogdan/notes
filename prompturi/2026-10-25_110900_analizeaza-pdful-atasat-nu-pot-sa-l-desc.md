@@ -1,2 +1,1 @@
-vreau  ca la tarife.csv dupa diferente sa mai apara o colona "Trimis Documentatie tehnico economica finala" in care dachiar daca apare data insemanca s-a trimis documentaie daca apare doar valoare fian insemanca exista toate valorile si se poate trimie, daca apare "E" s-a trimis dat nu esita data cand s-a trimis, faci pentru toate si sa apara la neconformitati sa conplmem manula
-Diferenta din tarife.cs sa se calculeza autoamt dintre Valoare Estimata si Valoare Finala daca nu e calculata sa calculeza programul automat
+refa si varaitna mobile de pe famse.ro cu noile inbunatarri sa paota citi si ultimele back-upruie. aii accel la server prin cherome
