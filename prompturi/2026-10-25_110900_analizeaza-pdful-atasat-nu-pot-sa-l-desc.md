@@ -1,3 +1,1 @@
-Imi apar mecocordate intre fiesie care sunt abandoante si care nu sunt in tarife, vreau sa faci astefel de verificari dar cu mentiune (tarifele au fost imprementate doar din 01.11.2024, pentru cele mai devreme nu se aplcai)
-Daca face cevo modificar ide nu de data in program s ase modifice automat si in cvs, am reatasta toate csv-uri utilizate te rog sa le verific si s aformate si unde de explue nu apre data sa fie data dataroita formatului, si mai vreau o sectriune activa doar pt bogdan  sa acce acces la editare svd din browser sa am un camp lanaga echipa
-Am atasta ultimele varaitne de csv-uri lucrezi cu cele din promp
+La tabul cu experimentale daca la  "Data inaintare definitiva" apare data sa ramana activapan acand este competa si casasuta cu "Aviz definitiva" duca care se considera fianliza pentru ca sonde se afal i nexploatare definitic si 
