@@ -1,1 +1,1 @@
-tot nu ai facut ce am si deci: "Data inaintare definitiva" di nexperimteale.csv cu "Data inaintarii documtatiei" din program din tabul Experimtale este aceasi, si populeaza in program este si data pentru care la sondele cu "Aviz exploatare experimentala" din tarife inceppi sa calculezi cele 180 zile
+Pentru sondele care in tarife au completa la Obs. ceva insemana ca aua o justificare pentru care nu s-a trimsi incat vlaore si nu se aplcia lasi valaore bara cu zie depasite dar o faci cu gri pt ca nu se aplcia inca
