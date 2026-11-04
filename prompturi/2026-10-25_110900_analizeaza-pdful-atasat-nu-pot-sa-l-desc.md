@@ -1,2 +1,1 @@
-La tabul cu experimentale daca la  "Data inaintare definitiva" apare data sa ramana activapan acand este competa si casasuta cu "Aviz definitiva" duca care se considera fianliza pentru ca sonde se afal i nexploatare definitic si 
-In tabul Avize vreau mult mai mutle staticisit dar si posibilitatea de a putea expoerta sub forava de csv, excel sau pdf valorile filtrate
+Pentru tableul si calculul cu tarifi temenul de 180 de zile pentru valoarea finala in urma exploatarii experimentalees sa sa decurca de la date rimiterii proiectului pentru exploatare definitaiv din cvs experimentale "Data inaintare definitiv"
