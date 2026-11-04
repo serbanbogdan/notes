@@ -1,1 +1,1 @@
-Pentru sondele care in tarife au completa la Obs. ceva insemana ca aua o justificare pentru care nu s-a trimsi incat vlaore si nu se aplcia lasi valaore bara cu zie depasite dar o faci cu gri pt ca nu se aplcia inca
+La tarife pentru Acordul de abandoanre termenul de 180 de zile sa decurga de la 180 ziel de la data dein coloana "Raport de mediu" din abandoanre.csv daca nu aapre data da o neconformitate si pune sa compeltam daca apare Esau este completati in acelasi csv "Data înaintării proiect final" sau "Aviz abandonare"
