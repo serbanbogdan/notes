@@ -466,7 +466,8 @@ kbd { font-family: inherit; border: 1px solid var(--gri-200); border-bottom-widt
 .ap-jos{margin-top:.5rem;align-items:center;flex-wrap:wrap}
 .btn-calendar { white-space: nowrap; padding: .5em .8em; }
 .bara .dreapta { gap: .5rem; }
-.bara nav button { padding: 0 .55rem; white-space: nowrap; }
+.bara nav button { padding: 0 .42rem; white-space: nowrap; }
+@media (max-width: 1700px) { .bara nav button { font-size: .9rem; } }
 @media (max-width: 1500px) { .bara .btn-calendar { padding-left: .55rem; padding-right: .55rem; } .bara .stare-salvare.ok .txt, .bara .stare-salvare.salvez .txt { display: none; } }
 
 /* ---------- varianta mobilă (PWA, doar citire) ---------- */
@@ -1063,10 +1064,21 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   function creeazaDepozit(opt) {
     opt = opt || {};
     var sef = opt.sef || 'bogdan';
-    // permisiuni verificate la citire, ca un fișier editat de mână să nu poată schimba ce nu are voie
+    // administratori: lista o scrie DOAR șeful (înregistrarea „admini:echipa”) și se citește direct din fișierul lui,
+    // ca verificarea drepturilor să nu depindă de ordinea în care se încarcă fișierele colegilor
+    function adminiLista() {
+      var v = null;
+      if (eu === sef && proprii['admini:echipa'] && proprii['admini:echipa'].lista) v = proprii['admini:echipa'].lista;
+      else { var f = fisiere[sef], r = f && f.inregistrari && f.inregistrari['admini:echipa']; v = r && r.lista; }
+      v = v && Array.isArray(v) ? v[0] : [];
+      return Array.isArray(v) ? v : [];
+    }
+    function esteAdmin(autor) { return autor === sef || adminiLista().indexOf(autor) >= 0; }
+    // permisiuni verificate la îmbinarea datelor, ca un fișier editat de mână să nu poată schimba ce nu are voie
     var permis = opt.permis || function (id, camp, autor) {
-      if (id.indexOf('utilizator:') === 0) return autor === sef || autor === id.slice(11);
-      if (id.indexOf('setari:') === 0 || id.indexOf('raport_echipa:') === 0 || id.indexOf('rapsef:') === 0 || id.indexOf('rapvalid:') === 0 || id.indexOf('activ_gen:') === 0) return autor === sef;
+      if (id.indexOf('admini:') === 0) return autor === sef;
+      if (id.indexOf('utilizator:') === 0) { var prop = id.slice(11); return autor === sef || autor === prop || (prop !== sef && esteAdmin(autor)); }
+      if (id.indexOf('setari:') === 0 || id.indexOf('raport_echipa:') === 0 || id.indexOf('rapsef:') === 0 || id.indexOf('rapvalid:') === 0 || id.indexOf('activ_gen:') === 0) return esteAdmin(autor);
       if (id.indexOf('raport:') === 0) { var p = id.split(':'); return autor === p[2]; }
       return true;
     };
@@ -1090,7 +1102,6 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
             if (!Array.isArray(v) || v.length < 3) return;
             if (v[2] !== autor) return;              // un fișier aduce doar câmpurile scrise de proprietarul lui
             if (typeof v[1] !== 'number' || !isFinite(v[1])) return;
-            if (!permis(id, camp, autor)) return;
             cur[camp] = v;
             if (v[1] > ultimTimp) ultimTimp = v[1];
           });
@@ -1104,18 +1115,19 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     function stare() {
       if (cache) return cache;
       var s = {};
-      function aplica(id, rec) {
-        var d = s[id] || (s[id] = { _v: {} });
+      function aplica(id, rec, verifica) {
         Object.keys(rec).forEach(function (camp) {
           var v = rec[camp];
+          if (verifica && !permis(id, camp, v[2])) return;
+          var d = s[id] || (s[id] = { _v: {} });
           if (maiNou(v, d._v[camp])) { d._v[camp] = v; d[camp] = v[0]; }
         });
       }
       Object.keys(fisiere).forEach(function (autor) {
         var inr = fisiere[autor].inregistrari;
-        Object.keys(inr).forEach(function (id) { aplica(id, inr[id]); });
+        Object.keys(inr).forEach(function (id) { aplica(id, inr[id], true); });
       });
-      Object.keys(proprii).forEach(function (id) { aplica(id, proprii[id]); });
+      Object.keys(proprii).forEach(function (id) { aplica(id, proprii[id], false); });
       cache = s;
       return s;
     }
@@ -1158,6 +1170,12 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
         if (id.indexOf(prefix) === 0 && (inclusivSterse || !s[id].sters)) { var d = s[id]; d.id = id; out.push(d); }
       });
       return out;
+    }
+    // ultima modificare a unui document, pe toate câmpurile: {t, autor}
+    function ultimaModificare(id) {
+      var d = stare()[id], r = null;
+      if (d) Object.keys(d._v).forEach(function (c) { var v = d._v[c]; if (c !== 'sters' && (!r || v[1] > r.t)) r = { t: v[1], autor: v[2] }; });
+      return r;
     }
     function istoric(id, camp) { // cine și când a modificat ultima dată
       var d = stare()[id];
@@ -1212,7 +1230,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       incarcaFisier: incarcaFisier,
       uitaFisier: function (autor) { delete fisiere[autor]; invalideaza(); },
       autori: function () { return Object.keys(fisiere); },
-      scrie: scrie, sterge: sterge, get: get, lista: lista, istoric: istoric, stare: stare,
+      scrie: scrie, sterge: sterge, get: get, lista: lista, istoric: istoric, ultimaModificare: ultimaModificare, stare: stare, esteAdmin: esteAdmin, admini: adminiLista,
       continutPropriu: continutPropriu, confirmaScriere: confirmaScriere,
       areNescrise: function () { return nescrise; },
       exportaNescrise: exportaNescrise, importaNescrise: importaNescrise,
@@ -2196,9 +2214,9 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   var ANTET_DEF = 'Aviz exploatare definitiva';   // nr/dată a avizului de exploatare definitivă; completat = sonda a trecut în exploatare definitivă (finalizat)
   var IMPLICIT = { sonda: 0, doc: 1, primire: 2, expira: 3 };
   var REGULI = [
-    { k: 'def', rx: /^(?!.*(TRIMIS|DOCUMENTA)).*DEFINITIV/ },
+    { k: 'def', rx: /^(?!.*(TRIMIS|DOCUMENTA|INAINT|^DATA)).*DEFINITIV/ },
     { k: 'sonda', rx: /^SONDA/ },
-    { k: 'doc', rx: /TRIMIS|DOCUMENTA/ },
+    { k: 'doc', rx: /TRIMIS|DOCUMENTA|INAINT/ },
     { k: 'primire', rx: /PRIMIRE|EMITERE/ },
     { k: 'expira', rx: /EXPIR|VALABIL/ }
   ];
@@ -2731,6 +2749,95 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   }
   var api = { crc32: crc32, zip: zip, xlsx: xlsx, csv: csv, descarca: descarca, serialExcel: serialExcel, litera: litera };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Exporta = api;
+})(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
+
+// ===== activitate.js =====
+// Jurnalul de activitate: cine a creat / modificat / șters ce și când.
+// Se alimentează automat din fiecare scriere a programului (nu din ce vede utilizatorul pe ecran), deci nu trebuie instrumentat fiecare buton.
+// Nu se păstrează niciodată conținutul textelor libere (note, descrieri, rânduri de raport) și nici valorile parolelor: doar numele câmpurilor modificate.
+(function (root) {
+  'use strict';
+  var B = root.Baza || (typeof require !== 'undefined' ? require('./core.js') : null);
+
+  // prefixul înregistrării → [denumire afișată, grup pentru filtru]
+  var TIPURI = [
+    ['sarcina:', 'Sarcină', 'sarcini'], ['categ:', 'Categorie de sarcini', 'sarcini'],
+    ['tarif:', 'Tarife ANRMPSG', 'tarife'], ['conserv:', 'Conservare', 'conservare'], ['prelung:', 'Conservare — prelungire', 'conservare'],
+    ['exper:', 'Exploatare experimentală', 'experimentale'], ['abandon:', 'Abandonare', 'abandonare'], ['tipaviz:', 'Tip aviz', 'avize'],
+    ['raport:', 'Raport săptămânal', 'raport'], ['rapsef:', 'Raport editat de șef', 'raport'], ['rapvalid:', 'Validare raport', 'raport'],
+    ['raport_echipa:', 'Raportul echipei', 'raport'], ['activ_gen:', 'Activitate generală', 'raport'],
+    ['setari:', 'Setări echipă', 'echipa'], ['utilizator:', 'Cont și parolă', 'echipa'], ['admini:', 'Administratori', 'echipa']
+  ];
+  var GRUPURI = [['sarcini', 'Sarcini'], ['tarife', 'Tarife'], ['experimentale', 'Experimentale'], ['conservare', 'Conservare'], ['abandonare', 'Abandonări'], ['avize', 'Avize'], ['raport', 'Rapoarte'], ['echipa', 'Echipă și conturi'], ['fisiere', 'Fișiere CSV']];
+  var ETICHETE = {
+    titlu: 'titlu', responsabil: 'responsabil', termen: 'termen', categorie: 'categorie', sonda: 'sondă', stare: 'stare', prioritate: 'prioritate', recurenta: 'repetare',
+    descriere: 'descriere', asteptDe: 'serviciul de la care se așteaptă', revinLa: 'data revenirii', finalizatLa: 'data finalizării', docTrimisa: 'documentația trimisă',
+    valabil: 'valabilitate', nota: 'notă', costCerut: 'cost cerut', serviciu: 'serviciu', suspendat: 'suspendat', motiv: 'motiv', finalizat: 'finalizat', avizDef: 'aviz definitiv',
+    disponibil: 'disponibil', nume: 'nume', membri: 'membri și secții', inlocuiri: 'înlocuiri pe secție', zileLibere: 'zile libere', aliasuri: 'denumiri recunoscute',
+    zileAvize: 'zile pentru avize', emailTEIZ: 'e-mail TEIZ', emailForaj: 'e-mail Foraj', emailReactivare: 'e-mail Reactivare', parola: 'parola', lista: 'lista', total: 'total'
+  };
+  var DATE_VALORI = { termen: 1, revinLa: 1, docTrimisa: 1, valabil: 1, disponibil: 1 };
+  var IGNORA = { creatDe: 1, creatLa: 1, sters: 1, versiuneMinima: 1, finalizatLa: 1, ordine: 1, poz: 1, vazut: 1 };
+
+  function tipDe(id) {
+    for (var i = 0; i < TIPURI.length; i++) if (id.indexOf(TIPURI[i][0]) === 0) return TIPURI[i];
+    return null;
+  }
+  function eticheta(c) { return ETICHETE[c] || (/^inf_/.test(c) ? 'informare ANRMPSG' : String(c).replace(/([A-Z])/g, ' $1').toLowerCase()); }
+  // „14|cristur nord|2026-03-13” → „14 cristur nord”
+  function obiectDinCheie(id) {
+    var c = id.slice(id.indexOf(':') + 1).split('|');
+    return c.length >= 2 ? (c[0] === '-' ? '' : c[0] + ' ') + c[1] : id.slice(id.indexOf(':') + 1);
+  }
+  // id: înregistrarea; campuri: ce s-a cerut; schimbate: câmpurile schimbate efectiv; exista: înregistrarea exista înainte
+  // ctx: {titlu(id) → text curent, obiect(id) → text, numeM(id)}
+  function descrie(id, campuri, schimbate, exista, ctx) {
+    var t = tipDe(id); if (!t || !schimbate || !schimbate.length) return null;
+    ctx = ctx || {};
+    var campuriUtile = schimbate.filter(function (c) { return !IGNORA[c]; });
+    var sters = schimbate.indexOf('sters') >= 0 && campuri.sters === true;
+    if (!sters && !campuriUtile.length && !(!exista && schimbate.length)) return null;
+    var r = { tip: t[1], grup: t[2], actiune: 'a modificat', obiect: '', detalii: '', ref: id };
+    var p = t[0];
+    if (p === 'sarcina:') r.obiect = String(campuri.titlu || (ctx.titlu && ctx.titlu(id)) || '').slice(0, 120);
+    else if (p === 'categ:') r.obiect = String(campuri.nume || id.slice(6));
+    else if (p === 'raport:' || p === 'rapsef:' || p === 'rapvalid:' || p === 'raport_echipa:' || p === 'activ_gen:') r.obiect = 'săptămâna ' + (id.split(':')[1] || '') + (p === 'rapsef:' ? ' — ' + (ctx.numeM ? ctx.numeM(id.split(':')[2]) : id.split(':')[2]) : '');
+    else if (p === 'utilizator:' || p === 'setari:' || p === 'admini:') r.obiect = p === 'utilizator:' ? (ctx.numeM ? ctx.numeM(id.slice(11)) : id.slice(11)) : '';
+    else r.obiect = (ctx.obiect && ctx.obiect(id)) || obiectDinCheie(id);
+    // acțiunea
+    if (sters) r.actiune = 'a șters';
+    else if (!exista && (p === 'sarcina:' || p === 'categ:')) r.actiune = 'a creat';
+    else if (p === 'sarcina:' && schimbate.indexOf('stare') >= 0 && campuri.stare === 'finalizata') r.actiune = 'a finalizat';
+    else if (p === 'sarcina:' && schimbate.indexOf('responsabil') >= 0 && campuriUtile.length === 1) r.actiune = 'a mutat';
+    else if (p === 'utilizator:') r.actiune = 'a schimbat parola';
+    else if (p === 'raport:') r.actiune = 'a completat';
+    else if (p === 'rapvalid:' || p === 'raport_echipa:') r.actiune = 'a validat / finalizat';
+    else if (!exista) r.actiune = 'a completat';
+    // detalii: doar numele câmpurilor; valori doar pentru date și responsabil
+    if (p === 'utilizator:' || p === 'raport:' || p === 'rapsef:' || p === 'activ_gen:') r.detalii = '';
+    else {
+      r.detalii = campuriUtile.filter(function (c) { return exista || (campuri[c] !== '' && campuri[c] !== null && campuri[c] !== undefined); }).slice(0, 8).map(function (c) {
+        var v = campuri[c];
+        if (c === 'responsabil' && v) return 'responsabil: ' + (ctx.numeM ? ctx.numeM(v) : v);
+        if (DATE_VALORI[c] && v && B && B.dinIso(String(v).slice(0, 10)) != null) return eticheta(c) + ': ' + B.fmtData(B.dinIso(String(v).slice(0, 10)));
+        if (c === 'stare' && v) return 'stare: ' + String(v).replace(/_/g, ' ');
+        if (c === 'avizDef' && v) return 'aviz definitiv: ' + v;
+        return eticheta(c);
+      }).join(', ');
+    }
+    return r;
+  }
+  // două intrări consecutive ale aceleiași persoane pe aceeași înregistrare, la mai puțin de 15 minute, se contopesc (autosalvările nu umplu jurnalul)
+  var FEREASTRA_MS = 15 * 60 * 1000;
+  function contopeste(ultim, nou, acum) {
+    if (!ultim || !nou || ultim.ref !== nou.ref || ultim.actiune !== nou.actiune || acum - ultim.t > FEREASTRA_MS) return null;
+    var vechi = ultim.detalii ? ultim.detalii.split(', ') : [], noi = nou.detalii ? nou.detalii.split(', ') : [];
+    var toate = vechi.slice(); noi.forEach(function (x) { if (toate.indexOf(x) < 0) toate.push(x); });
+    return { detalii: toate.join(', ').slice(0, 400), n: (ultim.n || 1) + 1 };
+  }
+  function textPerioada(k) { return { azi: 'azi', sapt: 'ultimele 7 zile', luna: 'ultimele 30 de zile', toate: 'tot' }[k] || 'tot'; }
+  var api = { TIPURI: TIPURI, GRUPURI: GRUPURI, descrie: descrie, contopeste: contopeste, eticheta: eticheta, obiectDinCheie: obiectDinCheie, textPerioada: textPerioada, FEREASTRA_MS: FEREASTRA_MS };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.Activitate = api;
 })(typeof window !== 'undefined' ? window : (typeof globalThis !== 'undefined' ? globalThis : this));
 
 // ===== sonde.js =====
@@ -3788,7 +3895,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   'use strict';
   var B = window.Baza, M = window.Potrivire, T = window.Tarife, A = window.Avize, C = window.Conservare, AB = window.Abandonare, SO = window.Sonde, CE = window.CsvEdit, E = window.Experimentale, R = window.Rapoarte, D = window.Depozit;
 
-  var VERSIUNE = '2.5', DATA_VERSIUNE = '04.11.2026';
+  var VERSIUNE = '2.6', DATA_VERSIUNE = '04.11.2026';
   var SEF = 'bogdan';
   var MEMBRI_IMPLICIT = [
     { id: 'bogdan', nume: 'Bogdan', rol: 'sef', sectii: [] },
@@ -3831,7 +3938,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   var STARI_SARCINA = { de_facut: 'De făcut', in_lucru: 'În lucru', astept: 'Aștept răspuns', finalizata: 'Finalizată' };
   var SURSE_ASTEPT = ['Serviciul TEIZ', 'Serviciul Reactivare Sonde', 'Serviciul Foraj', 'Serviciul Perimetre', 'Prestator', 'Alt serviciu'];
   var LIMITA_IN_LUCRU = 3;
-  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"yCGc0otkf7uySfJWUPQ1oQ==","h":"o469BqR2srQXG0jdHbpl5SW8PAwFesqlT34YxUKROw8="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"okgT9B4dSsSwE53HMFc+NA==","h":"paK3JKUqJkMJCS71GNFhc3jZI5Gnvb+N7WH/n273daY="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"XqXkROkEErt0mm/dF363Ew==","h":"15Jjye31DvySE+w22n+2edMHINILfbIRNlc5+g4AZc8="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"xewXCE5+TJ8sEoz+2xwp5g==","h":"P0nKuBKfYWp4Zdh9qeoZw3v/q+VVArS4nBPMS0uecZQ="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"Q8TwoaHO/z9kZHm3yavp2w==","h":"ttbf40k1v8nhpJb87L0uGACfhSqJqksw3+TM8R2Aee4="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"/lOxMAGYDNbMJL9DeMtbMg==","h":"ID8SjG7yByHYF1vVsfqT5RC9EmyDvW9faehTXjhUHPc="}};
+  var PIN_IMPLICIT = {"bogdan":{"alg":"pbkdf2-sha256","iter":600000,"sare":"R8odWDoRdlT4CpJy9NMueg==","h":"cRoAVxNV67RdXWylSykoG+LR8vpc8D0Jhtv+47pGpg4="},"cami":{"alg":"pbkdf2-sha256","iter":600000,"sare":"RGuMiY1LiubIWKHvlQkEiA==","h":"+vZPyIn2hUDAsNGvB7P7MVLzudzX+phljrb+PCBY5gc="},"adriana":{"alg":"pbkdf2-sha256","iter":600000,"sare":"hyZE2EIys9S6XoX/mXSjpA==","h":"kQs86L638aL3NWhhGZxhH/q0SoPH/OOMfDCMj0tKhOg="},"andrea":{"alg":"pbkdf2-sha256","iter":600000,"sare":"5L6ITib3RVZTxAgc3LIbQg==","h":"zKAE8aRGF+e8w8odq3Q8ze8HVFD3NUn+0vfLEF0oWrk="},"sile":{"alg":"pbkdf2-sha256","iter":600000,"sare":"jj4srp9euEdvrsKaeCybNQ==","h":"zMZPKHIdezz8XZmZkM4WZ/9ci9jR6pptslJZSQ1rXvo="},"cristi":{"alg":"pbkdf2-sha256","iter":600000,"sare":"74QMww8BKQWrolDKpxjMeQ==","h":"Y/AkbriEgVsQUjaBDA1UlDGrS+xltVjyDxIDkHQNZhg="}};
   var SECTIE_ZACAMANT_IMPLICIT = "Sectia,Zacamantul Comercial\nAGNITA,AGNITA\nAGNITA,ALTANA\nAGNITA,BARCUT\nAGNITA,BIRGHIS\nAGNITA,BRADENI\nAGNITA,CHIRPAR\nAGNITA,DAIA_TELINA\nAGNITA,ILIMBAV\nAGNITA,NETUS\nAGNITA,NOCRICH\nAGNITA,NOCRICH_VEST\nAGNITA,NOUL_SASESC\nAGNITA,RETIS\nAGNITA,SASAUSI\nAGNITA,VULCAN\nCRISTUR,BRADESTI\nCRISTUR,CADACIU\nCRISTUR,CECHESTI\nCRISTUR,CHEDEA\nCRISTUR,CHEDEA_EST\nCRISTUR,CRISTUR_NORD\nCRISTUR,CRISTUR_SUD\nCRISTUR,CUSMED\nCRISTUR,ELISENI_SACEL\nCRISTUR,FELICENI\nCRISTUR,LUPENI\nCRISTUR,MEDISORUL_MARE\nCRISTUR,PORUMBENII_MICI\nCRISTUR,SIMONESTI\nCRISTUR,SOIMUSU_MARE\nCRISTUR,TARCESTI\nDANES,ALMA\nDANES,BEIA\nDANES,BUNESTI\nDANES,CLOASTERF\nDANES,CRIS\nDANES,HODOS\nDANES,JIBERT\nDANES,NADES_PROD_SELEUS\nDANES,PROD_SELEUS\nDANES,SASCHIZ\nDANES,SIGHISOARA\nDELENII,ADAMUS\nDELENII,BAZNA\nDELENII,BAZNA_I\nDELENII,BOIAN\nDELENII,CETATEA_DE_BALTA\nDELENII,DELENII_HARANGLAB\nDELENII,IDICIU\nDELENII,VELT\nFILITELNIC,CIBU\nFILITELNIC,FILITELNIC\nFILITELNIC,LASLAU_NORD\nFILITELNIC,LASLAUL_MARE\nFILITELNIC,PIPEA\nMEDIAS,ALAMOR\nMEDIAS,ARMENI\nMEDIAS,AXENTE_SEVER\nMEDIAS,BOARTA\nMEDIAS,BOGATU_ROMAN\nMEDIAS,COPSA_MICA\nMEDIAS,LOAMNES\nMEDIAS,PETIS\nMEDIAS,RUSI\nMEDIAS,SADINCA\nMEDIAS,SANCEL\nMEDIAS,SOALA\nMEDIAS,TAPU\nMEDIAS,TAUNI\nMEDIAS,VISA\nROMAN,BACAU\nROMAN,BAIA\nROMAN,BALUSESTI\nROMAN,BERBICENI\nROMAN,COMANESTI\nROMAN,DAVIDENI\nROMAN,DAVIDENI_VEST\nROMAN,DRACENI\nROMAN,DRAGOMIRESTI\nROMAN,DUSESTI\nROMAN,FRASIN_GURA_HUMORULUI\nROMAN,GAICEANA\nROMAN,GLAVANESTI\nROMAN,HERLA\nROMAN,HURUIESTI_NEGULESTI_MALDARESTI\nROMAN,MALDARESTI\nROMAN,MARGINENI\nROMAN,MIRCESTI\nROMAN,MIRONU\nROMAN,NEGULESTI\nROMAN,OCHENI\nROMAN,PADURENI\nROMAN,PALTIN\nROMAN,PALTINOASA\nROMAN,PARAVA\nROMAN,POCOLENI\nROMAN,ROMAN\nROMAN,ROMANI\nROMAN,TARGU_NEAMT\nROMAN,TAZLAUL_MARE\nROMAN,TODIRESTI\nROMAN,VALEA_MOLDOVEI\nROMAN,VALEA_SEACA\nROMAN,VALEA_SEACA_EST\nROMAN,VARVATA\n";
   var FIS = { tarife: 'tarife.csv', zac: 'sectie_zacamant.csv', avize: 'avize_acorduri.csv', cons: 'conservare.csv', exp: 'experimentale.csv', aband: 'abandonare.csv', date: '_date' };
   var LS = 'org-echipa:';
@@ -3854,6 +3961,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     loginSel: null, loginEroare: '', ocupat: false, deRedesenat: false, meniu: false, panou: null
   };
   window.__app = S; // pentru teste
+  S.actUltim = {};   // ultima intrare de jurnal pe înregistrare (contopirea autosalvărilor)
 
   // ---------- utilitare ----------
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
@@ -3875,7 +3983,10 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   }
   function membru(id) { return membri().filter(function (m) { return m.id === id; })[0] || null; }
   function numeM(id) { var m = membru(id); return m ? m.nume : (id ? id : 'Nealocat'); }
-  function esteSef(id) { var m = membru(id || S.eu); return !!m && (m.rol === 'sef' || m.id === SEF); }
+  // drepturi de șef: șeful (Bogdan), membrii cu rol „sef” și administratorii numiți de Bogdan (lista „admini:echipa”, scrisă doar de el)
+  function adminiLista() { return S.dep && S.dep.admini ? S.dep.admini() : []; }
+  function esteAdmin(id) { id = id || S.eu; return id !== SEF && adminiLista().indexOf(id) >= 0 && !!membru(id); }
+  function esteSef(id) { id = id || S.eu; if (id === SEF) return true; var m = membru(id); return !!m && (m.rol === 'sef' || adminiLista().indexOf(id) >= 0); }
   function setari() { return S.dep.get('setari:echipa') || {}; }
   function responsabilSectie(faraInlocuiri) {
     var o = {}; membri().forEach(function (m) { (m.sectii || []).forEach(function (s) { if (!o[s]) o[s] = m.id; }); });
@@ -4371,9 +4482,30 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   }
   function scrie(id, campuri) {
     if (S.doarCitire) { toast(MOBIL ? 'Varianta mobilă este doar pentru citire; modifică datele în programul de pe calculator.' : 'Folosești o copie veche a programului; modificările nu se salvează. Deschide programul din folderul echipei.', 'eroare'); return []; }
+    var exista = !!S.dep.get(id);
     var c = S.dep.scrie(id, campuri);
-    if (c.length) { aiModificat(); if (id === 'setari:echipa') aplicaSetariGlobale(); }
+    if (c.length) { if (!S.faraJurnal) { try { logActivitate(id, campuri, c, exista); } catch (e) { } } aiModificat(); if (id === 'setari:echipa') aplicaSetariGlobale(); }
     return c;
+  }
+  // ---------- jurnalul de activitate: cine a creat / modificat ce ----------
+  function obiectActivitate(id) {
+    var pre = id.slice(0, id.indexOf(':') + 1), cheie = id.slice(pre.length);
+    var liste = { 'tarif:': S.tar.analize, 'conserv:': S.cons.analize, 'prelung:': S.cons.analize, 'exper:': S.exp.analize, 'abandon:': S.aband.analize }[pre];
+    if (!liste) return '';
+    for (var i = 0; i < liste.length; i++) { var a = liste[i]; if ((a.stare_rand && a.stare_rand.id === id) || T.cheiPotrivite(cheie, a.cheie)) return a.sonda || ''; }
+    return '';
+  }
+  function jurnalScrie(d) {
+    var acum = Date.now(), k = d.ref + '|' + S.eu, ult = S.actUltim[k];
+    var m = AC.contopeste(ult, d, acum);
+    if (m) { S.dep.scrie(ult.id, { cand: new Date(acum).toISOString(), detalii: m.detalii, n: m.n }); ult.t = acum; ult.detalii = m.detalii; ult.n = m.n; return; }
+    var id = D.idNou('activ:');
+    S.dep.scrie(id, { cand: new Date(acum).toISOString(), cine: S.eu, tip: d.tip, grup: d.grup, actiune: d.actiune, obiect: d.obiect || '', detalii: d.detalii || '', ref: d.ref, n: 1 });
+    S.actUltim[k] = { id: id, t: acum, ref: d.ref, actiune: d.actiune, detalii: d.detalii || '', n: 1 };
+  }
+  function logActivitate(id, campuri, schimbate, exista) {
+    var d = AC.descrie(id, campuri, schimbate, exista, { titlu: function (i) { var x = S.dep.get(i); return x && x.titlu; }, numeM: numeM, obiect: obiectActivitate });
+    if (d && id.indexOf('admini:') !== 0) jurnalScrie(d);
   }
 
   // ---------- salvarea fișierelor CSV (tarife, avize) cu îmbinare ----------
@@ -4416,7 +4548,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     var vechi = S.dep.get(prefix + de);
     if (!vechi) return;
     var c = {}; Object.keys(vechi).forEach(function (k) { if (k.charAt(0) !== '_' && k !== 'id' && k !== 'sters') c[k] = vechi[k]; });
-    scrie(prefix + la, c); scrie(prefix + de, { sters: true });
+    S.faraJurnal = true; try { scrie(prefix + la, c); scrie(prefix + de, { sters: true }); } finally { S.faraJurnal = false; }
   }
   function adaugaRand(tab, celule) {
     var X = tab === 'tar' ? T : A, st = S[tab], m = st.model;
@@ -4717,6 +4849,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     var tabs = [['acasa', 'Acasă'], ['sarcini', 'Sarcini'], ['sonde', 'Sonde'], ['tarife', 'Tarife'], ['experimentale', 'Experimentale'], ['avize', 'Avize'], ['conservare', 'Conservare'], ['abandonari', 'Abandonări'], ['raport', 'Raport']];
     if (esteSef()) tabs.push(['echipa', 'Echipa']);
     if (esteSef() && !MOBIL) tabs.push(['fisiere', 'Fișiere CSV']);
+    if (esteSef() && !MOBIL) tabs.push(['activitate', 'Activitate']);
     var urg = nrUrgenteMele();
     return '<header class="bara"><div class="titlu"><b>Organizare</b><span>Serviciul Geologic</span></div><nav aria-label="Secțiuni">' +
       tabs.map(function (t) { return '<button data-a="vedere" data-v="' + t[0] + '"' + (S.vedere === t[0] ? ' aria-current="page"' : '') + '>' + t[1] + (t[0] === 'acasa' && urg ? '<span class="numar" title="Termene și sarcini care cer atenție">' + urg + '</span>' : '') + '</button>'; }).join('') +
@@ -4738,6 +4871,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       case 'abandonari': return vAbandonari();
       case 'sonde': return vSonde();
       case 'fisiere': return vFisiere();
+      case 'activitate': return esteSef() ? vActivitate() : vAcasa();
       case 'experimentale': return vExperimentale();
       case 'raport': return vRaport();
       case 'echipa': return esteSef() ? vEchipa() : vAcasa();
@@ -5046,6 +5180,12 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     }
     return h + '</div>';
   }
+  function infoCreareSarcina(id, s0) {
+    var um = S.dep.ultimaModificare ? S.dep.ultimaModificare(id) : null, p = [];
+    if (s0.creatDe) p.push('Creată de <b>' + esc(numeM(s0.creatDe)) + '</b>' + (s0.creatLa ? ' la ' + esc(dataOra(s0.creatLa)) : ''));
+    if (um) p.push('ultima modificare: <b>' + esc(numeM(um.autor)) + '</b> la ' + esc(dataOra(new Date(um.t).toISOString())));
+    return p.length ? '<p class="nota" style="margin:.8rem 0 0">' + p.join(' · ') + '</p>' : '';
+  }
   function modalSarcina(id, preset, suprascrie) {
     var s0 = id ? S.dep.get(id) : null, nou = !s0;
     var s = s0;
@@ -5071,7 +5211,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       '<div class="camp" style="grid-column:1/-1"><label for="s-desc">Detalii / note</label><textarea id="s-desc" name="descriere" rows="3" ' + (poate ? '' : 'readonly') + '>' + esc(v('descriere', '')) + '</textarea><span class="ajutor">Nu scrie aici date personale sau medicale.</span></div>' +
       '</form>' + (s ? '<p class="nota" style="margin:0">Creată de ' + esc(numeM(s.creatDe)) + (s.creatLa ? ' la ' + dataOra(s.creatLa) : '') + (S.dep.istoric(id, 'stare') ? '. Starea modificată ultima dată de ' + esc(numeM(S.dep.istoric(id, 'stare').autor)) + ' la ' + dataOra(new Date(S.dep.istoric(id, 'stare').t).toISOString()) : '') + '.</p>' : '');
     var m = modal({
-      titlu: nou ? 'Sarcină nouă' : 'Sarcină', corp: corp,
+      titlu: nou ? 'Sarcină nouă' : 'Sarcină', corp: corp + (s0 ? infoCreareSarcina(id, s0) : ''),
       subsol: (s && (sef || s.creatDe === S.eu) ? '<button class="btn atentie" data-sterge>Șterge</button><span class="spatiu"></span>' : '') + '<button class="btn" data-inchide>Renunță</button>' + (poate ? '<button class="btn principal" data-salveaza>' + (nou ? 'Adaugă sarcina' : 'Salvează') + '</button>' : '')
     });
     var form = m.el.querySelector('form');
@@ -5406,7 +5546,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     return '<div class="antet-pagina"><h1>Avize și acorduri ANRMPSG</h1><span class="detalii">arhiva PDF a avizelor și acordurilor primite: filtre, statistici și export (CSV, Excel, PDF)</span><span class="spatiu"></span><button class="btn" data-a="aviz-primit">Aviz primit (PDF)</button><button class="btn" data-a="pdf-scan" title="Citește numele PDF-urilor din folderul de avize și le grupează pe categorii">Scanează folderul de avize</button></div>' + vArhiva();
   }
   // ---------- Avize / acorduri ANRMPSG în PDF: primire, extragere, salvare pe ani, scanare și deschidere ----------
-  var AP = window.AvizePdf;
+  var AP = window.AvizePdf, AC = window.Activitate;
   var CALE_AVIZE = '\\\\10.11.1.13\\bkpdate\\Geologic\\Serviciul Geologic\\Avize si Acorduri ANRM';
   S.pdf = { items: [], scanat: null, root: null, incarcat: false, scanare: false };
   function pdfIndex() {
@@ -5869,7 +6009,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
   function edNormalizeaza() { var w = 0; S.ed.rows.forEach(function (r) { w = Math.max(w, r.length); }); S.ed.rows.forEach(function (r) { while (r.length < w) r.push(''); }); }
   function vFisiere() {
     if (!esteSef() || MOBIL) return vAcasa();
-    var ed = S.ed || {}, h = '<div class="antet-pagina"><h1>Fișiere CSV</h1><span class="detalii">editare directă a fișierelor folosite de program — doar pentru ' + esc(numeM(SEF)) + '</span></div>';
+    var ed = S.ed || {}, h = '<div class="antet-pagina"><h1>Fișiere CSV</h1><span class="detalii">editare directă a fișierelor folosite de program — doar pentru ' + esc(numeM(SEF)) + ' și administratori</span></div>';
     h += '<div class="filtre">' + fisiereEditabile().map(function (nm) { return '<button class="filtru-stare" data-a="ed-fisier" data-v="' + esc(nm) + '" aria-pressed="' + (ed.nume === nm) + '">' + esc(nm) + '</button>'; }).join('') + '</div>';
     if (!ed.nume) return h + '<section class="sectiune"><p class="gol"><b>Alege un fișier.</b> Modificările se scriu în fișierul din folderul programului numai când apeși „Salvează în fișier”; înainte se păstrează o copie în <code class="cale">_backup\\editor</code>. Datele se scriu „zz.ll.aaaa”. Dacă fișierul e deschis în Excel, închide-l întâi.</p></section>';
     if (ed.incarc) return h + '<section class="sectiune"><p class="nota">Se citește ' + esc(ed.nume) + '…</p></section>';
@@ -6350,6 +6490,54 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     }
   }
 
+  // ---------- Activitate: jurnalul „cine a făcut ce” (doar șef și administratori) ----------
+  function intrariActivitate() {
+    var out = [];
+    S.dep.lista('activ:').forEach(function (x) {
+      var h = S.dep.istoric(x.id, 'cand'); if (!x.cand) return;
+      out.push({ id: x.id, cand: x.cand, cine: h ? h.autor : (x.cine || ''), tip: x.tip || '', grup: x.grup || '', actiune: x.actiune || '', obiect: x.obiect || '', detalii: x.detalii || '', n: x.n || 1 });
+    });
+    S.dep.lista('jurnal:').forEach(function (x) {
+      if (!x.cand) return;
+      var mod = (x.modificari || []).slice(0, 4).map(function (p) { return p.op === 'set' ? (p.camp ? String(p.rand).split('|').slice(0, 2).join(' ') + ': ' + p.camp + ' „' + p.vechi + '” → „' + p.nou + '”' : String(p.rand || '')) : (p.op === 'adauga' ? 'rând nou ' + p.rand : 'rând șters ' + p.rand); }).join('; ') + ((x.modificari || []).length > 4 ? '; … încă ' + ((x.modificari || []).length - 4) : '');
+      out.push({ id: x.id, cand: x.cand, cine: x.cine || '', tip: 'Fișier CSV', grup: 'fisiere', actiune: 'a modificat', obiect: x.fisier || '', detalii: mod, n: 1 });
+    });
+    return out.sort(function (a, b) { return String(b.cand).localeCompare(String(a.cand)); });
+  }
+  function listaActivitate() {
+    var f = S.f, per = f.actPerioada || 'sapt', lim = per === 'azi' ? S.azi : per === 'sapt' ? S.azi - 6 : per === 'luna' ? S.azi - 29 : null;
+    var q = f.actCauta ? M.norm(f.actCauta) : '';
+    return intrariActivitate().filter(function (x) {
+      if (f.actCine && x.cine !== f.actCine) return false;
+      if (f.actGrup && x.grup !== f.actGrup) return false;
+      if (lim != null) { var z = B.azi(new Date(x.cand)); if (z < lim) return false; }
+      if (q && M.norm([x.tip, x.actiune, x.obiect, x.detalii, numeM(x.cine)].join(' ')).indexOf(q) < 0) return false;
+      return true;
+    });
+  }
+  function vActivitate() {
+    var f = S.f, lista = listaActivitate(), per = f.actPerioada || 'sapt';
+    var h = '<div class="antet-pagina"><h1>Activitate</h1><span class="detalii">cine a creat, modificat sau șters ce și când — vizibil doar pentru șef și administratori</span></div>';
+    h += '<div class="filtre"><select data-i="act-perioada" aria-label="Perioada">' + [['azi', 'Azi'], ['sapt', 'Ultimele 7 zile'], ['luna', 'Ultimele 30 de zile'], ['toate', 'Tot jurnalul']].map(function (x) { return '<option value="' + x[0] + '"' + (per === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>' +
+      '<select data-i="act-cine" aria-label="Utilizator"><option value="">Toți utilizatorii</option>' + membri().map(function (m) { return '<option value="' + m.id + '"' + (f.actCine === m.id ? ' selected' : '') + '>' + esc(m.nume) + '</option>'; }).join('') + '</select>' +
+      '<select data-i="act-grup" aria-label="Ce s-a modificat"><option value="">Orice</option>' + AC.GRUPURI.map(function (g) { return '<option value="' + g[0] + '"' + (f.actGrup === g[0] ? ' selected' : '') + '>' + g[1] + '</option>'; }).join('') + '</select>' +
+      '<input type="search" class="cautare" data-i="act-cauta" placeholder="Caută (sondă, sarcină, persoană)" value="' + esc(f.actCauta || '') + '" aria-label="Caută în jurnal"><span class="spatiu"></span><b>' + plural(lista.length, 'intrare', 'intrări') + '</b>' +
+      '<button class="btn mic" data-a="act-export"' + (lista.length ? '' : ' disabled') + '>Exportă CSV</button></div>';
+    var LIM = 400;
+    h += '<div class="tabel-cadru"><table class="tabel"><thead><tr><th>Când</th><th>Cine</th><th>Ce</th><th>Acțiune</th><th>Obiect</th><th>Detalii</th></tr></thead><tbody>' +
+      lista.slice(0, LIM).map(function (x) {
+        return '<tr style="cursor:default"><td>' + esc(dataOra(x.cand)) + '</td><td>' + (x.cine ? badge(x.cine, true) + ' ' + esc(numeM(x.cine)) : '—') + '</td><td>' + esc(x.tip) + '</td><td>' + esc(x.actiune) + (x.n > 1 ? ' <span class="nota">×' + x.n + '</span>' : '') + '</td><td><b>' + esc(x.obiect || '—') + '</b></td><td>' + esc(x.detalii) + '</td></tr>';
+      }).join('') + (lista.length ? '' : '<tr><td colspan="6" class="gol">Nicio intrare pentru filtrul ales.</td></tr>') + (lista.length > LIM ? '<tr><td colspan="6" class="gol">Încă ' + (lista.length - LIM) + ' intrări — restrânge filtrul sau exportă.</td></tr>' : '') + '</tbody></table></div>';
+    h += '<div class="subsol-tabel"><span>Jurnalul se completează automat la fiecare creare, modificare sau ștergere făcută în program, de oricine (și modificările din fișierele CSV). Salvările repetate făcute în 15 minute pe același element se contopesc într-o singură intrare.</span><span>Nu se păstrează textele libere (note, descrieri, rânduri de raport) și nici parolele — doar ce element s-a schimbat și ce câmpuri.</span></div>';
+    return h;
+  }
+  function exportaActivitate() {
+    var l = listaActivitate(); if (!l.length) return;
+    var rows = [['Când', 'Cine', 'Ce', 'Acțiune', 'Obiect', 'Detalii']].concat(l.map(function (x) { return [dataOra(x.cand), numeM(x.cine), x.tip, x.actiune + (x.n > 1 ? ' ×' + x.n : ''), x.obiect, x.detalii]; }));
+    Exporta.descarca('Jurnal activitate - ' + B.fmtData(S.azi).replace(/\./g, '-') + '.csv', Exporta.csv(rows), 'text/csv;charset=utf-8');
+    toast('Jurnalul (' + plural(l.length, 'intrare', 'intrări') + ') a fost descărcat în format CSV.', 'bine');
+  }
+
   // ---------- Conservare ----------
   function textCons(a) {
     var t = [];
@@ -6565,7 +6753,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     var Wprec = B.saptISO(B.luniDinCheie(W) - 7).cheie;
     var sug = R.sugestii(W, S.eu, sarcini(), rap, sugestiiTarife(W).concat(R.studiiReportate(S.dep.get('raport:' + Wprec + ':' + S.eu))));
     var h = '<p class="nota" style="margin-top:-.4rem">Partea fixă are patru câmpuri; ce nu completezi nu apare deloc în raportul către șef (nu apare „0”). În partea flexibilă scrii ce ai mai făcut în afara lor. Se salvează automat. Nu scrie date personale sau medicale.</p>';
-    if (blocat) h += '<div class="alerta"><span class="ic">🔒</span><span class="text">Raportul echipei pentru această săptămână a fost finalizat de ' + esc(numeM(SEF)) + (fin.finalizatLa ? ' la ' + dataOra(fin.finalizatLa) : '') + '. Modificările de aici nu mai intră în raportul final.</span></div>';
+    if (blocat) h += '<div class="alerta"><span class="ic">🔒</span><span class="text">Raportul echipei pentru această săptămână a fost finalizat de ' + esc(numeM((S.dep.istoric('raport_echipa:' + W, 'stare') || {}).autor || SEF)) + (fin.finalizatLa ? ' la ' + dataOra(fin.finalizatLa) : '') + '. Modificările de aici nu mai intră în raportul final.</span></div>';
     var ovrMeu = S.dep.get('rapsef:' + W + ':' + S.eu), aut = R.automate(W, S.eu, sarcini()), gen = R.generalePentru(W, S.eu, activitatiGenerale());
     if (ovrMeu && !ovrMeu.sters && !esteSef()) h += '<div class="alerta"><span class="ic">✎</span><span class="text">Șeful a editat raportul tău pentru această săptămână; în raportul echipei apare varianta lui. Ce scrii aici nu mai schimbă acea variantă.</span></div>';
     h += '<p class="nota">Sarcinile pe care le marchezi ca efectuate în săptămâna aceasta intră singure în raport, cu pictograma ✔ (nu trebuie să le mai scrii). ★ marchează activitățile generale adăugate de șef.</p>';
@@ -6707,8 +6895,8 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       membri().map(function (m) {
         var sm = sarcini().filter(function (s) { return s.responsabil === m.id && s.stare !== 'finalizata'; }).length;
         var p = S.dep.istoric('utilizator:' + m.id, 'parola');
-        return '<tr style="cursor:default"><td>' + badge(m.id, true) + ' <b>' + esc(m.nume) + '</b>' + (esteSef(m.id) ? ' <span class="nota">șef serviciu</span>' : '') + '</td><td>' + Object.keys(sectii).sort().map(function (s) { return '<label class="bifa" style="margin-right:.8rem"><input type="checkbox" data-i="echipa-sectie" data-id="' + m.id + '" data-s="' + s + '"' + ((m.sectii || []).indexOf(s) >= 0 ? ' checked' : '') + '> ' + esc(numeSectie(s)) + '</label>'; }).join('') + '</td><td>' + sm + '</td><td>' + (p ? '<span class="nota">schimbată ' + dataOra(new Date(p.t).toISOString()) + '</span> ' : '<span class="nota">inițială</span> ') + (m.id !== S.eu ? '<button class="btn mic" data-a="reset-parola" data-id="' + m.id + '">Resetează</button>' : '') + '</td></tr>';
-      }).join('') + '</tbody></table></div><p class="nota">O secție bifată la doi membri merge la primul din listă. Schimbările se aplică imediat pentru toți colegii.</p></section>';
+        return '<tr style="cursor:default"><td>' + badge(m.id, true) + ' <b>' + esc(m.nume) + '</b>' + (m.id === SEF ? ' <span class="nota">șef serviciu</span>' : (esteAdmin(m.id) ? ' <span class="pastila st-in_termen">administrator</span>' : '')) + (S.eu === SEF && m.id !== SEF ? '<br><label class="bifa nota"><input type="checkbox" data-i="echipa-admin" data-id="' + m.id + '"' + (esteAdmin(m.id) ? ' checked' : '') + '> administrator (aceleași drepturi ca ' + esc(numeM(SEF)) + ')</label>' : '') + '</td><td>' + Object.keys(sectii).sort().map(function (s) { return '<label class="bifa" style="margin-right:.8rem"><input type="checkbox" data-i="echipa-sectie" data-id="' + m.id + '" data-s="' + s + '"' + ((m.sectii || []).indexOf(s) >= 0 ? ' checked' : '') + '> ' + esc(numeSectie(s)) + '</label>'; }).join('') + '</td><td>' + sm + '</td><td>' + (p ? '<span class="nota">schimbată ' + dataOra(new Date(p.t).toISOString()) + '</span> ' : '<span class="nota">inițială</span> ') + (m.id !== S.eu && (m.id !== SEF || S.eu === SEF) ? '<button class="btn mic" data-a="reset-parola" data-id="' + m.id + '">Resetează</button>' : '') + '</td></tr>';
+      }).join('') + '</tbody></table></div><p class="nota">O secție bifată la doi membri merge la primul din listă. Schimbările se aplică imediat pentru toți colegii.' + (S.eu === SEF ? ' Un administrator are aceleași drepturi ca tine (Echipa, Fișiere CSV, Activitate, rapoarte, resetarea parolelor colegilor), dar doar tu poți numi sau retrage administratori și nimeni nu îți poate reseta parola.' : '') + '</p></section>';
     var rs = responsabilSectie();
     h += '<section class="sectiune" style="margin-top:1.1rem"><header><h2>Zăcăminte pe secții</h2><span class="detalii">din ' + FIS.zac + ' (folderul programului)</span><span class="spatiu"></span><button class="btn mic" data-a="zac-adauga">+ Zăcământ</button></header><div class="grila" style="grid-template-columns:repeat(auto-fit,minmax(230px,1fr))">' +
       Object.keys(sectii).sort().map(function (s) { return '<div class="bloc"><h3>' + esc(numeSectie(s)) + ' <span class="nota">— ' + esc(rs[s] ? numeM(rs[s]) : 'fără responsabil') + '</span></h3><div class="nota" style="line-height:1.7">' + sectii[s].map(function (z) { return esc(numeZac(z)); }).join(', ') + '</div></div>'; }).join('') + '</div></section>';
@@ -7003,6 +7191,7 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       case 'arh-tab': S.f.arhTab = d.v; redeseneaza(); break;
       case 'arh-reset': S.f.arhTip = ''; S.f.arhAn = ''; S.f.arhCauta = ''; S.f.arhSectia = ''; S.f.arhProb = ''; S.f.arhDe = ''; S.f.arhPana = ''; redeseneaza(); break;
       case 'arh-export': exportaArhiva(d.v); break;
+      case 'act-export': exportaActivitate(); break;
       case 'cons-azi': seteazaConserv(d.cheie, d.camp, B.isoData(S.azi)); S.deRedesenat = false; redeseneaza(); break;
       case 'aviz-nou': modalAvizNou(); break;
       case 'import-avize': modalImportAvize(); break;
@@ -7084,8 +7273,8 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
     if (i === 'ed-celula' && S.ed && S.ed.rows) { S.ed.rows[+t.dataset.r][+t.dataset.c] = t.value; edMarcheaza(); return; }
     if (i === 'ed-cauta' && S.ed) { S.ed.cauta = t.value; cautaTarziu(i, t.selectionStart); return; }
     if (i === 'rapid') { previzRapid(t); return; }
-    if (i === 'tar-cauta' || i === 'sar-cauta' || i === 'av-cauta' || i === 'cons-cauta' || i === 'exp-cauta' || i === 'ab-cauta' || i === 'arh-cauta' || i === 'sonde-cauta') {
-      var k = { 'tar-cauta': 'tarCauta', 'sar-cauta': 'sarCauta', 'av-cauta': 'avCauta', 'cons-cauta': 'consCauta', 'exp-cauta': 'expCauta', 'ab-cauta': 'abCauta', 'arh-cauta': 'arhCauta', 'sonde-cauta': 'sondeCauta' }[i];
+    if (i === 'tar-cauta' || i === 'sar-cauta' || i === 'av-cauta' || i === 'cons-cauta' || i === 'exp-cauta' || i === 'ab-cauta' || i === 'arh-cauta' || i === 'sonde-cauta' || i === 'act-cauta') {
+      var k = { 'tar-cauta': 'tarCauta', 'sar-cauta': 'sarCauta', 'av-cauta': 'avCauta', 'cons-cauta': 'consCauta', 'exp-cauta': 'expCauta', 'ab-cauta': 'abCauta', 'arh-cauta': 'arhCauta', 'sonde-cauta': 'sondeCauta', 'act-cauta': 'actCauta' }[i];
       S.f[k] = t.value; cautaTarziu(i, t.selectionStart);
     }
     if (t.classList.contains('auto')) autoInaltime(t);
@@ -7102,6 +7291,9 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
       case 'sar-auto': S.f.sarAuto = t.value; redeseneaza(); break;
       case 'tar-resp': S.f.tarResp = t.value; redeseneaza(); break;
       case 'arh-sectia': S.f.arhSectia = t.value; redeseneaza(); break;
+      case 'act-perioada': S.f.actPerioada = t.value; redeseneaza(); break;
+      case 'act-cine': S.f.actCine = t.value; redeseneaza(); break;
+      case 'act-grup': S.f.actGrup = t.value; redeseneaza(); break;
       case 'arh-prob': S.f.arhProb = t.value; redeseneaza(); break;
       case 'arh-de': S.f.arhDe = t.value; redeseneaza(); break;
       case 'arh-pana': S.f.arhPana = t.value; redeseneaza(); break;
@@ -7140,6 +7332,14 @@ body.mobil :is([data-a="evidenta"],[data-a="tar-termen"],[data-a="tar-suspenda"]
         var val = t.type === 'checkbox' ? (t.checked ? true : null) : t.value.trim();
         seteazaStareTarif(t.dataset.cheie, t.dataset.camp, val === '' ? null : val);
         S.deRedesenat = false; redeseneaza(); break;
+      }
+      case 'echipa-admin': {
+        if (S.eu !== SEF) { toast('Doar ' + numeM(SEF) + ' poate numi administratori.', 'eroare'); redeseneaza(); break; }
+        var la = adminiLista().filter(function (x) { return x !== t.dataset.id && !!membru(x); });
+        if (t.checked) la.push(t.dataset.id);
+        scrie('admini:echipa', { lista: la });
+        jurnalScrie({ tip: 'Administratori', grup: 'echipa', actiune: t.checked ? 'a numit administrator' : 'a retras drepturile de administrator', obiect: numeM(t.dataset.id), detalii: '', ref: 'admini:' + t.dataset.id + ':' + Date.now() });
+        redeseneaza(); toast(t.checked ? numeM(t.dataset.id) + ' este acum administrator.' : numeM(t.dataset.id) + ' nu mai este administrator.', 'bine'); break;
       }
       case 'echipa-sectie': {
         var lista = membri().map(function (m) { return { id: m.id, nume: m.nume, rol: m.rol, sectii: (m.sectii || []).slice() }; });
