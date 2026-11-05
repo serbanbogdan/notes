@@ -1,3 +1,2 @@
-Fisierele de pe serverul meu local cu toate ate sun acum atasate vreau sa le analizei si sa le aplica modificari, ele sunt diferite cu cele din proie pt acu au mai fost editate, sa le consideri pe aceste oficilea si lor sa le falci moficari si sa le salveiz in folderul proiectului pe viitor 
-"Trimis documentație tehnico-economică finală" nu apre in fiserul de tarife vreau sa creezi o coloan cu aceste data 
-Toate datele vreau sa le salvezi si eveluat inlocuiestin fodlerul "" al priectului 
+In momentul in care vine un nou aviz si este introdus in aviz primit sa se acutulize si in restul fisierelor si sa ii sia apara userului un promp cu unde si ce modifica.
+Petru inforamri nu se astepta raspuns de la ANRMPSG si sa nu apra in restante este doar o obligarti a echipe si trebuie trimsia la timp.
