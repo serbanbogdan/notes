@@ -6,3 +6,4 @@ Proiecte tehnice aviz de abndoanare 11 bunesti, 1 Corlata
 Proiecte tehnic prelungire conservare: 9 Paltinoasa
 Documentatie tehnico-economica: 212 Crsitur Nord
 Proiecte tehnic exploatere experimtala 18 Norchric" 
+Dar si un rapot simialr dar lunar.
