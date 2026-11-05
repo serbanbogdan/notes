@@ -6302,6 +6302,117 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
     S.av.analize.forEach(function (a) { if (AP.sondaNormalizata(a.sonda) === k && a.nr) v[String(a.nr).split('/')[0].trim()] = 1; });
     return Object.keys(v);
   }
+
+  // ===== Aviz primit → propagare în fișierele CSV (cu prompt: ce și unde se modifică) =====
+  function planAvizPrimit(f) {
+    var tip = M.norm(f.tip || '').toLowerCase(), nrData = String(f.nr || '').trim() + (String(f.data || '').trim() ? '/' + String(f.data).trim() : ''), data = String(f.data || '').trim();
+    var linii = [], intrebari = [], note = [];
+    function aceeasi(x) { return M.aceeasiSonda(x, f.sonda).leaga; }
+    var abandon = /abandon/.test(tip) && !/ridicare/.test(tip), acordAb = abandon && /acord/.test(tip), avizAb = abandon && !acordAb;
+    var prelCons = /prelungire/.test(tip) && /conserv/.test(tip), cons = !prelCons && /conserv/.test(tip);
+    var expDef = /definitiv/.test(tip), exp = !expDef && /experiment/.test(tip);
+    var tarifRx = acordAb ? /acord.*abandon/i : avizAb ? /aviz.*abandon/i : (prelCons || cons) ? /conserv/i : (exp || expDef) ? /experiment/i : /sapare/.test(tip) ? /sapare|proiect geologic/i : null;
+    if (!nrData) note.push('Lipsește numărul avizului.');
+    if (!data) note.push('Lipsește data avizului — datele din tarife nu se pot completa.');
+    // abandonare.csv
+    if (acordAb || avizAb) {
+      var ab = (S.aband.analize || []).filter(function (a) { return aceeasi(a.sonda); })[0], col = acordAb ? 'acord' : 'aviz', nume = acordAb ? 'Acord abandonare' : 'Aviz abandonare';
+      if (ab) { var r0 = S.aband.model.randuri.filter(function (r) { return r.cheie === ab.cheie; })[0], v0 = r0 ? AB.val(S.aband.model, r0, col).trim() : '';
+        linii.push({ fis: 'aband', cheie: ab.cheie, sonda: ab.sonda, col: col, titlu: nume, vechi: v0, nou: nrData, adauga: false }); }
+      else note.push('Sonda nu este în ' + FIS.aband + ' — se adaugă un rând nou.'), linii.push({ fis: 'aband', cheie: null, sonda: f.sonda, col: col, titlu: nume, vechi: '', nou: nrData, adauga: true });
+    }
+    // experimentale.csv
+    if (exp || expDef) {
+      var ex = (S.exp.analize || []).filter(function (a) { return aceeasi(a.sonda); }).sort(function (x, y) { return (y.primire || 0) - (x.primire || 0); })[0];
+      if (expDef) {
+        if (ex) { var rE = S.exp.model.randuri.filter(function (r) { return r.cheie === ex.cheie; })[0]; linii.push({ fis: 'exp', cheie: ex.cheie, sonda: ex.sonda, col: 'def', titlu: 'Aviz definitiva', vechi: rE ? E.val(S.exp.model, rE, 'def').trim() : '', nou: nrData }); }
+        else note.push('Sonda nu este în ' + FIS.exp + '; aviz definitiv nu se poate înscrie fără rândul exploatării experimentale.');
+      } else {
+        if (ex && !ex.avizDef && ex.primire != null && ex.expira != null && ex.expira >= S.azi) note.push('Sonda are deja un aviz experimental valabil (' + (ex.avizNr || '') + ' până la ' + B.fmtData(ex.expira) + '); se înscrie ca aviz nou.');
+        intrebari.push({ k: 'expira', eticheta: 'Data expirării avizului experimental', tip: 'data', obligatoriu: false });
+        if (ex && ex.primire == null) { linii.push({ fis: 'exp', cheie: ex.cheie, sonda: ex.sonda, col: 'primire', titlu: 'Data primire aviz', vechi: '', nou: nrData }); linii.push({ fis: 'exp', cheie: ex.cheie, sonda: ex.sonda, col: 'expira', titlu: 'Date expirare aviz', vechi: '', nou: '{expira}' }); }
+        else linii.push({ fis: 'exp', cheie: null, sonda: f.sonda, col: 'primire', titlu: 'Data primire aviz (rând nou în ' + FIS.exp + ')', vechi: '', nou: nrData, adauga: true, cuExpira: true });
+      }
+    }
+    // conservare.csv
+    if (prelCons || cons) {
+      var cs = (S.cons.analize || []).filter(function (a) { return aceeasi(a.sonda); })[0];
+      if (cs && prelCons) {
+        var rC = S.cons.model.randuri.filter(function (r) { return r.cheie === cs.cheie; })[0];
+        intrebari.push({ k: 'valabil', eticheta: 'Noua valabilitate a conservării (până la)', tip: 'data', obligatoriu: true });
+        linii.push({ fis: 'cons', cheie: cs.cheie, sonda: cs.sonda, col: 'aviz', titlu: 'Dată emitere/dată valabilitate aviz de conservare', vechi: rC ? C.val(S.cons.model, rC, 'aviz').trim() : '', nou: nrData });
+        linii.push({ fis: 'cons', cheie: cs.cheie, sonda: cs.sonda, col: 'valabil', titlu: 'Valabilitate', vechi: cs.valabil != null ? B.fmtData(cs.valabil) : '', nou: '{valabil}' });
+        linii.push({ fis: 'cons', cheie: cs.cheie, sonda: cs.sonda, col: 'doc', titlu: 'Documentație inaintata', vechi: rC ? C.val(S.cons.model, rC, 'doc').trim() : '', nou: '' });
+      } else note.push(cs ? 'Aviz de conservare nou pentru o sondă existentă — folosește „+ Evidență → Prelungire conservare”.' : 'Sonda nu este în ' + FIS.cons + ' — adaug-o din „+ Evidență → Sondă nouă în conservare” (ți-o deschid după aplicare).'), linii.push({ deschideEv: cs ? 'prel_cons' : 'cons_noua' });
+    }
+    // tarife.csv — „Data Acord” pentru rândul deschis corespunzător
+    if (tarifRx && data) {
+      var tr = (S.tar.analize || []).filter(function (a) { return aceeasi(a.sonda) && tarifRx.test(a.tip || '') && a.aviz == null; }).sort(function (x, y) { return (y.reg || 0) - (x.reg || 0); })[0];
+      if (tr) linii.push({ fis: 'tar', cheie: tr.cheie, sonda: tr.sonda, col: 'aviz', titlu: 'Data Acord (' + tr.tip + ', înregistrat ' + (tr.reg != null ? B.fmtData(tr.reg) : '—') + ')', vechi: '', nou: data });
+      else note.push('În ' + FIS.tarife + ' nu există un rând deschis „' + (f.tip || '') + '” pentru această sondă — nimic de completat acolo.');
+    }
+    return { linii: linii, intrebari: intrebari, note: note };
+  }
+  function propunePropagareAviz(f) {
+    var plan = planAvizPrimit(f), NF = { aband: FIS.aband, exp: FIS.exp, cons: FIS.cons, tar: FIS.tarife };
+    var reale = plan.linii.filter(function (l) { return !l.deschideEv; }), ev = plan.linii.filter(function (l) { return l.deschideEv; })[0];
+    if (!reale.length && !ev) { toast('Aviz salvat. Nu am găsit în fișiere nimic de actualizat pentru acest aviz.', 'bine'); return; }
+    var h = '<p class="nota" style="margin-top:0">Avizul <b>' + esc(f.tip || '') + ' ' + esc(f.nr || '') + (f.data ? '/' + esc(f.data) : '') + '</b> pentru <b>' + esc(f.sonda) + '</b> a fost salvat. Iată ce propun să modific în fișierele CSV (poți debifa ce nu vrei):</p>';
+    h += '<table class="tabel"><thead><tr><th></th><th>Fișier</th><th>Sonda / câmp</th><th>Acum</th><th>Devine</th></tr></thead><tbody>' + reale.map(function (l, i) {
+      return '<tr><td><input type="checkbox" data-pl="' + i + '" checked aria-label="Aplică"></td><td>' + esc(NF[l.fis]) + '</td><td><b>' + esc(l.sonda) + '</b><span class="sub">' + esc(l.titlu) + '</span></td><td>' + (l.vechi ? esc(l.vechi) : '<span class="nota">(gol)</span>') + '</td><td><b>' + (l.nou === '{valabil}' ? '<span id="pl-valabil-txt">(completează mai jos)</span>' : l.nou === '{expira}' ? '<span class="nota">(din câmpul de mai jos, dacă îl completezi)</span>' : l.nou ? esc(l.nou) : '<span class="nota">(se golește)</span>') + '</b></td></tr>';
+    }).join('') + '</tbody></table>';
+    if (plan.intrebari.length) h += '<div class="grila" style="grid-template-columns:1fr 1fr;margin-top:.7rem">' + plan.intrebari.map(function (q) { return '<div class="camp"><label for="pl-' + q.k + '">' + esc(q.eticheta) + (q.obligatoriu ? ' *' : ' (opțional)') + '</label><input id="pl-' + q.k + '" type="text" inputmode="numeric" placeholder="zz.ll.aaaa" data-pq="' + q.k + '"></div>'; }).join('') + '</div>';
+    if (plan.note.length) h += '<ul class="ap-probleme">' + plan.note.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+    var m = modal({ titlu: 'Aviz primit — actualizez și fișierele?', lat: true, fix: true, corp: h, subsol: '<button class="btn" data-inchide>Nu acum</button><button class="btn principal" data-pl-aplica>Aplică modificările bifate</button>' });
+    var inpV = m.el.querySelector('#pl-valabil'); if (inpV) inpV.addEventListener('input', function () { var z = B.citesteData(inpV.value).z, t = m.el.querySelector('#pl-valabil-txt'); if (t) t.textContent = z != null ? B.fmtData(z) : '(completează mai jos)'; });
+    m.el.querySelector('[data-pl-aplica]').addEventListener('click', async function () {
+      var btn = this, rasp = {};
+      plan.intrebari.forEach(function (q) { var v = (m.el.querySelector('#pl-' + q.k).value || '').trim(), z = v ? B.citesteData(v).z : null; if (v && z == null) er = q.eticheta + ' nu este o dată validă.'; else if (!v && q.obligatoriu) er = 'Completează: ' + q.eticheta + '.'; rasp[q.k] = z != null ? B.fmtData(z) : ''; });
+      var bifate = reale.filter(function (l, i) { return m.el.querySelector('[data-pl="' + i + '"]').checked; });
+      if (!bifate.length && !ev) { m.inchide(); return; }
+      var erori = [];
+      plan.intrebari.forEach(function (q) { var v = (m.el.querySelector('#pl-' + q.k).value || '').trim(), z = v ? B.citesteData(v).z : null; if (v && z == null) erori.push(q.eticheta + ' nu este o dată validă.'); else if (!v && q.obligatoriu && bifate.some(function (l) { return l.nou === '{' + q.k + '}'; })) erori.push('Completează: ' + q.eticheta + '.'); rasp[q.k] = z != null ? B.fmtData(z) : ''; });
+      if (erori.length) { toast(erori[0], 'eroare'); return; }
+      btn.disabled = true;
+      try {
+        var rezumat = [], porFis = {};
+        bifate.forEach(function (l) { (porFis[l.fis] = porFis[l.fis] || []).push(l); });
+        // tarife: prin editarea de celulă (cu bara de scriere)
+        (porFis.tar || []).forEach(function (l) { editeazaCelula('tar', l.cheie, l.col, l.nou); programeazaCSV('tar', true); rezumat.push(FIS.tarife + ': ' + l.sonda + ' — Data Acord ' + l.nou); });
+        var X = { aband: AB, exp: E, cons: C }, sub = { aband: 'abandonare', exp: 'experimentale', cons: 'conservare' }, inc = { aband: incarcaAbandonare, exp: incarcaExperimentale, cons: incarcaConservare };
+        for (var fis in porFis) {
+          if (fis === 'tar') continue;
+          var lst = porFis[fis];
+          var rz = await modificaCSV(NF[fis], X[fis], sub[fis], function (mo) {
+            lst.forEach(function (l) {
+              var r = l.cheie ? mo.randuri.filter(function (x) { return x.cheie === l.cheie || T.cheiPotrivite(x.cheie, l.cheie); })[0] : null;
+              if (!r && l.adauga) {
+                var campuriN = {}; campuriN[l.col] = l.nou; campuriN.sonda = l.sonda;
+                if (fis === 'exp' && l.cuExpira) campuriN.expira = rasp.expira || '';
+                r = X[fis].randNou(mo, campuriN); mo.randuri.push(r); return;
+              }
+              if (!r) return;
+              var pm = /^\{(\w+)\}$/.exec(l.nou), val = pm ? (rasp[pm[1]] || '') : l.nou;
+              if (pm && !val && !l.obligatoriu && pm[1] !== 'valabil') return;
+              X[fis].setVal(mo, r, l.col, val);
+            });
+          }, function (m2) { return true; }, 'aviz primit: ' + f.sonda + ' ' + (f.nr || ''));
+          if (rz && rz.eroare) throw new Error(rz.eroare);
+          await inc[fis](true);
+          lst.forEach(function (l) { rezumat.push(NF[fis] + ': ' + l.sonda + ' — ' + l.titlu + (l.nou ? ' = ' + (/^\{/.test(l.nou) ? (rasp[l.nou.slice(1, -1)] || '') : l.nou) : ' golit')); });
+        }
+        if (porFis.cons) {   // starea „documentație trimisă” a prelungirii se închide
+          var ac0 = S.cons.analize.filter(function (x) { return M.aceeasiSonda(x.sonda, f.sonda).leaga; })[0];
+          if (ac0) { if (S.dep.get('prelung:' + ac0.cheie)) scrie('prelung:' + ac0.cheie, { sters: true }); scrie('conserv:' + ac0.cheie, { docTrimisa: null, valabil: null }); }
+        }
+        analizeazaTarife(); analizeazaAvize && analizeazaAvize();
+        m.inchide(); S.deRedesenat = false; redeseneaza();
+        toast('Fișiere actualizate: ' + (rezumat.length ? rezumat.length + ' modificări.' : 'nimic de modificat.'), 'bine');
+        if (ev) modalEvidenta(ev.deschideEv, { sonda: f.sonda, nr: f.nr || '' });
+      } catch (x) { btn.disabled = false; toast('Nu s-a putut actualiza: ' + (x.message || x), 'eroare'); }
+    });
+  }
+  window.__org = window.__org || {}; window.__org.propuneAviz = function (f) { return propunePropagareAviz(f); };
   function modalAvizPrimit() {
     var fisiere = [], id = 0;
     var an0 = String(B.dinZi(S.azi).y);
@@ -6333,7 +6444,7 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
         (f.probleme.length ? '<ul class="ap-probleme">' + f.probleme.map(function (p) { return '<li>' + esc(p) + '</li>'; }).join('') + '</ul>' : '') +
         (f.hint ? '<div class="nota">' + esc(f.hint) + '</div>' : '') +
         '<div class="rand-flex ap-jos"><span class="nota">Se salvează ca: <b data-tinta>' + esc(numeTinta(f)) + '</b> în <code class="cale" data-tinta-an>' + esc(f.an) + '\\</code></span><span class="spatiu"></span>' +
-        (f.salvat ? '<span class="nota">Salvat: ' + esc(f.salvat) + '</span>' : '<button class="btn principal" data-ap="salveaza" data-id="' + f.id + '"' + (f.salvare ? ' disabled' : '') + '>Salvează în folder</button>') + '</div></div>';
+        (f.salvat ? '<span class="nota">Salvat: ' + esc(f.salvat) + '</span> <button class="btn mic" data-ap="propaga" data-id="' + f.id + '">Actualizează fișierele</button>' : '<button class="btn principal" data-ap="salveaza" data-id="' + f.id + '"' + (f.salvare ? ' disabled' : '') + '>Salvează în folder</button>') + '</div></div>';
     }
     function deseneaza() {
       lista.innerHTML = '<datalist id="ap-sonde">' + sondeCunoscute().map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist><datalist id="ap-tipuri">' + AP.TIPURI.concat(tipuriAvizMemorate()).map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist>' + fisiere.map(card).join('');
@@ -6376,6 +6487,7 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
       var a = b.dataset.ap;
       if (a === 'radacina') { try { await pdfAlegeRadacina(); stareFolder(); } catch (x) { if (!x || x.name !== 'AbortError') toast(x.message, 'eroare'); } }
       else if (a === 'scan') { await pdfScaneaza(); stareFolder(); }
+      else if (a === 'propaga') { var fp = fisiere.filter(function (x) { return String(x.id) === b.dataset.id; })[0]; if (fp) propunePropagareAviz(fp); }
       else if (a === 'salveaza') {
         var f = fisiere.filter(function (x) { return String(x.id) === b.dataset.id; })[0]; if (!f || f.salvare) return;
         var sonda = AP.construiesteNume(f.sonda, '', '').replace(/\.pdf$/, '');
@@ -6400,6 +6512,7 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
           pdfIndex(); S.pdf.items = S.pdf.items.filter(function (x) { return x.cale !== cale; }); S.pdf.items.push(it); pdfSalveazaIndex();
           memoreazaTipAviz(f.tip);
           toast('Salvat în folderul de avize: ' + cale, 'bine');
+          f.sugereaza = true; setTimeout(function () { try { propunePropagareAviz(f); } catch (e) { toast('Nu am putut pregăti actualizarea fișierelor: ' + e.message, 'eroare'); } }, 50);
         } catch (x) {
           f.salvare = false;
           if (!(x && x.name === 'AbortError')) toast(x.message || String(x), 'eroare');
@@ -7028,6 +7141,7 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
     var h = '<div class="antet-pagina"><h1>Restanțe ANRMPSG</h1><span class="detalii">avize și acorduri trimise la ANRMPSG, încă fără răspuns — vechimea se numără de la data trimiterii</span></div>';
     var filtre = [['toate', 'Toate', nr.toate], ['acord', 'Acorduri', nr.acord], ['aviz', 'Avize', nr.aviz], ['rosu', 'Peste o lună', nr.rosu, nr.rosu ? 1 : 0], ['ale', 'Ale mele', nr.ale]];
     h += '<div class="filtre">' + filtre.map(function (x) { return '<button class="filtru-stare' + (x[3] ? ' portocaliu' : '') + '" data-a="rs-filtru" data-v="' + x[0] + '" aria-pressed="' + (tip === x[0]) + '">' + x[1] + ' <b>' + x[2] + '</b></button>'; }).join('') + '<input type="search" class="cautare" data-i="rs-cauta" placeholder="Caută sondă sau responsabil" value="' + esc(f.rsCauta || '') + '"></div>';
+    h += '<p class="nota">Informările către ANRMPSG nu apar aici: nu se așteaptă răspuns de la ANRMPSG, sunt doar o obligație a echipei și trebuie trimise la timp.</p>';
     h += '<div class="legenda-rs"><span>Culoare după vechime:</span><span class="bara-rs" aria-hidden="true"></span><span>ziua trimiterii</span><span>→</span><span>o lună sau mai mult (rămâne roșu)</span></div>';
     h += '<div class="tabel-cadru"><table class="tabel"><thead><tr><th>De la ANRMPSG</th><th>Sonda</th><th>Responsabil</th><th>Trimis la</th><th>Așteaptă de</th><th>Sursă</th></tr></thead><tbody>' +
       lista.map(function (x) {
@@ -7551,18 +7665,19 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
   function lunaRaport() { return S.f.raportLuna || (function () { var o = B.dinZi(S.azi); return { an: o.y, luna: o.m }; })(); }
   function vRaport() {
     var W = saptRaport(), luni = B.luniDinCheie(W), sef = esteSef(), tab = sef ? S.f.raportTab : 'meu';
-    if (['meu', 'echipa', 'total', 'luna'].indexOf(tab) < 0) tab = 'meu';
+    if (['meu', 'echipa', 'total', 'luna', 'final', 'finalluna'].indexOf(tab) < 0) tab = 'meu';
+    var lunar = tab === 'luna' || tab === 'finalluna';
     var c = { nr: +W.slice(-2), luni: luni, duminica: luni + 6 };
     var nav;
-    if (tab === 'luna') {
+    if (lunar) {
       var L = lunaRaport();
       nav = '<button class="btn mic" data-a="rap-luna" data-d="-1" aria-label="Luna anterioară">‹</button><b>' + esc(R.titluLuna(L.an, L.luna, R.saptamaniLuna(L.an, L.luna))) + '</b><button class="btn mic" data-a="rap-luna" data-d="1" aria-label="Luna următoare">›</button><button class="btn mic simplu" data-a="rap-luna" data-d="0">Luna aceasta</button>';
     } else {
       nav = '<button class="btn mic" data-a="rap-sapt" data-d="-1" aria-label="Săptămâna anterioară">‹</button><b>' + esc(R.titluSapt(c)) + '</b><button class="btn mic" data-a="rap-sapt" data-d="1" aria-label="Săptămâna următoare">›</button>' + (W !== B.saptISO(S.azi).cheie ? '<button class="btn mic simplu" data-a="rap-sapt" data-d="0">Săptămâna aceasta</button>' : '');
     }
-    var h = '<div class="antet-pagina"><h1>' + (tab === 'luna' ? 'Raport lunar' : 'Raport săptămânal') + '</h1><span class="rand-flex">' + nav + '</span><span class="spatiu"></span>' +
-      (sef ? '<span class="grup-btn" role="group" aria-label="Tipul raportului"><button data-a="rap-tab" data-v="meu" aria-pressed="' + (tab === 'meu') + '">Raportul meu</button><button data-a="rap-tab" data-v="echipa" aria-pressed="' + (tab === 'echipa') + '">Pe persoane</button><button data-a="rap-tab" data-v="total" aria-pressed="' + (tab === 'total') + '">Total echipă</button><button data-a="rap-tab" data-v="luna" aria-pressed="' + (tab === 'luna') + '">Lunar</button></span>' : '') + '</div>';
-    return h + (tab === 'echipa' ? vRaportEchipa(W) : tab === 'total' ? vRaportTotal(W) : tab === 'luna' ? vRaportLuna() : vRaportMeu(W));
+    var h = '<div class="antet-pagina"><h1>' + (tab === 'finalluna' ? 'Raport final lunar' : tab === 'final' ? 'Raport final' : tab === 'luna' ? 'Raport lunar' : 'Raport săptămânal') + '</h1><span class="rand-flex">' + nav + '</span><span class="spatiu"></span>' +
+      (sef ? '<span class="grup-btn" role="group" aria-label="Tipul raportului"><button data-a="rap-tab" data-v="meu" aria-pressed="' + (tab === 'meu') + '">Raportul meu</button><button data-a="rap-tab" data-v="echipa" aria-pressed="' + (tab === 'echipa') + '">Pe persoane</button><button data-a="rap-tab" data-v="total" aria-pressed="' + (tab === 'total') + '">Total echipă</button><button data-a="rap-tab" data-v="luna" aria-pressed="' + (tab === 'luna') + '">Lunar</button><button data-a="rap-tab" data-v="final" aria-pressed="' + (tab === 'final') + '">Raport final</button><button data-a="rap-tab" data-v="finalluna" aria-pressed="' + (tab === 'finalluna') + '">Raport final lunar</button></span>' : '') + '</div>';
+    return h + (tab === 'final' || tab === 'finalluna' ? vRaportFinal(tab === 'finalluna') : tab === 'echipa' ? vRaportEchipa(W) : tab === 'total' ? vRaportTotal(W) : tab === 'luna' ? vRaportLuna() : vRaportMeu(W));
   }
   function vRaportMeu(W) {
     var id = 'raport:' + W + ':' + S.eu, rap = S.dep.get(id) || {};
@@ -7642,6 +7757,69 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
     tot.nr = +W.slice(-2); tot.luni = B.luniDinCheie(W); tot.duminica = tot.luni + 6;
     return '<section class="sectiune"><header><h2>Total echipă</h2><span class="detalii">fără numele colegilor; rândurile identice se adună o singură dată</span></header>' + barUnelte() +
       '<div class="document-raport" id="document-raport">' + R.inHtml(tot) + '</div></section>';
+  }
+
+  // ---------- Raport final: documentația întocmită/trimisă pe categorii ----------
+  var CATEG_FINAL = [
+    { k: 'acord', titlu: 'Proiecte tehnice acord de abandonare' },
+    { k: 'aviz', titlu: 'Proiecte tehnice aviz de abandonare' },
+    { k: 'cons', titlu: 'Proiecte tehnice prelungire conservare' },
+    { k: 'tef', titlu: 'Documentație tehnico-economică' },
+    { k: 'exp', titlu: 'Proiecte tehnice exploatare experimentală' }
+  ];
+  function documenteTrimise() { // [{k, cheie, sonda, z}] din analize + registrul permanent (celula se golește după primirea avizului)
+    var out = [];
+    function add(k, a, z) { if (z != null) out.push({ k: k, cheie: a.cheie, sonda: a.sonda, z: z }); }
+    (S.aband.analize || []).forEach(function (a) { add('acord', a, a.anrmDinTarife ? null : a.anrm); add('aviz', a, a.proiect); });
+    (S.cons.analize || []).forEach(function (a) { add('cons', a, a.docDepus); });
+    (S.tar && S.tar.analize || []).forEach(function (a) { add('tef', a, a.docTEF); });
+    (S.exp.analize || []).forEach(function (a) { add('exp', a, a.docTrimisa); });
+    var vazute = {};
+    out.forEach(function (x) { vazute[x.k + ':' + x.cheie] = 1; });
+    S.dep.lista('docreg:').forEach(function (d) { var i = d.id.slice(7); if (!vazute[i] && d.z) { var o = B.dinIso(d.z); if (o != null) out.push({ k: d.k, cheie: i.slice(i.indexOf(':') + 1), sonda: d.sonda, z: o, dinRegistru: true }); } });
+    return out;
+  }
+  function salveazaRegistruDoc() { // păstrează data trimiterii chiar dacă ulterior celula din CSV se golește
+    if (S.doarCitire) return;
+    var f0 = S.faraJurnal; S.faraJurnal = true;
+    try {
+      documenteTrimise().forEach(function (x) {
+        if (x.dinRegistru) return;
+        var id = 'docreg:' + x.k + ':' + x.cheie, iso = B.isoData(x.z), e = S.dep.get(id);
+        if (!e || e.z !== iso || e.sonda !== x.sonda) S.dep.scrie(id, { k: x.k, sonda: x.sonda, z: iso });
+      });
+    } catch (e) { }
+    S.faraJurnal = f0;
+  }
+  function numeSondaFinal(t) { return String(t || '').trim().replace(/\s+/g, ' ').toLowerCase().replace(/(^|[\s\-\/(])([a-zăâîșşțţ])/g, function (m, a, b) { return a + b.toUpperCase(); }).replace(/ De /g, ' de '); }
+  function rapFinalDate(z1, z2) {
+    var grupe = {};
+    CATEG_FINAL.forEach(function (c) { grupe[c.k] = {}; });
+    documenteTrimise().forEach(function (x) {
+      if (x.z < z1 || x.z > z2 || !grupe[x.k]) return;
+      var n = numeSondaFinal(x.sonda), c = M.norm(n);
+      if (!grupe[x.k][c]) grupe[x.k][c] = n;
+    });
+    return CATEG_FINAL.map(function (c) { return { k: c.k, titlu: c.titlu, sonde: Object.keys(grupe[c.k]).map(function (q) { return grupe[c.k][q]; }).sort(function (a, b) { return a.localeCompare(b, 'ro', { numeric: true }); }) }; }).filter(function (c) { return c.sonde.length; });
+  }
+  function textRapFinal(cat) { return cat.map(function (c) { return c.titlu + (c.k === 'cons' ? ': ' : ' ') + c.sonde.join(', '); }).join('\n'); }
+  function vRaportFinal(lunar) {
+    var z1, z2, sub;
+    if (lunar) {
+      var L = lunaRaport(), sapt = R.saptamaniLuna(L.an, L.luna);
+      if (!sapt.length) { z1 = B.zi(L.an, L.luna, 1); z2 = B.zi(L.an, L.luna, B.zileInLuna(L.an, L.luna)); }
+      else { z1 = B.luniDinCheie(sapt[0]); z2 = B.luniDinCheie(sapt[sapt.length - 1]) + 6; }
+      sub = 'Documentația din ' + R.titluLuna(L.an, L.luna, sapt) + ' (' + B.fmtData(z1) + ' – ' + B.fmtData(z2) + ')';
+    } else {
+      var W = saptRaport(); z1 = B.luniDinCheie(W); z2 = z1 + 6;
+      sub = 'Documentația din săptămâna ' + (+W.slice(-2)) + ' (' + B.fmtData(z1) + ' – ' + B.fmtData(z2) + ')';
+    }
+    setTimeout(salveazaRegistruDoc, 0);
+    var cat = rapFinalDate(z1, z2), nr = cat.reduce(function (s, c) { return s + c.sonde.length; }, 0);
+    window.__rapFinalText = textRapFinal(cat);
+    return '<section class="sectiune"><header><h2>' + esc(lunar ? 'Raport final lunar' : 'Raport final') + '</h2><span class="detalii">' + esc(sub) + '</span><span class="spatiu"></span>' + (nr ? '<button class="btn" data-a="rap-final-copiaza">Copiază textul</button>' : '') + '</header>' +
+      '<p class="nota">Se completează singur din datele de „înaintat / trimis” din programul și fișierele CSV (abandonare, conservare, tarife, experimentale). Apar doar categoriile în care s-a întocmit documentație în perioadă. Schimbi perioada cu săgețile de mai sus.</p>' +
+      (nr ? '<div class="document-raport" id="document-raport">' + cat.map(function (c) { return '<p><b>' + esc(c.titlu) + (c.k === 'cons' ? ':' : '') + '</b> ' + esc(c.sonde.join(', ')) + '</p>'; }).join('') + '</div>' : '<p class="gol">Nu există documentație trimisă în această perioadă.</p>') + '</section>';
   }
   function vRaportLuna() {
     var L = lunaRaport(), mem = membri().map(function (m) { return { id: m.id, nume: m.nume }; });
@@ -8045,6 +8223,7 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
       case 'aviz-nou': modalAvizNou(); break;
       case 'import-avize': modalImportAvize(); break;
       case 'rap-sapt': { var W = saptRaport(); S.f.raportSapt = d.d === '0' ? null : B.saptISO(B.luniDinCheie(W) + 7 * +d.d).cheie; redeseneaza(); break; }
+      case 'rap-final-copiaza': { var tf = window.__rapFinalText || ''; (async function () { try { await navigator.clipboard.writeText(tf); } catch (x) { var ta = document.createElement('textarea'); ta.value = tf; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } toast('Textul raportului final a fost copiat.', 'bine'); })(); break; }
       case 'rap-tab': S.f.raportTab = d.v; redeseneaza(); break;
       case 'rap-luna': { var L0 = lunaRaport(), n0 = d.d === '0' ? null : (function () { var t = B.adaugaLuni(B.zi(L0.an, L0.luna, 1), +d.d), o = B.dinZi(t); return { an: o.y, luna: o.m }; })(); S.f.raportLuna = n0; redeseneaza(); break; }
       case 'rap-faranume': S.f.raportFaraNume = d.v === '1'; redeseneaza(); break;
