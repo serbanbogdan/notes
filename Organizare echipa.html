@@ -643,6 +643,19 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
 .camp .rand-flex { display: flex; flex-wrap: nowrap; gap: .25rem; align-items: center; }
 .camp .rand-flex > input { flex: 1; min-width: 0; }
 .camp .rand-flex > .btn { flex: none; }
+
+/* mini-calendar */
+#mini-cal { position: fixed; z-index: 9999; width: 15.5rem; background: #fff; border: 1px solid #203d88; border-radius: .5rem; box-shadow: 0 6px 22px rgba(0,0,0,.25); padding: .5rem; font-size: .9rem; }
+#mini-cal .mc-cap { display: flex; align-items: center; justify-content: space-between; margin-bottom: .3rem; color: #203d88; }
+#mini-cal .mc-cap button { border: 0; background: #e8eefb; color: #203d88; border-radius: .3rem; width: 1.8rem; height: 1.8rem; font-size: 1.1rem; cursor: pointer; }
+#mini-cal .mc-grila { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+#mini-cal .mc-zs { color: #777; font-size: .75rem; padding: .15rem 0; }
+#mini-cal .mc-zi { border: 0; background: transparent; border-radius: .3rem; height: 1.85rem; cursor: pointer; color: #222; }
+#mini-cal .mc-zi:hover { background: #dbe6fb; }
+#mini-cal .mc-azi { outline: 1px solid #00bc70; }
+#mini-cal .mc-sel { background: #203d88; color: #fff; }
+#mini-cal .mc-sub { display: flex; justify-content: space-between; margin-top: .4rem; }
+#mini-cal .mc-sub button { border: 0; background: none; color: #203d88; cursor: pointer; font-weight: bold; }
 </style>
 </head>
 <body>
@@ -5854,16 +5867,46 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
     inp.dispatchEvent(new Event('input', { bubbles: true }));
     inp.dispatchEvent(new Event('change', { bubbles: true }));
   }
-  function deschideCalendar(b) {
+  // mini-calendar propriu (fereastră mică lângă iconiță, luna curentă) — nu folosește selectorul nativ
+  var LUNI_RO = ['ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie', 'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie'];
+  function inchideMiniCal() { var x = document.getElementById('mini-cal'); if (x) x.remove(); document.removeEventListener('mousedown', miniCalAfara, true); document.removeEventListener('keydown', miniCalTasta, true); }
+  function miniCalAfara(e) { if (!e.target.closest('#mini-cal') && !e.target.closest('.btn-cal')) inchideMiniCal(); }
+  function miniCalTasta(e) { if (e.key === 'Escape') { e.stopPropagation(); inchideMiniCal(); } }
+  function deschideMiniCal(b) {
     var inp = casetaDinButon(b); if (!inp || inp.readOnly || inp.disabled) return;
-    var d = document.createElement('input'); d.type = 'date'; d.tabIndex = -1; d.setAttribute('aria-hidden', 'true');
-    d.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
-    var z = B.citesteDataRapida(inp.value || '', S.azi, false); d.value = z && z.z != null ? B.isoData(z.z) : B.isoData(S.azi);
-    document.body.appendChild(d);
-    var gata = function () { setTimeout(function () { if (d.parentNode) d.remove(); }, 300); };
-    d.addEventListener('change', function () { var zz = d.value ? B.dinIso(d.value) : null; if (zz != null) scrieInCasuta(b, B.fmtData(zz)); gata(); });
-    d.addEventListener('blur', gata);
-    try { d.focus(); if (d.showPicker) d.showPicker(); else d.click(); } catch (e) { d.click(); }
+    var deschis = document.getElementById('mini-cal'); inchideMiniCal(); if (deschis && deschis._btn === b) return;
+    var z0 = B.citesteDataRapida(inp.value || '', S.azi, false), zSel = z0 && z0.z != null ? z0.z : null;
+    var ref = new Date((zSel != null ? B.isoData(zSel) : B.isoData(S.azi)) + 'T12:00:00'), an = ref.getFullYear(), luna = ref.getMonth();
+    var el = document.createElement('div'); el.id = 'mini-cal'; el._btn = b; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Alege data');
+    function desen() {
+      var prima = new Date(an, luna, 1), start = (prima.getDay() + 6) % 7, nrZ = new Date(an, luna + 1, 0).getDate(), h = '';
+      h += '<div class="mc-cap"><button type="button" data-mc="-1" aria-label="Luna precedentă">‹</button><b>' + LUNI_RO[luna] + ' ' + an + '</b><button type="button" data-mc="1" aria-label="Luna următoare">›</button></div><div class="mc-grila">';
+      ['L', 'M', 'M', 'J', 'V', 'S', 'D'].forEach(function (x) { h += '<span class="mc-zs">' + x + '</span>'; });
+      for (var i = 0; i < start; i++) h += '<span></span>';
+      for (var d = 1; d <= nrZ; d++) {
+        var iso = an + '-' + ('0' + (luna + 1)).slice(-2) + '-' + ('0' + d).slice(-2), zz = B.dinIso(iso);
+        h += '<button type="button" class="mc-zi' + (zz === S.azi ? ' mc-azi' : '') + (zz === zSel ? ' mc-sel' : '') + '" data-mz="' + iso + '">' + d + '</button>';
+      }
+      h += '</div><div class="mc-sub"><button type="button" data-mc="azi">Azi</button><button type="button" data-mc="x">Închide</button></div>';
+      el.innerHTML = h;
+    }
+    desen();
+    el.addEventListener('mousedown', function (e) { e.preventDefault(); });
+    el.addEventListener('click', function (e) {
+      var t = e.target.closest('button'); if (!t) return; e.stopPropagation();
+      if (t.dataset.mz) { var zz = B.dinIso(t.dataset.mz); inchideMiniCal(); if (zz != null) scrieInCasuta(b, B.fmtData(zz)); return; }
+      var m = t.dataset.mc;
+      if (m === 'x') { inchideMiniCal(); return; }
+      if (m === 'azi') { inchideMiniCal(); scrieInCasuta(b, B.fmtData(S.azi)); return; }
+      luna += +m; if (luna < 0) { luna = 11; an--; } if (luna > 11) { luna = 0; an++; }
+      desen();
+    });
+    document.body.appendChild(el);
+    var r = b.getBoundingClientRect(), w = el.offsetWidth, hh = el.offsetHeight;
+    var left = Math.max(8, Math.min(r.left, window.innerWidth - w - 8)), top = r.bottom + 4;
+    if (top + hh > window.innerHeight - 8) top = Math.max(8, r.top - hh - 4);
+    el.style.left = left + 'px'; el.style.top = top + 'px';
+    document.addEventListener('mousedown', miniCalAfara, true); document.addEventListener('keydown', miniCalTasta, true);
   }
   var BTN_CAL = '<button type="button" class="btn mic simplu btn-cal" data-a="cal" title="Alege data din calendar" aria-label="Alege data din calendar">📅</button>';
   var BTN_E = '<button type="button" class="btn mic simplu btn-e" data-a="cal-e" title="Primit / trimis, dar nu se știe data (se scrie E)">E</button>';
@@ -7767,6 +7810,8 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
   }
 
   // ---------- evenimente ----------
+  // butoanele de salvare / calendar nu iau focusul: altfel „change” de pe câmp redesenează fereastra înainte de click și clicul se pierde
+  document.addEventListener('mousedown', function (e) { if (e.target.closest && e.target.closest('[data-a="panou-salveaza"],[data-a="cal"],[data-a="cal-e"],[data-a="ed-salveaza"]')) e.preventDefault(); });
   document.addEventListener('click', async function (e) {
     var t = e.target.closest('[data-a]');
     if (t && temporizatorRaport && !/^rap-(adauga|sterge|sugestie|trimite)$/.test(t.dataset.a)) flushRaport();
@@ -7800,7 +7845,7 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
       case 'aviz': deschidePanou('aviz', d.cheie); break;
       case 'inchide-panou': inchidePanou(); break;
       case 'panou-salveaza': salveazaPanou(); break;
-      case 'cal': deschideCalendar(t); break;
+      case 'cal': deschideMiniCal(t); break;
       case 'cal-e': scrieInCasuta(t, 'E'); break;
       case 'tar-stare': S.f.tarStare = d.v; redeseneaza(); break;
       case 'tar-sort': if (S.f.tarSort === d.v) S.f.tarDir = -S.f.tarDir; else { S.f.tarSort = d.v; S.f.tarDir = 1; } redeseneaza(); break;
