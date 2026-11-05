@@ -656,6 +656,15 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
 #mini-cal .mc-sel { background: #203d88; color: #fff; }
 #mini-cal .mc-sub { display: flex; justify-content: space-between; margin-top: .4rem; }
 #mini-cal .mc-sub button { border: 0; background: none; color: #203d88; cursor: pointer; font-weight: bold; }
+
+/* v2.8 – Raport: rândurile colegilor se împachetează, nimic nu mai iese din panou */
+.lista-membri-raport .rm { display: flex !important; flex-wrap: wrap; align-items: center; gap: .35rem .6rem; }
+.lista-membri-raport .rm > span:nth-child(2) { flex: 1 1 7rem; min-width: 0; }
+.lista-membri-raport .rm .btn, .lista-membri-raport .rm .pastila { white-space: nowrap; }
+.doua-coloane > .stiva, .doua-coloane > .sectiune { min-width: 0; }
+.document-raport { max-width: none; width: 100%; box-sizing: border-box; overflow-wrap: anywhere; }
+.antet-pagina .grup-btn { flex-wrap: wrap; }
+@media (max-width: 1100px) { .doua-coloane { grid-template-columns: minmax(0, 1fr) !important; } }
 </style>
 </head>
 <body>
@@ -7735,7 +7744,7 @@ tr.rand-rs > td:first-child { box-shadow: inset 5px 0 0 var(--rsm); }
     var cum = cumulatSapt(W);
     var editat = !!fin.continut;
     var gen = activitatiGenerale().filter(function (g) { return g.sapt === W && !g.sters && g.text; });
-    var h = '<div class="doua-coloane" style="grid-template-columns:minmax(260px,330px) minmax(0,1fr)"><div class="stiva"><section class="sectiune liniste"><header><h2>Rapoartele colegilor</h2></header><div class="lista-membri-raport">' + mem.map(function (m) {
+    var h = '<div class="doua-coloane" style="grid-template-columns:minmax(320px,400px) minmax(0,1fr)"><div class="stiva"><section class="sectiune liniste"><header><h2>Rapoartele colegilor</h2></header><div class="lista-membri-raport">' + mem.map(function (m) {
       var r = rap[m.id], propriu = S.dep.get('raport:' + W + ':' + m.id);
       var s = r && R.esteValidat(r.stare) ? '<span class="pastila st-finalizat">validat' + (r.validatDeSef ? ' de șef' : '') + '</span>' : (r && r.stare === 'partial' ? '<span class="pastila st-atentie">parțial</span>' : (R.areContinut(r) ? '<span class="pastila st-fara_data">ciornă</span>' : '<span class="nota">necompletat</span>'));
       return '<div class="rm" style="grid-template-columns:auto 1fr auto auto auto">' + badge(m.id, true) + '<span><b>' + esc(m.nume) + '</b>' + (r && r.editatSef ? '<br><span class="nota">editat de șef</span>' : (propriu && propriu.trimisLa ? '<br><span class="nota">' + dataOra(propriu.trimisLa) + '</span>' : '')) + '</span>' + s + '<button class="btn mic simplu" data-a="rap-edit-membru" data-id="' + m.id + '" aria-label="Editează raportul lui ' + esc(m.nume) + '">Editează</button>' + (r && R.esteValidat(r.stare) ? (r.validatDeSef ? '<button class="btn mic simplu" data-a="rap-invalideaza-sef" data-id="' + m.id + '">Anulează final</button>' : '') : (R.areContinut(r) ? '<button class="btn mic" data-a="rap-valideaza-sef" data-id="' + m.id + '" title="Consideră raportul acestui coleg final">Consideră final</button>' : '')) + '</div>';
