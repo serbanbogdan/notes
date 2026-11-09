@@ -1,2 +1,2 @@
-Fisierul atasata este prezentarea modificata de mine si vreau sa pleci de la ea si s faci urmatoarele modificari:
-Din fisierulul "Analiza Justificativa Livrabil_1_Etapa_2_501_Filitelnic_DRAFT_rev3.pdf" vreau ca figurile de la 4 la 16 care sun simulari de propagara a fisuri sa le pui in dpretul imaginiloe cu intepretarea petroficzica, vreau sa ajustzi imagine din "Analiza Justificativa Livrabil_1_Etapa_2_501_Filitelnic_DRAFT_rev3.pdf" sa fie puse la aceasi adancime
+Vreau o opriune in care sa viziualziez urmatoarele tascurie pe persone pe luna dar si pe an (similar cu pdf-ul atasata)
+vreau sa vad asta de la calendar
