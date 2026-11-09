@@ -5602,6 +5602,7 @@ div.pc { cursor: default; }
     // alerte
     var al = [];
     if (S.tar.eroare === 'lipsa') al.push('<div class="alerta urgent"><span class="ic">!</span><span class="text">În folder nu există <b>' + FIS.tarife + '</b>. Copiază fișierul de tarife în folderul programului (cu acest nume), apoi apasă „Recitește”.</span><button class="btn mic" data-a="reciteste">Recitește</button></div>');
+    var mt = notificareMailTeiz(); if (mt) al.push(mt);
     var mele = deschiseTarife(eu);
     var dep = mele.filter(function (a) { return a.stare === 'depasit' || a.stare === 'urgent'; }).length;
     if (dep) al.push('<div class="alerta urgent"><span class="ic">!</span><span class="text">' + (dep === 1 ? 'Un termen de 180 de zile a trecut' : dep + ' termene de 180 de zile au trecut') + ' fără valoarea finală în fișierul de tarife.</span><button class="btn mic" data-a="vedere" data-v="tarife" data-stare="depasit">Vezi</button></div>');
@@ -6823,10 +6824,72 @@ div.pc { cursor: default; }
     return 'documentația pentru exploatare definitivă până la ' + B.fmtData(a.termenDoc) + (a.zileRamase < 0 ? ' (depășit cu ' + nrZile(a.zileRamase) + ')' : ' (' + nrZile(a.zileRamase) + ')');
   }
   function clsExp(a) { return a.stare === 'depus' ? 'asteapta' : a.stare; }
+
+  // ---------- e-mail lunar către Serviciul TEIZ (sonde în exploatare experimentală, cu costuri estimate / finale) ----------
+  function lunaMailTeiz(z) { var o = B.dinZi(z); return o.y + '-' + (o.m < 10 ? '0' : '') + o.m; }
+  function mailTeizTrimis(z) { var r = S.dep.get('mailteiz:' + lunaMailTeiz(z)); return r && r.trimis ? r : null; }
+  function sondeMailTeiz() { return S.exp.analize.filter(function (a) { return !a.finalizat && a.sonda; }); }
+  function costuriSonda(sonda) {
+    return S.tar.analize.filter(function (t) { return t.sonda && M.aceeasiSonda(sonda, t.sonda).leaga; }).filter(function (t) { return t.est != null || t.vf != null; });
+  }
+  function textMailTeiz(z) {
+    var o = B.dinZi(z), luna = B.LUNI_RO[o.m - 1] + ' ' + o.y, l = sondeMailTeiz().slice().sort(function (a, b) { return a.sonda.localeCompare(b.sonda, 'ro', { numeric: true }); });
+    var corp = 'Bună ziua,\n\nVă transmitem situația lunară (' + luna + ') a sondelor aflate în exploatare experimentală, împreună cu valorile estimate și finale realizate ale lucrărilor, acolo unde acestea există în evidența noastră.\n\n';
+    l.forEach(function (a, i) {
+      corp += (i + 1) + '. Sonda ' + a.sonda + '\n';
+      corp += '   - aviz de exploatare experimentală: ' + (a.avizNr ? a.avizNr + ', ' : '') + (a.primire != null ? 'din ' + B.fmtData(a.primire) : 'data primirii nu este înregistrată') + (a.expira != null ? ', expiră la ' + B.fmtData(a.expira) : '') + '\n';
+      corp += '   - documentația pentru exploatare definitivă: ' + (a.docTrimisa != null ? 'înaintată la ' + B.fmtData(a.docTrimisa) : 'neînaintată încă' + (a.termenDoc != null ? ' (termen ' + B.fmtData(a.termenDoc) + ')' : '')) + '\n';
+      var c = costuriSonda(a.sonda);
+      if (!c.length) corp += '   - costuri: nu există valori în evidență\n';
+      c.forEach(function (t) {
+        corp += '   - costuri (' + t.tip + (t.aviz != null ? ' din ' + B.fmtData(t.aviz) : t.reg != null ? ', înregistrat la ' + B.fmtData(t.reg) : '') + '): estimat ' + (t.est != null ? B.fmtLei(t.est) + ' lei' : 'nu există') + '; final realizat ' + (t.vf != null ? B.fmtLei(t.vf) + ' lei' : 'nu există încă') + '\n';
+      });
+      corp += '\n';
+    });
+    if (!l.length) corp += '(în prezent nu există sonde active în exploatare experimentală)\n\n';
+    corp += 'Vă rugăm să ne comunicați valorile finale care lipsesc sau eventualele corecturi.\n\nCu stimă,\nServiciul Geologic';
+    return { catre: setari().emailTEIZ || '', subiect: 'Situație lunară sonde în exploatare experimentală — ' + luna, corp: corp };
+  }
+  function notificareMailTeiz() {
+    if (MOBIL || S.doarCitire || !S.exp.model || !sondeMailTeiz().length) return '';
+    if (mailTeizTrimis(S.azi)) return '';
+    var o = B.dinZi(S.azi), luna = B.LUNI_RO[o.m - 1] + ' ' + o.y, tarziu = o.d > 7;
+    return '<div class="alerta' + (tarziu ? ' urgent' : '') + '"><span class="ic">' + (tarziu ? '!' : '✉') + '</span><span class="text">' + (tarziu ? 'Nu a fost trimis e-mailul lunar către Serviciul TEIZ pentru ' + luna + ' (trebuia trimis în prima săptămână a lunii).' : 'E-mailul lunar către Serviciul TEIZ pentru ' + luna + ' se trimite în prima săptămână a lunii (până la 7 ' + B.LUNI_RO[o.m - 1] + ').') + '</span><button class="btn mic" data-a="mail-teiz">Generează și trimite</button></div>';
+  }
+  function blocMailTeiz() {
+    if (MOBIL) return '';
+    var t = mailTeizTrimis(S.azi), o = B.dinZi(S.azi), luna = B.LUNI_RO[o.m - 1] + ' ' + o.y;
+    return '<section class="sectiune"><header><h2>E-mail lunar către Serviciul TEIZ</h2><span class="detalii">situația sondelor în exploatare experimentală, cu costurile estimate și finale realizate</span><span class="spatiu"></span>' +
+      (S.doarCitire ? '' : '<button class="btn' + (t ? '' : ' principal') + '" data-a="mail-teiz">' + (t ? 'Generează din nou' : 'Generează și trimite e-mail') + '</button>') + '</header>' +
+      '<p class="nota" style="margin:0">' + (t ? '<b>' + esc(luna) + ':</b> e-mail trimis la ' + esc(dataOra(t.trimis)) + '.' : '<b>' + esc(luna) + ':</b> încă netrimis. Se trimite în prima săptămână a lunii; până atunci apare o notificare în pagina Acasă.') + ' Adresa Serviciului TEIZ se completează în pagina Echipa.</p></section>';
+  }
+  function modalMailTeiz() {
+    var e = textMailTeiz(S.azi);
+    var m = modal({
+      titlu: 'E-mail lunar către Serviciul TEIZ', lat: true,
+      corp: '<div class="grila" style="grid-template-columns:1fr"><div class="camp"><label for="mt-catre">Către (Serviciul TEIZ)</label><input id="mt-catre" type="text" value="' + esc(e.catre) + '" placeholder="adresa Serviciului TEIZ"></div><div class="camp"><label for="mt-sub">Subiect</label><input id="mt-sub" type="text" value="' + esc(e.subiect) + '"></div><div class="camp"><label for="mt-corp">Text</label><textarea id="mt-corp" rows="16" style="width:100%">' + esc(e.corp) + '</textarea></div></div>' +
+        '<p class="nota" style="margin:.5rem 0 0">Apăsând „Copiază” sau „Deschide în programul de e-mail”, luna se consideră trimisă și notificarea dispare.</p>',
+      subsol: '<button class="btn" data-inchide>Închide</button><button class="btn" data-copiaza>Copiază textul</button><button class="btn principal" data-deschide>Deschide în programul de e-mail</button>'
+    });
+    function marcheaza() { scrie('mailteiz:' + lunaMailTeiz(S.azi), { trimis: new Date().toISOString(), luna: lunaMailTeiz(S.azi), sonde: sondeMailTeiz().length }); }
+    async function copiaza(t) { try { await navigator.clipboard.writeText(t); } catch (x) { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } }
+    m.el.querySelector('[data-copiaza]').onclick = async function () {
+      await copiaza('Subiect: ' + m.el.querySelector('#mt-sub').value + '\n\n' + m.el.querySelector('#mt-corp').value);
+      marcheaza(); toast('Textul e-mailului a fost copiat.', 'bine'); m.inchide(); redeseneaza();
+    };
+    m.el.querySelector('[data-deschide]').onclick = async function () {
+      var catre = m.el.querySelector('#mt-catre').value.trim(), sub = m.el.querySelector('#mt-sub').value, corp = m.el.querySelector('#mt-corp').value;
+      var url = 'mailto:' + encodeURIComponent(catre).replace(/%40/g, '@') + '?subject=' + encodeURIComponent(sub) + '&body=' + encodeURIComponent(corp);
+      if (url.length > 1900) { await copiaza(corp); url = 'mailto:' + encodeURIComponent(catre).replace(/%40/g, '@') + '?subject=' + encodeURIComponent(sub) + '&body=' + encodeURIComponent('Lipește aici textul copiat din program (Ctrl+V).'); toast('Textul e lung: l-am copiat; lipește-l în e-mail (Ctrl+V).', 'bine'); }
+      marcheaza(); m.inchide(); redeseneaza();
+      window.location.href = url;
+    };
+  }
   function vExperimentale() {
     var st = S.exp, f = S.f;
     var h = '<div class="antet-pagina"><h1>Exploatare experimentală</h1><span class="detalii">avize experimentale, documentația pentru exploatare definitivă și termenul de 180 de zile pentru tarife</span></div>';
     if (st.eroare === 'lipsa' || !st.model) return h + '<section class="sectiune"><p class="gol"><b>Fișierul ' + E.NUME_FISIER + ' nu se află în folderul programului.</b><br>Copiază-l în folder (coloane: Sonda, Data trimis documentatie, Data primire aviz, Data expirare aviz), apoi apasă „Recitește datele din folder”. Până atunci, termenele avizelor experimentale din tarife se calculează de la data înregistrării.</p></section>';
+    h += blocMailTeiz();
     var nr = {}; st.analize.forEach(function (a) { nr[a.stare] = (nr[a.stare] || 0) + 1; });
     var filtre = [['toate', 'Toate', st.analize.length], ['depasit', 'Termen depășit', nr.depasit || 0, 1], ['atentie', 'Atenție', nr.atentie || 0, 1], ['in_termen', 'În termen', nr.in_termen || 0], ['depus', 'Așteaptă aviz definitiv', nr.depus || 0, nr.depus ? 1 : 0], ['finalizat', 'Finalizate (exploatare definitivă)', nr.finalizat || 0]];
     h += '<div class="filtre">' + filtre.map(function (x) { return '<button class="filtru-stare' + (x[3] ? ' portocaliu' : '') + '" data-a="exp-filtru" data-v="' + x[0] + '" aria-pressed="' + ((f.expStare || 'toate') === x[0]) + '">' + x[1] + ' <b>' + x[2] + '</b></button>'; }).join('') + '<input type="search" class="cautare" data-i="exp-cauta" placeholder="Caută" value="' + esc(f.expCauta || '') + '" aria-label="Caută în sondele în exploatare experimentală"><span class="spatiu"></span><button class="btn mic principal" data-a="evidenta" data-tip="exp_noua">+ Exploatare experimentală nouă</button></div>';
@@ -8302,6 +8365,7 @@ div.pc { cursor: default; }
       case 'cons-filtru': S.f.consStare = d.v; redeseneaza(); break;
       case 'cons-tab': S.f.consTab = d.v; redeseneaza(); break;
       case 'prel-primit': { var apr = S.cons.analize.filter(function (x) { return x.cheie === d.cheie; })[0]; if (apr) modalEvidenta('prel_cons', { cheie: apr.cheie, nr: apr.prelungNr || '' }); break; }
+      case 'mail-teiz': modalMailTeiz(); break;
       case 'exp-filtru': S.f.expStare = d.v; redeseneaza(); break;
       case 'experimentala': deschidePanou('experimentala', d.cheie); break;
       case 'exp-azi': seteazaExp(d.cheie, d.camp, B.isoData(S.azi)); break;
