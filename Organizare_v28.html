@@ -6832,23 +6832,39 @@ div.pc { cursor: default; }
   function costuriSonda(sonda) {
     return S.tar.analize.filter(function (t) { return t.sonda && M.aceeasiSonda(sonda, t.sonda).leaga; }).filter(function (t) { return t.est != null || t.vf != null; });
   }
-  function textMailTeiz(z) {
-    var o = B.dinZi(z), luna = B.LUNI_RO[o.m - 1] + ' ' + o.y, l = sondeMailTeiz().slice().sort(function (a, b) { return a.sonda.localeCompare(b.sonda, 'ro', { numeric: true }); });
-    var corp = 'Bună ziua,\n\nVă transmitem situația lunară (' + luna + ') a sondelor aflate în exploatare experimentală, împreună cu valorile estimate și finale realizate ale lucrărilor, acolo unde acestea există în evidența noastră.\n\n';
-    l.forEach(function (a, i) {
-      corp += (i + 1) + '. Sonda ' + a.sonda + '\n';
-      corp += '   - aviz de exploatare experimentală: ' + (a.avizNr ? a.avizNr + ', ' : '') + (a.primire != null ? 'din ' + B.fmtData(a.primire) : 'data primirii nu este înregistrată') + (a.expira != null ? ', expiră la ' + B.fmtData(a.expira) : '') + '\n';
-      corp += '   - documentația pentru exploatare definitivă: ' + (a.docTrimisa != null ? 'înaintată la ' + B.fmtData(a.docTrimisa) : 'neînaintată încă' + (a.termenDoc != null ? ' (termen ' + B.fmtData(a.termenDoc) + ')' : '')) + '\n';
-      var c = costuriSonda(a.sonda);
-      if (!c.length) corp += '   - costuri: nu există valori în evidență\n';
-      c.forEach(function (t) {
-        corp += '   - costuri (' + t.tip + (t.aviz != null ? ' din ' + B.fmtData(t.aviz) : t.reg != null ? ', înregistrat la ' + B.fmtData(t.reg) : '') + '): estimat ' + (t.est != null ? B.fmtLei(t.est) + ' lei' : 'nu există') + '; final realizat ' + (t.vf != null ? B.fmtLei(t.vf) + ' lei' : 'nu există încă') + '\n';
-      });
-      corp += '\n';
+  function esteTipExp(tip) { return /EXPERIMENTAL/.test(M.norm(tip || '')); }
+  function randuriMailTeiz() { // sonde active din experimentale + sonde din tarife (exploatare experimentală) fără valoare finală
+    var rez = [], vazute = {};
+    function tarifeSonda(sonda) { return S.tar.analize.filter(function (t) { return t.sonda && esteTipExp(t.tip) && M.aceeasiSonda(sonda, t.sonda).leaga; }); }
+    sondeMailTeiz().forEach(function (a) {
+      var tr = tarifeSonda(a.sonda);
+      var aviz = (a.avizNr ? a.avizNr + ' / ' : '') + (a.primire != null ? B.fmtData(a.primire) : '—');
+      var doc = a.docTrimisa != null ? 'înaintată ' + B.fmtData(a.docTrimisa) : 'neînaintată' + (a.termenDoc != null ? ' (termen ' + B.fmtData(a.termenDoc) + ')' : '');
+      if (!tr.length) rez.push({ sonda: a.sonda, aviz: aviz, expira: a.expira != null ? B.fmtData(a.expira) : '—', doc: doc, est: null, vf: null, obs: 'nu există rând în tarife' });
+      tr.forEach(function (t) { vazute[t.cheie] = 1; rez.push({ sonda: a.sonda, aviz: aviz, expira: a.expira != null ? B.fmtData(a.expira) : '—', doc: doc, est: t.est, vf: t.vf, obs: t.vf == null ? 'lipsește valoarea finală' : '' }); });
     });
-    if (!l.length) corp += '(în prezent nu există sonde active în exploatare experimentală)\n\n';
-    corp += 'Vă rugăm să ne comunicați valorile finale care lipsesc sau eventualele corecturi.\n\nCu stimă,\nServiciul Geologic';
-    return { catre: setari().emailTEIZ || '', subiect: 'Situație lunară sonde în exploatare experimentală — ' + luna, corp: corp };
+    S.tar.analize.forEach(function (t) { // din tarife: exploatare experimentală fără valoare finală, chiar dacă sonda nu mai e activă în experimentale
+      if (!t.sonda || !esteTipExp(t.tip) || t.vf != null || vazute[t.cheie]) return;
+      rez.push({ sonda: t.sonda, aviz: t.aviz != null ? B.fmtData(t.aviz) : '—', expira: '—', doc: '—', est: t.est, vf: null, obs: 'lipsește valoarea finală (din tarife)' });
+    });
+    return rez.sort(function (a, b) { return a.sonda.localeCompare(b.sonda, 'ro', { numeric: true }); });
+  }
+  var ANTET_TAB_TEIZ = ['Nr.', 'Sonda', 'Aviz exploatare experimentală (nr. / data)', 'Expiră', 'Documentație exploatare definitivă', 'Valoare estimată (lei)', 'Valoare finală realizată (lei)', 'Observații'];
+  function celuleMailTeiz(r, i) { return [String(i + 1), r.sonda, r.aviz, r.expira, r.doc, r.est != null ? B.fmtLei(r.est) : '—', r.vf != null ? B.fmtLei(r.vf) : '—', r.obs || '']; }
+  function tabelHtmlMailTeiz(l) {
+    var st = 'border:1px solid #888;padding:3px 6px;font:12px Arial,sans-serif;vertical-align:top';
+    return '<table style="border-collapse:collapse"><thead><tr>' + ANTET_TAB_TEIZ.map(function (h) { return '<th style="' + st + ';background:#203d88;color:#fff;text-align:left">' + esc(h) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+      l.map(function (r, i) { return '<tr>' + celuleMailTeiz(r, i).map(function (c, k) { return '<td style="' + st + (k >= 5 && k <= 6 ? ';text-align:right' : '') + (k === 7 && c ? ';color:#b4520e' : '') + '">' + esc(c) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table>';
+  }
+  function tabelTextMailTeiz(l) {
+    var rows = [ANTET_TAB_TEIZ].concat(l.map(celuleMailTeiz)), w = ANTET_TAB_TEIZ.map(function (_, k) { return Math.max.apply(null, rows.map(function (r) { return r[k].length; })); });
+    function lin(r) { return r.map(function (c, k) { return c + new Array(w[k] - c.length + 1).join(' '); }).join(' | ').replace(/\s+$/, ''); }
+    return lin(rows[0]) + '\n' + w.map(function (x) { return new Array(x + 1).join('-'); }).join('-+-') + '\n' + rows.slice(1).map(lin).join('\n');
+  }
+  function textMailTeiz(z) {
+    var o = B.dinZi(z), luna = B.LUNI_RO[o.m - 1] + ' ' + o.y;
+    var intro = 'Bună ziua,\n\nVă transmitem situația lunară (' + luna + ') a sondelor aflate în exploatare experimentală, cu valorile estimate și finale realizate ale lucrărilor, acolo unde acestea există în evidența noastră. Pentru sondele marcate „lipsește valoarea finală” vă rugăm să ne comunicați valoarea finală a lucrărilor.';
+    return { catre: setari().emailTEIZ || '', subiect: 'Situație lunară sonde în exploatare experimentală — ' + luna, intro: intro, incheiere: 'Cu stimă,\nServiciul Geologic' };
   }
   function notificareMailTeiz() {
     if (MOBIL || S.doarCitire || !S.exp.model || !sondeMailTeiz().length) return '';
@@ -6859,28 +6875,37 @@ div.pc { cursor: default; }
   function blocMailTeiz() {
     if (MOBIL) return '';
     var t = mailTeizTrimis(S.azi), o = B.dinZi(S.azi), luna = B.LUNI_RO[o.m - 1] + ' ' + o.y;
-    return '<section class="sectiune"><header><h2>E-mail lunar către Serviciul TEIZ</h2><span class="detalii">situația sondelor în exploatare experimentală, cu costurile estimate și finale realizate</span><span class="spatiu"></span>' +
+    return '<section class="sectiune"><header><h2>E-mail lunar către Serviciul TEIZ</h2><span class="detalii">situația sondelor în exploatare experimentală (tabel), cu costurile estimate și finale realizate</span><span class="spatiu"></span>' +
       (S.doarCitire ? '' : '<button class="btn' + (t ? '' : ' principal') + '" data-a="mail-teiz">' + (t ? 'Generează din nou' : 'Generează și trimite e-mail') + '</button>') + '</header>' +
       '<p class="nota" style="margin:0">' + (t ? '<b>' + esc(luna) + ':</b> e-mail trimis la ' + esc(dataOra(t.trimis)) + '.' : '<b>' + esc(luna) + ':</b> încă netrimis. Se trimite în prima săptămână a lunii; până atunci apare o notificare în pagina Acasă.') + ' Adresa Serviciului TEIZ se completează în pagina Echipa.</p></section>';
   }
   function modalMailTeiz() {
-    var e = textMailTeiz(S.azi);
+    var e = textMailTeiz(S.azi), l = randuriMailTeiz();
     var m = modal({
       titlu: 'E-mail lunar către Serviciul TEIZ', lat: true,
-      corp: '<div class="grila" style="grid-template-columns:1fr"><div class="camp"><label for="mt-catre">Către (Serviciul TEIZ)</label><input id="mt-catre" type="text" value="' + esc(e.catre) + '" placeholder="adresa Serviciului TEIZ"></div><div class="camp"><label for="mt-sub">Subiect</label><input id="mt-sub" type="text" value="' + esc(e.subiect) + '"></div><div class="camp"><label for="mt-corp">Text</label><textarea id="mt-corp" rows="16" style="width:100%">' + esc(e.corp) + '</textarea></div></div>' +
-        '<p class="nota" style="margin:.5rem 0 0">Apăsând „Copiază” sau „Deschide în programul de e-mail”, luna se consideră trimisă și notificarea dispare.</p>',
-      subsol: '<button class="btn" data-inchide>Închide</button><button class="btn" data-copiaza>Copiază textul</button><button class="btn principal" data-deschide>Deschide în programul de e-mail</button>'
+      corp: '<div class="grila" style="grid-template-columns:1fr"><div class="camp"><label for="mt-catre">Către (Serviciul TEIZ)</label><input id="mt-catre" type="text" value="' + esc(e.catre) + '" placeholder="adresa Serviciului TEIZ"></div><div class="camp"><label for="mt-sub">Subiect</label><input id="mt-sub" type="text" value="' + esc(e.subiect) + '"></div><div class="camp"><label for="mt-intro">Text de început</label><textarea id="mt-intro" rows="5" style="width:100%">' + esc(e.intro) + '</textarea></div></div>' +
+        '<div class="tabel-cadru" style="margin:.6rem 0;max-height:40vh;overflow:auto">' + tabelHtmlMailTeiz(l) + '</div><p class="nota" style="margin:0 0 .4rem">' + plural(l.length, 'rând', 'rânduri') + ' (sondele active în experimentale și sondele din tarife — exploatare experimentală — fără valoare finală).</p>' +
+        '<p class="nota" style="margin:.2rem 0 0">„Copiază tabelul” pune în clipboard un tabel pe care îl lipești direct în e-mail (Outlook). „Deschide în programul de e-mail” folosește un tabel din text. Oricare dintre ele marchează luna ca trimisă și notificarea dispare.</p>',
+      subsol: '<button class="btn" data-inchide>Închide</button><button class="btn" data-copiaza>Copiază tabelul</button><button class="btn principal" data-deschide>Deschide în programul de e-mail</button>'
     });
-    function marcheaza() { scrie('mailteiz:' + lunaMailTeiz(S.azi), { trimis: new Date().toISOString(), luna: lunaMailTeiz(S.azi), sonde: sondeMailTeiz().length }); }
-    async function copiaza(t) { try { await navigator.clipboard.writeText(t); } catch (x) { var ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } }
+    function marcheaza() { scrie('mailteiz:' + lunaMailTeiz(S.azi), { trimis: new Date().toISOString(), luna: lunaMailTeiz(S.azi), sonde: l.length }); }
+    function introTxt() { return m.el.querySelector('#mt-intro').value; }
+    async function copiazaRich() {
+      var intro = introTxt(), html = '<div style="font:13px Arial,sans-serif">' + esc(intro).replace(/\n/g, '<br>') + '<br><br>' + tabelHtmlMailTeiz(l) + '<br><br>' + esc(e.incheiere).replace(/\n/g, '<br>') + '</div>';
+      var txt = intro + '\n\n' + tabelTextMailTeiz(l) + '\n\n' + e.incheiere;
+      try { await navigator.clipboard.write([new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([txt], { type: 'text/plain' }) })]); return true; }
+      catch (x) { try { await navigator.clipboard.writeText(txt); } catch (y) { var ta = document.createElement('textarea'); ta.value = txt; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); } return false; }
+    }
     m.el.querySelector('[data-copiaza]').onclick = async function () {
-      await copiaza('Subiect: ' + m.el.querySelector('#mt-sub').value + '\n\n' + m.el.querySelector('#mt-corp').value);
-      marcheaza(); toast('Textul e-mailului a fost copiat.', 'bine'); m.inchide(); redeseneaza();
+      var rich = await copiazaRich();
+      marcheaza(); toast(rich ? 'Tabelul a fost copiat; lipește-l în e-mail (Ctrl+V).' : 'Textul a fost copiat (tabel din text); lipește-l în e-mail.', 'bine'); m.inchide(); redeseneaza();
     };
     m.el.querySelector('[data-deschide]').onclick = async function () {
-      var catre = m.el.querySelector('#mt-catre').value.trim(), sub = m.el.querySelector('#mt-sub').value, corp = m.el.querySelector('#mt-corp').value;
-      var url = 'mailto:' + encodeURIComponent(catre).replace(/%40/g, '@') + '?subject=' + encodeURIComponent(sub) + '&body=' + encodeURIComponent(corp);
-      if (url.length > 1900) { await copiaza(corp); url = 'mailto:' + encodeURIComponent(catre).replace(/%40/g, '@') + '?subject=' + encodeURIComponent(sub) + '&body=' + encodeURIComponent('Lipește aici textul copiat din program (Ctrl+V).'); toast('Textul e lung: l-am copiat; lipește-l în e-mail (Ctrl+V).', 'bine'); }
+      var catre = m.el.querySelector('#mt-catre').value.trim(), sub = m.el.querySelector('#mt-sub').value;
+      var corp = introTxt() + '\n\n' + tabelTextMailTeiz(l) + '\n\n' + e.incheiere;
+      var baza = 'mailto:' + encodeURIComponent(catre).replace(/%40/g, '@') + '?subject=' + encodeURIComponent(sub) + '&body=';
+      var url = baza + encodeURIComponent(corp);
+      if (url.length > 1900) { await copiazaRich(); url = baza + encodeURIComponent('Lipește aici (Ctrl+V) mesajul cu tabelul, copiat din program.'); toast('Tabelul e mare: l-am copiat; lipește-l în e-mail (Ctrl+V).', 'bine'); }
       marcheaza(); m.inchide(); redeseneaza();
       window.location.href = url;
     };
