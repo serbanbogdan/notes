@@ -6921,6 +6921,7 @@ div.pc { cursor: default; }
     return S.tar.analize.filter(function (t) { return t.sonda && M.aceeasiSonda(sonda, t.sonda).leaga; }).filter(function (t) { return t.est != null || t.vf != null; });
   }
   function esteTipExp(tip) { return /EXPERIMENTAL/.test(M.norm(tip || '')); }
+  var OBS_TEIZ = 'Lipsește valoarea finală. Se solicită transmiterea costurilor realizate imediat ce sunt disponibile.';
   function randuriMailTeiz() { // sonde active din experimentale + sonde din tarife (exploatare experimentală) fără valoare finală
     var rez = [], vazute = {};
     function tarifeSonda(sonda) { return S.tar.analize.filter(function (t) { return t.sonda && esteTipExp(t.tip) && M.aceeasiSonda(sonda, t.sonda).leaga; }); }
@@ -6928,12 +6929,12 @@ div.pc { cursor: default; }
       var tr = tarifeSonda(a.sonda);
       var aviz = (a.avizNr ? a.avizNr + ' / ' : '') + (a.primire != null ? B.fmtData(a.primire) : '—');
       var doc = a.docTrimisa != null ? 'înaintată ' + B.fmtData(a.docTrimisa) : 'neînaintată' + (a.termenDoc != null ? ' (termen ' + B.fmtData(a.termenDoc) + ')' : '');
-      if (!tr.length) rez.push({ sonda: a.sonda, aviz: aviz, expira: a.expira != null ? B.fmtData(a.expira) : '—', inaint: a.docTrimisa != null, doc: doc, est: null, vf: null, obs: 'nu există rând în tarife' });
-      tr.forEach(function (t) { vazute[t.cheie] = 1; if (t.vf != null) return; rez.push({ sonda: a.sonda, aviz: aviz, expira: a.expira != null ? B.fmtData(a.expira) : '—', inaint: a.docTrimisa != null, doc: doc, est: t.est, vf: t.vf, obs: t.vf == null ? 'lipsește valoarea finală' : '' }); });
+      if (!tr.length) rez.push({ sonda: a.sonda, aviz: aviz, expira: a.expira != null ? B.fmtData(a.expira) : '—', inaint: a.docTrimisa != null, doc: doc, est: null, vf: null, obs: a.docTrimisa != null ? OBS_TEIZ : '' });
+      tr.forEach(function (t) { vazute[t.cheie] = 1; if (t.vf != null) return; rez.push({ sonda: a.sonda, aviz: aviz, expira: a.expira != null ? B.fmtData(a.expira) : '—', inaint: a.docTrimisa != null, doc: doc, est: t.est, vf: t.vf, obs: a.docTrimisa != null && t.vf == null ? OBS_TEIZ : '' }); });
     });
     S.tar.analize.forEach(function (t) { // din tarife: exploatare experimentală fără valoare finală, chiar dacă sonda nu mai e activă în experimentale
       if (!t.sonda || !esteTipExp(t.tip) || t.vf != null || vazute[t.cheie]) return;
-      rez.push({ sonda: t.sonda, aviz: t.aviz != null ? B.fmtData(t.aviz) : '—', expira: '—', doc: '—', est: t.est, vf: null, obs: 'lipsește valoarea finală (din tarife)' });
+      rez.push({ sonda: t.sonda, aviz: t.aviz != null ? B.fmtData(t.aviz) : '—', expira: '—', doc: '—', est: t.est, vf: null, obs: '' });
     });
     return rez.sort(function (a, b) { return a.sonda.localeCompare(b.sonda, 'ro', { numeric: true }); });
   }
