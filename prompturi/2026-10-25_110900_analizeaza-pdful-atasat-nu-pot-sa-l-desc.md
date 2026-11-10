@@ -1,6 +1,6 @@
 
 Mai vreau că dacă la un widget aplica o anumită configurare cum este gradientul culori etc să pot slava că un templete și pe care pot sal import și la restul windgetulruli. Și mai vreau următoarea îmbunătățire pt wigetueilw mari inomentul setării daca widgetul ecprea mare nu mai am loc pt restul opțiunilor pt configurare și îmi rămân jos foarte puțin și nu pot dereli vreau că maxim 30% sa fie ocupat de previzilaizare(și restutul într-un zoom) și restul saxfie pt editare. 
 
-Vreau și varianta 2 de widget de ceas similar într-o anumită variație cu poza atașată.
+Vreau și varianta 2 de widget de ceas similar într-o anumită variație cu poza atașată. Vreau sa afi atent la la colțuri și margi și să faci totul la fel. Vreau că această themă sa o adaptezi și pentru restul widgetului.
 
 Am următorii senzori in home Assistent: sensor.claude_usage_bogdan_pro_session_limit_usage, sensor.claude_usage_bogdan_pro_week_usage, sensor.claude_usage_bogdan_pro_weekly_reset_time, sensor.claude_usage_bogdan_pro_session_reset_time. vreau sa îmi faci un widget care sa ia din home Assistent informațiile și să îmi facă un widget similar cu cel de la ceas prin care sa îmi arăți parametrii seniorilor o iconița cu Claude și un deseigna la care sa solosesti și alte elemente pt a face widgetul sa arate modern, vreau să aibă widgetul opțiuni în plus dar și similare că cel de ceas cum este gradientul opacitate etc.
