@@ -1,1 +1,2 @@
-vreau ca la Aplicatia de viziualizare loguri daca pe o trsa am mai multe logri fereastra cu nume logirl si culor devien mare si ocupa mul spatiu si deacea as vrea o optiune draga si sa o pot face mai mica chiar daca ascude loguri
+In momentul de fata am aplciatai ANM Alert care si un widget dar si Widget studio care managereaza taote wigeturile. Vrea ca widgetul sa apara doar in Widget studio si sa respectele teleme de acolo ira aplciataia sa nu mai manaegereaze widgetul doar sa se  deschid la atingera widgetuui si de unde sa fie afisate detalaita alerta si de unde pot schimba judetul.
+judetul vrea sa fie automat selecta in fucntie de locatia mea dar sa pot si schimba manual
