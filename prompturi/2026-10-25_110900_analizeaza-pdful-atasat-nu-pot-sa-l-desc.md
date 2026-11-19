@@ -1,2 +1,5 @@
-In momentul de fata am aplciatai ANM Alert care si un widget dar si Widget studio care managereaza taote wigeturile. Vrea ca widgetul sa apara doar in Widget studio si sa respectele teleme de acolo ira aplciataia sa nu mai manaegereaze widgetul doar sa se  deschid la atingera widgetuui si de unde sa fie afisate detalaita alerta si de unde pot schimba judetul.
-judetul vrea sa fie automat selecta in fucntie de locatia mea dar sa pot si schimba manual
+Vreau sa imi faci un artefact care sa simuleze un launcher android special pentru un ecran de Samsung S25 Ultra.
+Regula principala: ceva out of the box cu o regula importatna totul sa fie disponibume la maxim 2 atingeri 
+Desing: mult blur si minimal si modern care saim bine simbiotic iconitele Samsung native cu restul designului
+Nu prealuat functii din lacueherulie android sau Ios daca nu reespecta toate reguluil sau sunt neaparat utile
+vreau sa fie ceva noi nemaiintalnit foarte customizabul si sa se potrimesca perfect
