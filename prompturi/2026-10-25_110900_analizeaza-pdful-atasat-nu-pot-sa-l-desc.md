@@ -1,1 +1,8 @@
-Vreau ca la programul de organizare echipa pentru butoul "+ Evidenta" cand introduc o nou sonda indifere de care in functie de inforamtiile introduse sa se dupa in toate categoriile pt care eu am completa data: de exemplu daca am adaugat o sonda la acord abandoare si are si valaore estimata sa apara o data la abandonari dar si al tarife, si similar si pte exploatare experimetala si tarife si asa mai departe sa am un loc unde introduc sonde si programul sa le inregistreze in mai multe locuri in functie de caracteristi. pentru a face asta "Adauga in evidenta sa aiva toate optiune de completata pentru a perminte acest lucru, cu campuri optionale si asa mai departe". in program aoar in unel locuri "acord abandoanre" si in altele "Acord Abandonare" verifica sa vrea sa corectezi si sa fie clara acelasi lucri dar sa fie corectate si o singura vaianta folosita pentru toate care sa se potrivesca si cu restul.
+Cursantul este: Serban Alina-Roxana
+nu folosie nici un nume pesnteu Societate nici macar unul fictiv doar "Laboratorul de Cercetare și Analize Fizico"
+chiar dca nu este cazjul la inceputi in capitolul "1.1" vreau sa definesti si TEG (ces este si la ce se foloseste cat pe scurt)
+elinina din text [date simulate] sau alte formualri similare.
+inlocuieste "Societatea are un sistem de management integrat certificat ISO 9001, iar laboratorul pregătește acreditarea RENAR conform SR EN ISO/IEC 17025:2018." cu "laboratorul are un sistem de management integrat certificat ISO 9001, iar laboratorul pregătește acreditarea RENAR conform SR EN ISO/IEC 17025:2018." si in alte contexte faci la fel
+In figura 3 inlocuieste "masini / IT" cu "Aparatura / IT"
+Vreau sca la final sa pui in disclamer incare sa spui ca date, costuriel etc sunt fictive si persoan cnu poate fi trasala raspunderre intr-un dele pt personele care folosesc aceste date in alt scop n afara de a satisface aces proiect
+Elimina anexele
