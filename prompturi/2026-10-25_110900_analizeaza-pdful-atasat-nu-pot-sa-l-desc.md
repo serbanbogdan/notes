@@ -1,8 +1,11 @@
-Cursantul este: Serban Alina-Roxana
-nu folosie nici un nume pesnteu Societate nici macar unul fictiv doar "Laboratorul de Cercetare și Analize Fizico"
-chiar dca nu este cazjul la inceputi in capitolul "1.1" vreau sa definesti si TEG (ces este si la ce se foloseste cat pe scurt)
-elinina din text [date simulate] sau alte formualri similare.
-inlocuieste "Societatea are un sistem de management integrat certificat ISO 9001, iar laboratorul pregătește acreditarea RENAR conform SR EN ISO/IEC 17025:2018." cu "laboratorul are un sistem de management integrat certificat ISO 9001, iar laboratorul pregătește acreditarea RENAR conform SR EN ISO/IEC 17025:2018." si in alte contexte faci la fel
-In figura 3 inlocuieste "masini / IT" cu "Aparatura / IT"
-Vreau sca la final sa pui in disclamer incare sa spui ca date, costuriel etc sunt fictive si persoan cnu poate fi trasala raspunderre intr-un dele pt personele care folosesc aceste date in alt scop n afara de a satisface aces proiect
-Elimina anexele
+Avand la baza "Proiectu fina ISO 9001 pentru laborator" vreau sa imi faci o prezentare .pptx care sa respecte urmatoarele cerente:
+- sa reprezinte cat mai bine cea ce e escris in proeict
+- fiecare slide sa aiba notite
+- numaru lde slideri sa fie minim 8 maxim 12
+- de foarte mre importanta este ca notitele sa fie citite in aroximativ 10 minute
+- sa respecte tablatul din poza atasata
+- nu vreau sa fie icnarcat cu text
+- nu trebuei sa detaleieze prea multe inforamtii deja detaliate in proiect
+- scopul este de a arata procedura nu neaparat cirectitudinea
+- nu isnsita pe date le tehnice legate de parte de la borator ci mai degraba pe elementele de Management al calitaii intalnite si in curs
+- in "PROIECTUL FINAL - MANAGER CALITATE ISO 9001 2026.PDF" la punctul D sunte cerinte vreau sa le respecti    
