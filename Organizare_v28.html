@@ -4838,8 +4838,26 @@ div.pc { cursor: default; }
     var p = 'denied';
     try { p = await IO.permisiune(h, false); } catch (e) { }
     S.folderAles = h;
-    if (p === 'granted') await conecteaza(h);
+    // v2.9: la pornire se verifică toate folderele (programul, avizele ANRMPSG, backup); dacă lipsește vreun acces, se cere o singură dată, cu un clic
+    var lipsa = await acceseLipsa();
+    if (p === 'granted' && !lipsa.length) await conecteaza(h);
     else { S.etapa = 'permisiune'; redeseneaza(); }
+  }
+  var FOLDERE_ACCES = [
+    { k: 'org', nume: 'Organizare (folderul programului)', cale: '\\\\10.11.1.13\\bkpdate\\Geologic\\Serviciul Geologic\\Organizare' },
+    { k: 'avize', nume: 'Avize și acorduri ANRM', cale: '\\\\10.11.1.13\\bkpdate\\Geologic\\Serviciul Geologic\\Avize si Acorduri ANRM' },
+    { k: 'backup', nume: 'Folderul de backup', optional: true }
+  ];
+  async function handleAcces(k) { if (k === 'org') return S.folderAles || await IO.handleSalvat(); return await IO.handleSalvatCheie(k); }
+  async function acceseLipsa() { // [{k, nume, h, p}] — folderele fără acces (sau neales, la avize)
+    var r = [];
+    for (var i = 0; i < FOLDERE_ACCES.length; i++) {
+      var f = FOLDERE_ACCES[i], h = await handleAcces(f.k).catch(function () { return null; });
+      if (!h) { if (f.k === 'avize' && !ls('fara-avize')) r.push({ k: f.k, nume: f.nume, cale: f.cale, h: null, p: 'neales' }); continue; }
+      var p = await IO.permisiune(h, false).catch(function () { return 'denied'; });
+      if (p !== 'granted') r.push({ k: f.k, nume: f.nume, cale: f.cale, h: h, p: p });
+    }
+    S.accesLipsa = r; return r;
   }
   async function alegeFolder() {
     var h;
@@ -4857,9 +4875,31 @@ div.pc { cursor: default; }
     await conecteaza(h);
   }
   async function cerePermisiune() {
-    var p = await IO.permisiune(S.folderAles, true).catch(function () { return 'denied'; });
-    if (p === 'granted') await conecteaza(S.folderAles);
-    else toast('Fără permisiune programul nu poate citi folderul. Apasă din nou și alege „Permite”.', 'eroare');
+    // un singur clic: se cer pe rând toate accesele lipsă; Chrome/Edge oferă „Permite la fiecare vizită”, după care nu mai întreabă
+    var lipsa = S.accesLipsa || await acceseLipsa(), opritActivare = false;
+    for (var i = 0; i < lipsa.length; i++) {
+      var x = lipsa[i];
+      try {
+        if (!x.h && x.k === 'avize') { await pdfAlegeRadacina(); continue; }
+        var p = await IO.permisiune(x.h, true);
+        if (x.k === 'avize' && p === 'granted') S.pdf.root = x.h;
+      } catch (e) { if (e && (e.name === 'SecurityError' || /activation|gesture/i.test(e.message || ''))) { opritActivare = true; break; } }
+    }
+    lipsa = await acceseLipsa();
+    var org = lipsa.filter(function (x) { return x.k === 'org'; })[0];
+    if (!lipsa.length || (!org && !opritActivare && lipsa.every(function (x) { return x.p === 'denied' || x.k === 'backup'; }))) {
+      if (lipsa.length) toast('Programul pornește fără acces la: ' + lipsa.map(function (x) { return x.nume; }).join(', ') + '.', 'eroare');
+      await conecteaza(S.folderAles); return;
+    }
+    redeseneaza();
+    if (opritActivare) toast('Browserul cere încă un clic pentru folderul următor — apasă din nou „Acordă accesul”.', 'bine');
+    else if (org) toast('Fără permisiune programul nu poate citi folderul. Apasă din nou și alege „Permite la fiecare vizită”.', 'eroare');
+  }
+  async function continuaFaraAcces() {
+    var lipsa = S.accesLipsa || [];
+    if (lipsa.some(function (x) { return x.k === 'org'; })) { toast('Folderul programului este obligatoriu.', 'eroare'); return; }
+    if (lipsa.some(function (x) { return x.k === 'avize' && !x.h; })) ls('fara-avize', 1);
+    await conecteaza(S.folderAles);
   }
   async function conecteaza(h) {
     S.folder = h; S.ocupat = true; redeseneaza();
@@ -5735,7 +5775,7 @@ div.pc { cursor: default; }
     } else if (S.etapa === 'folder' || S.etapa === 'permisiune') {
       var cale = IO.caleaPaginii();
       st += '<div class="panou-folder">' + (S.etapa === 'permisiune' ?
-        '<h2>Deschide folderul programului</h2><p>Browserul cere confirmarea accesului la folderul „<b>' + esc(S.folderAles ? S.folderAles.name : '') + '</b>”. Ca să nu mai întrebe, alege „Permite la fiecare vizită”.</p><div class="rand-flex"><button class="btn principal" data-a="permisiune">Deschide folderul</button><button class="btn simplu" data-a="alege-folder">Alege alt folder</button></div>' :
+        '<h2>Acces la folderele programului</h2><p>Programul lucrează cu folderele de mai jos. Apasă o dată „Acordă accesul” și, la fiecare întrebare a browserului, alege <b>„Permite la fiecare vizită”</b> (Allow on every visit) — după aceea nu mai întreabă și totul funcționează automat.</p><ul class="lista-acces">' + (S.accesLipsa || []).map(function (x) { return '<li><b>' + esc(x.nume) + '</b>' + (x.h ? ' — „' + esc(x.h.name) + '”' : '') + (x.cale ? '<br><code class="cale">' + esc(x.cale) + '</code>' : '') + '<br><span class="nota">' + (x.p === 'neales' ? 'nu a fost ales încă: calea se copiază automat, o lipești (Ctrl+V) în bara de adrese a ferestrei, apoi „Select Folder”' : x.p === 'denied' ? 'acces refuzat anterior' : 'așteaptă confirmarea') + '</span></li>'; }).join('') + '</ul><div class="rand-flex"><button class="btn principal" data-a="permisiune">Acordă accesul</button>' + ((S.accesLipsa || []).some(function (x) { return x.k === 'org'; }) ? '' : '<button class="btn simplu" data-a="fara-acces">Continuă fără ele</button>') + '<button class="btn simplu" data-a="alege-folder">Alege alt folder</button></div>' :
         '<h2>Alege folderul programului</h2><p>Datele echipei stau în <b>folderul în care se află acest fișier</b>. Alege-l o singură dată; programul îl va deschide singur de acum înainte.</p>' +
         (cale ? '<p>Folderul acestui fișier: <code class="cale">' + esc(cale) + '</code><br><span class="nota">În fereastra care se deschide poți lipi calea în bara de adrese, apoi „Selectare folder”.</span></p>' : '') +
         '<div><button class="btn principal" data-a="alege-folder">Alege folderul</button></div>') + '</div>';
@@ -8739,6 +8779,7 @@ div.pc { cursor: default; }
     switch (a) {
       case 'alege-folder': alegeFolder(); break;
       case 'permisiune': cerePermisiune(); break;
+      case 'fara-acces': continuaFaraAcces(); break;
       case 'alege-user': S.loginSel = d.id; S.loginEroare = ''; redeseneaza(); break;
       case 'vedere':
         S.vedere = d.v; S.meniu = false;
