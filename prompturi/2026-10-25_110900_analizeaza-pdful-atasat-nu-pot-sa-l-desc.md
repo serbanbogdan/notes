@@ -1,4 +1,5 @@
 Vreau sa vreau totul intr-un program html dinamic care sa aiba urmatoarel optiunie:
+ 0. o schita in care nu corelezi nispurile doar topul foramtiunilor
  1. imi palce prima corelare si hai sa ii dam un nume corelare Clasica 
  2. dar vreau sa am optiunede a corela astfel:
         N1(S1)se efileaza, N1(S2) cu N1(S3)
@@ -8,4 +9,4 @@ Vreau sa vreau totul intr-un program html dinamic care sa aiba urmatoarel optiun
         N3(S1) cu N3(S2), N3(S3)se elfileaza
         N4(S1) cu N4(S2) cu N4(S3)
 Pentru asta vreau ca forma nispuriloe sa permita ambel tipuri de corelear adica doram curbei gama sa mermita ambele varianta.
-Vreau si mai multe varinte in html dar doar cele 2 scenarii
+Vreau si mai multe varinte in html dar doar cele 3 scenarii
