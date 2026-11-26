@@ -1,3 +1,4 @@
+Mai vreau sa faci ca urmatorele nicpusir sa fie inundate: N1(S2),N1(S3),N4(S3) restul saturte pe rezistivitati
 Vreau sa vreau totul intr-un program html dinamic care sa aiba urmatoarel optiunie:
  0. o schita in care nu corelezi nispurile doar topul foramtiunilor
  1. imi palce prima corelare si hai sa ii dam un nume corelare Clasica 
