@@ -1,2 +1,11 @@
-ai o imagine cu 3 sonde dintr-un zăcământ ai în stânga cu verde un log didactic de GR, iar în stânga rezistivitatea cu  albastru Deep portocaliu (desene și cu roșu punctat) și cu albastru shalow.vreau sa îmi faci și zonele traversat Sarmațian și Badenian. Vreau o schiță cât mai didactică cu cele 3 sonde facdistat mai mare între sonde decât cea desenată.
-și vreau să îmi faci o corelare pe straturi de nisip în cadrul zonelor mai mari 
+Vreau sa vreau totul intr-un program html dinamic care sa aiba urmatoarel optiunie:
+ 1. imi palce prima corelare si hai sa ii dam un nume corelare Clasica 
+ 2. dar vreau sa am optiunede a corela astfel:
+        N1(S1)se efileaza, N1(S2) cu N1(S3)
+        N21(S1) cu N21(S2) cu N21(S3)
+        N22(S1) cu N22(S2), N22(S3)se efileaza
+        N23(S1)se elileaza,  N23(S2) cu N23(S3)
+        N3(S1) cu N3(S2), N3(S3)se elfileaza
+        N4(S1) cu N4(S2) cu N4(S3)
+Pentru asta vreau ca forma nispuriloe sa permita ambel tipuri de corelear adica doram curbei gama sa mermita ambele varianta.
+Vreau si mai multe varinte in html dar doar cele 2 scenarii
