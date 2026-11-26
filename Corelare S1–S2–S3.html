@@ -70,16 +70,42 @@ td:first-child{font-weight:700;white-space:nowrap}
 .chk{display:inline-flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--panel);font-size:15px;cursor:pointer}
 .chk input{width:20px;height:20px;margin:0;accent-color:#d9483b}
 .chk:has(input:focus-visible){outline:3px solid var(--focus);outline-offset:2px}
+.lgrp{display:inline-flex}.lgrp .chk{border-top-right-radius:0;border-bottom-right-radius:0}.lgrp .ibtn{border-top-left-radius:0;border-bottom-left-radius:0;border-left:0;font-size:14px;padding:8px 10px}.ibtn[aria-pressed=true]{background:var(--act);color:var(--actink);border-color:var(--act)}.ibtn:disabled{opacity:.45;cursor:not-allowed}
 .left{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 body:not(.sat-on) .sat,body:not(.sat-on) .flc{display:none}
+section[hidden]{display:none}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.tabs button{font-size:16px;font-weight:600}
+.tabs button[aria-pressed=true]{background:var(--act);color:var(--actink);border-color:var(--act)}
+.chk:has(input:checked){border-color:var(--ink)}
+.wgrid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(18px,3vw,34px);align-items:start}
+.panel>*+*{margin-top:14px}
+.card{background:var(--panel);border-radius:10px;padding:16px 18px}
+.card h3{font-size:17px;margin:0 0 8px}
+.card p{margin:0 0 8px}
+.card ul{margin:0 0 8px;padding-left:20px}
+.card li{margin-bottom:4px}
+.card .k2{font-weight:600;margin:10px 0 4px}
+.now{background:light-dark(#fff4d6,#2a2414)}
+.scroll{overflow-x:auto}
+th.num,td.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.wleg{margin-top:22px}
+@media(max-width:1000px){.wgrid{grid-template-columns:minmax(0,1fr)}}
 body.sat-on .lit{display:none}
 @media(max-width:860px){.below{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:600px){table{font-size:13px}th,td{padding:6px 4px}.stack thead{display:none}.stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:0;padding:2px 0}.stack td::before{content:attr(data-l);color:var(--mute);font-weight:400}.seg button{font-size:14px;padding:8px 10px}}
+.chip{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}#tsv{min-width:760px}input[type=range]{width:min(320px,70vw);accent-color:#37474f;min-height:44px}.mdc{display:inline-flex;align-items:center;gap:10px;font-size:15px}.mdc output{min-width:4.5em;font-variant-numeric:tabular-nums;font-weight:600}.tgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,520px),1fr));gap:clamp(14px,2vw,22px);align-items:start;margin-top:16px}
 @media(prefers-reduced-motion:reduce){.lay{transition:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
+<nav class="tabs" aria-label="Secțiuni">
+<button id="tCor" type="button" aria-pressed="true">Corelare S1 – S2 – S3</button>
+<button id="tWell" type="button" aria-pressed="false">Sonda S4: carotaj</button>
+<button id="tTraj" type="button" aria-pressed="false">Vertical vs. dirijată</button>
+</nav>
+<section id="vCor">
 <h1>Corelare S1 – S2 – S3</h1>
 <p class="sub">Sarmațian și Badenian, trei scenarii de corelare pe aceleași loguri. Bifează „Arată saturația” ca să vezi nisipurile cu gaze și pe cele inundate. Schiță didactică, scări orientative.</p>
 
@@ -106,13 +132,7 @@ body.sat-on .lit{display:none}
 
 <div class="plate" id="plate"></div>
 
-<div class="ov" id="ov" hidden>
-<div class="ovb" role="dialog" aria-modal="true" aria-labelledby="ovt">
-<p id="ovt"></p>
-<img id="ovi" alt="Secțiunea exportată">
-<button id="ovc" type="button">Închide</button>
-</div>
-</div>
+
 
 <div class="below">
 <section class="note" id="note" aria-live="polite"></section>
@@ -127,6 +147,72 @@ body.sat-on .lit{display:none}
 <div class="lg" id="lg"></div>
 </section>
 </div>
+</div>
+</section>
+
+<section id="vTraj" hidden>
+<h1>Sondă verticală vs. sondă dirijată</h1>
+<p class="sub">Vertical well vs. deviated (directional) well. Aceleași repere, doi termeni de adâncime diferiți: mută cursorul MD și vezi cum se despart MD, TVD, TVDSS și deplasarea orizontală. Toți termenii sunt dați în română și în engleză. Date didactice, valori orientative.</p>
+<div class="bar">
+<div class="left" role="group" aria-label="Termeni afișați">
+<label class="chk" for="cMD"><input type="checkbox" id="cMD" checked>MD</label>
+<label class="chk" for="cTVD"><input type="checkbox" id="cTVD">TVD</label>
+<label class="chk" for="cTVDSS"><input type="checkbox" id="cTVDSS">TVDSS</label>
+<label class="chk" for="cHD"><input type="checkbox" id="cHD">HD · deplasare</label>
+<label class="chk" for="cINC"><input type="checkbox" id="cINC">INC · înclinare</label>
+<label class="chk" for="cKOP"><input type="checkbox" id="cKOP">KOP / EOB</label>
+<label class="chk" for="cCOTE"><input type="checkbox" id="cCOTE">Cote · Elevations</label>
+<button id="tNext" type="button">Pasul următor</button>
+<button id="tReset" type="button">De la început</button>
+</div>
+<div class="zoom"><button id="tep" type="button">Exportă PNG</button><button id="tes" type="button">SVG</button></div>
+</div>
+<div class="bar"><div class="left"><label class="mdc" for="tmd">MD · adâncime măsurată / measured depth <input type="range" id="tmd" min="0" max="3000" step="10" value="2000"><output id="tmdo" for="tmd">2000 m</output></label>
+<button id="jKOP" type="button">KOP</button><button id="jEOB" type="button">EOB</button><button id="jMID" type="button">2000 m</button><button id="jTD" type="button">TD</button></div></div>
+<p id="texs" class="small" aria-live="polite"></p>
+<div class="plate" id="tplate"></div>
+<div class="tgrid"><div class="panel" id="tpanel"></div></div>
+</section>
+<section id="vWell" hidden>
+<h1>Sonda S4: ce afli din fiecare carotaj</h1>
+<p class="sub">Bifează pe rând GR, rezistivitatea, neutron–densitatea și sonicul: apar curbele brute, neinterpretate. Apasă <b>Interpretează</b> lângă fiecare carotaj ca să vezi ce aduce, iar la final vezi ce perforezi. Nisipul A are gaz pe apă, nisipul B țiței cu cap de gaze pe apă, nisipul C e acvifer. Date didactice, valori orientative.</p>
+<div class="bar">
+<div class="left" role="group" aria-label="Carotaje afișate">
+<span class="lgrp"><label class="chk" for="lGR"><input type="checkbox" id="lGR" checked>1 · GR</label><button class="ibtn" id="iGR" type="button" aria-pressed="false" aria-label="Interpretează GR">Interpretează</button></span>
+<span class="lgrp"><label class="chk" for="lRES"><input type="checkbox" id="lRES">2 · Rezistivitate</label><button class="ibtn" id="iRES" type="button" aria-pressed="false" aria-label="Interpretează rezistivitatea">Interpretează</button></span>
+<span class="lgrp"><label class="chk" for="lND"><input type="checkbox" id="lND">3 · Neutron–densitate</label><button class="ibtn" id="iND" type="button" aria-pressed="false" aria-label="Interpretează neutron–densitatea">Interpretează</button></span>
+<span class="lgrp"><label class="chk" for="lDT"><input type="checkbox" id="lDT">4 · Sonic</label><button class="ibtn" id="iDT" type="button" aria-pressed="false" aria-label="Interpretează sonicul">Interpretează</button></span>
+<label class="chk" for="lPF"><input type="checkbox" id="lPF">5 · Perforare</label>
+<button id="wNext" type="button">Pasul următor</button>
+<button id="wReset" type="button">De la început</button>
+</div>
+<div class="zoom">
+<button id="wzm" type="button" aria-label="Micșorează">−</button>
+<output id="wzl">100%</output>
+<button id="wzp" type="button" aria-label="Mărește">+</button>
+<button id="wzf" type="button">Tot</button>
+<span class="sep" aria-hidden="true"></span>
+<button id="wep" type="button">Exportă PNG</button>
+<button id="wes" type="button">SVG</button>
+</div>
+</div>
+<p id="wexs" class="small" aria-live="polite"></p>
+<div class="wgrid">
+<div class="plate" id="wplate"></div>
+<div class="panel" id="wpanel" aria-live="polite"></div>
+</div>
+<section class="wleg">
+<h3>Legendă</h3>
+<div class="lg" id="wlg"></div>
+</section>
+</section>
+</div>
+
+<div class="ov" id="ov" hidden>
+<div class="ovb" role="dialog" aria-modal="true" aria-labelledby="ovt">
+<p id="ovt"></p>
+<img id="ovi" alt="Secțiunea exportată">
+<button id="ovc" type="button">Închide</button>
 </div>
 </div>
 
@@ -317,7 +403,7 @@ function show(i,push){if(i===cur)return;cur=i;
   if(push){try{history.replaceState(null,'','#'+SC[i].id)}catch(e){try{location.hash=SC[i].id}catch(e2){}}}}
 const fromHash=()=>{const i=SC.findIndex(s=>'#'+s.id===location.hash);return i<0?1:i};
 btns.forEach((b,i)=>b.addEventListener('click',()=>show(i,true)));
-window.addEventListener('hashchange',()=>show(fromHash(),false));
+window.addEventListener('hashchange',()=>{if(location.hash!=='#sonda')show(fromHash(),false)});
 show(fromHash(),false);
 
 /* zoom */
@@ -363,23 +449,26 @@ const exs=document.getElementById('exs'),ov=document.getElementById('ov'),ovi=do
 const say=t=>{exs.textContent=t};
 let dl=null,lastUrl=null;
 (async()=>{try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){dl=null}})();
+/* cadru comun pentru export: titlu sus, legendă jos */
+function frame(c,w,hh,title,sub,items,cols){
+  const TOP=100,rows=Math.ceil(items.length/cols),BOT=60+rows*42,h=hh+TOP+BOT,cw=(w-80)/cols;
+  c.removeAttribute('style');c.removeAttribute('id');
+  c.setAttribute('viewBox',`0 ${-TOP} ${w} ${h}`);c.setAttribute('width',w);c.setAttribute('height',h);
+  c.setAttribute('font-family','IBM Plex Sans, Arial, Helvetica, sans-serif');
+  const head=`<rect x="0" y="${-TOP}" width="${w}" height="${h}" fill="#fbfaf6"/>`+
+    T(40,-52,title,'font-size="36" font-weight="700" fill="#16191d"')+T(40,-16,sub,'font-size="21" fill="#555"');
+  const leg=`<path d="M40 ${hh+12}H${w-40}" stroke="#ccc" stroke-width="1"/>`+items.map(([s,t],i)=>{const x=f1(40+(i%cols)*cw),yy=hh+32+Math.floor(i/cols)*42;
+    return s.replace('<svg ',`<svg x="${x}" y="${yy}" `)+T(+x+48,yy+14,t,'font-size="19" fill="#222"')}).join('');
+  c.insertAdjacentHTML('afterbegin',head);c.insertAdjacentHTML('beforeend',leg);
+  return{xml:new XMLSerializer().serializeToString(c),w,h};
+}
 function exportSvg(){
   const c=document.getElementById('sv').cloneNode(true);
   c.querySelectorAll('.lay').forEach(l=>{if(+l.dataset.s!==cur)l.remove();else l.removeAttribute('class')});
   const on=satOn();
   if(!on)c.querySelectorAll('.sat').forEach(e=>e.remove());
   const items=LG.filter(([,,k])=>on?k!=='lit':k!=='sat');
-  c.removeAttribute('style');c.removeAttribute('id');
-  const TOP=100,cols=5,rows=Math.ceil(items.length/cols),BOT=60+rows*42,h=H+TOP+BOT,cw=(W-80)/cols;
-  c.setAttribute('viewBox',`0 ${-TOP} ${W} ${h}`);c.setAttribute('width',W);c.setAttribute('height',h);
-  c.setAttribute('font-family','IBM Plex Sans, Arial, Helvetica, sans-serif');
-  const head=`<rect x="0" y="${-TOP}" width="${W}" height="${h}" fill="#fbfaf6"/>`+
-    T(40,-52,'Corelare S1 – S2 – S3','font-size="36" font-weight="700" fill="#16191d"')+
-    T(40,-16,'Scenariul '+SC[cur].h+(on?'  ·  Inundate: N1 (S2, S3), N2.3 (S1), N3 (S1), N2.2 (S3), N4 (S3)':'')+'  ·  schiță didactică, scări orientative','font-size="21" fill="#555"');
-  const leg=`<path d="M40 ${H+12}H${W-40}" stroke="#ccc" stroke-width="1"/>`+items.map(([s,t],i)=>{const x=f1(40+(i%cols)*cw),yy=H+32+Math.floor(i/cols)*42;
-    return s.replace('<svg ',`<svg x="${x}" y="${yy}" `)+T(+x+48,yy+14,t,'font-size="19" fill="#222"')}).join('');
-  c.insertAdjacentHTML('afterbegin',head);c.insertAdjacentHTML('beforeend',leg);
-  return{xml:new XMLSerializer().serializeToString(c),w:W,h};
+  return frame(c,W,H,'Corelare S1 – S2 – S3','Scenariul '+SC[cur].h+(on?'  ·  Inundate: N1 (S2, S3), N2.3 (S1), N3 (S1), N2.2 (S3), N4 (S3)':'')+'  ·  schiță didactică, scări orientative',items,5);
 }
 async function toPng(xml,w,h){
   const img=new Image();
@@ -390,15 +479,15 @@ async function toPng(xml,w,h){
   const cx=cv.getContext('2d');cx.fillStyle='#fbfaf6';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(img,0,0,cv.width,cv.height);
   return await new Promise((res,rej)=>cv.toBlob(b=>b?res(b):rej(new Error('blob')),'image/png'));
 }
-async function deliver(name,blob){
+async function deliver(name,blob,msg=say){
   if(lastUrl){URL.revokeObjectURL(lastUrl);lastUrl=null}
-  if(dl){try{await dl.save({filename:name,data:blob});say('Salvat: '+name);return}catch(e){const k=e&&e.code;
-    if(k==='declined'){say('Salvarea a fost anulată.');return}
-    if(k==='rate_limited'){say('Așteaptă câteva secunde și încearcă din nou.');return}}}
+  if(dl){try{await dl.save({filename:name,data:blob});msg('Salvat: '+name);return}catch(e){const k=e&&e.code;
+    if(k==='declined'){msg('Salvarea a fost anulată.');return}
+    if(k==='rate_limited'){msg('Așteaptă câteva secunde și încearcă din nou.');return}}}
   /* rezervă: imaginea afișată, de salvat manual */
   lastUrl=URL.createObjectURL(blob);ovi.src=lastUrl;
   ovt.textContent='Salvarea directă nu e disponibilă aici. Ține apăsat pe imagine (telefon) sau clic dreapta → Salvează imaginea ca.';
-  ov.hidden=false;say('');document.getElementById('ovc').focus();
+  ov.hidden=false;msg('');document.getElementById('ovc').focus();
 }
 const busy=(b,on)=>{b.disabled=on};
 const ep=document.getElementById('ep'),es=document.getElementById('es');
@@ -408,6 +497,347 @@ es.addEventListener('click',async()=>{busy(es,true);
   try{const r=exportSvg();await deliver(`corelare_S1-S2-S3_${SC[cur].id}.svg`,new Blob([r.xml],{type:'image/svg+xml'}))}catch(e){say('Nu am putut genera fișierul.')}finally{busy(es,false)}});
 document.getElementById('ovc').addEventListener('click',()=>{ov.hidden=true});
 ov.addEventListener('click',e=>{if(e.target===ov)ov.hidden=true});
+
+/* ================= Sonda didactică S4 ================= */
+const V={W:1040,H:1185,D0:1500,D1:1720,Y0:172,K:4.4};
+const wy=d=>V.Y0+(d-V.D0)*V.K;
+const TR={dep:{x:14,w:64},gr:{x:86,w:150},res:{x:244,w:160},nd:{x:412,w:170},dt:{x:590,w:140},int:{x:738,w:130}};
+const XL=TR.int.x+TR.int.w+10;
+const RW=0.06,RMF=0.3,GW=1552,GO=1608,OW=1632;
+const ZN=[{n:'A',t:1535,b:1565,phi:0.24},{n:'B',t:1590,b:1650,phi:0.26},{n:'C',t:1675,b:1690,phi:0.25}];
+const SWD={g:0.2,o:0.25,w:1},SXO={g:0.8,o:0.8,w:1};
+const FZ=[{z:'A',t:1535,b:GW,f:'g'},{z:'A',t:GW,b:1565,f:'w'},{z:'B',t:1590,b:GO,f:'g'},{z:'B',t:GO,b:OW,f:'o'},{z:'B',t:OW,b:1650,f:'w'},{z:'C',t:1675,b:1690,f:'w'}];
+const PERF=[{t:1537,b:1546},{t:1612,b:1624}];
+const WC={gr:'#2e7d32',rd:'#c62828',rs:'#1565c0',rhob:'#c62828',nphi:'#1565c0',dt:'#6a1b9a',g:'#e8776b',o:'#4f9d57',w:'#6aa9df',hc:'#f0a04b',sand:'#f2c33d',sandB:'#f5d470'};
+const NM={gr:'GR',res:'Rezistivitate',nd:'Neutron–densitate',dt:'Sonic'};
+const fmt=(v,dp)=>v.toFixed(dp).replace('.',',');
+/* fracțiile de gaz / țiței / apă în nisip, cu tranziții scurte la contacte */
+const fr=(z,d)=>{if(z.n==='A'){const g=sig((GW-d)/0.5);return{g,o:0,w:1-g}}
+  if(z.n==='B'){const g=sig((GO-d)/0.5),w=sig((d-OW)/1.0);return{g,o:Math.max(0,1-g-w),w}}return{g:0,o:0,w:1}};
+/* loguri sintetice: Archie pentru Rt/Rxo, răspunsuri N–D și Wyllie pentru sonic */
+const WLg=(()=>{const r=mul(97),d=[];for(let k=0;k<=(V.D1-V.D0)*4;k++)d.push(V.D0+k/4);const n=d.length;
+  const a=sn(n,r,6,4),b=sn(n,r,1,2),c=sn(n,r,6,0.04),e=sn(n,r,2,0.02),p=sn(n,r,4,0.011),q=sn(n,r,4,0.011),t=sn(n,r,5,1.4),s=sn(n,r,3,0.02);
+  const L={d,gr:[],rd:[],rs:[],nphi:[],rhob:[],dt:[]};
+  for(let i=0;i<n;i++){const D=d[i];let m=0,z=ZN[0];for(const Z of ZN){const mm=sig((D-Z.t)/0.5)*sig((Z.b-D)/0.5);if(mm>m){m=mm;z=Z}}
+    const f=fr(z,D),phi=z.phi,sw=f.g*SWD.g+f.o*SWD.o+f.w*SWD.w,sxo=f.g*SXO.g+f.o*SXO.o+f.w*SXO.w;
+    const rt=RW/((phi**2)*(sw**2)),rxo=RMF/((phi**2)*(sxo**2)),rsh=2*(10**c[i]);
+    L.gr.push(m*(36+0.4*a[i])+(1-m)*(110+a[i])+b[i]);
+    L.rd.push(10**(m*Math.log10(rt)+(1-m)*Math.log10(rsh)+e[i]));
+    L.rs.push(10**(m*Math.log10(rxo)+(1-m)*Math.log10(rsh*1.08)+0.8*e[i]+s[i]));
+    L.nphi.push(m*(phi-0.11*f.g)+(1-m)*0.40+p[i]);
+    L.rhob.push(m*(2.65-1.65*(phi+0.08*f.g))+(1-m)*2.45+q[i]);
+    L.dt.push(m*(55.5+133.5*phi+12*f.g)+(1-m)*(112-0.03*(D-1500))+t[i]);}
+  return L})();
+const xa=(k,f)=>TR[k].x+TR[k].w*cl(f,0,1);
+const fGR=v=>v/150,fR=v=>(Math.log10(cl(v,0.2,200))+0.69897)/3,fN=v=>(0.45-v)/0.6,fD=v=>(v-1.9)/1.0,fT=v=>(140-v)/100;
+const yT=wy(V.D0),yB=wy(V.D1),WY=WLg.d.map(d=>wy(d));
+const wline=xs=>path(xs.map((x,i)=>[x,WY[i]]));
+const warea=(fw,bk)=>poly([...fw.map((x,i)=>[x,WY[i]]),...bk.map((x,i)=>[x,WY[i]]).reverse()]);
+const xGR=WLg.gr.map(v=>xa('gr',fGR(v))),xRD=WLg.rd.map(v=>xa('res',fR(v))),xRS=WLg.rs.map(v=>xa('res',fR(v))),xNP=WLg.nphi.map(v=>xa('nd',fN(v))),xRB=WLg.rhob.map(v=>xa('nd',fD(v))),xDT=WLg.dt.map(v=>xa('dt',fT(v)));
+const sandM=WLg.gr.map(v=>v<75),xCut=xa('gr',fGR(75));
+const vline=x=>`<path d="M${f1(x)} ${f1(yT)}V${f1(yB)}" stroke="#e4e4e4" stroke-width="1"/>`;
+const GG={gr:[30,60,90,120].map(v=>vline(xa('gr',fGR(v)))).join(''),
+  res:[0.5,1,2,5,10,20,50,100].map(v=>vline(xa('res',fR(v)))).join(''),
+  nd:[1,2,3,4,5,6,7,8,9].map(k=>vline(TR.nd.x+TR.nd.w*k/10)).join(''),
+  dt:[60,80,100,120].map(v=>vline(xa('dt',fT(v)))).join('')};
+const CUT=`<path d="M${f1(xCut)} ${f1(yT)}V${f1(yB)}" stroke="#888" stroke-width="1" stroke-dasharray="5 5"/>`;
+const RAW={gr:`<path d="${wline(xGR)}" fill="none" stroke="${WC.gr}" stroke-width="2"/>`,
+  res:`<path d="${wline(xRS)}" fill="none" stroke="${WC.rs}" stroke-width="1.8"/><path d="${wline(xRD)}" fill="none" stroke="${WC.rd}" stroke-width="2.8" stroke-linecap="round" stroke-dasharray="0.1 4.5"/>`,
+  nd:`<path d="${wline(xNP)}" fill="none" stroke="${WC.nphi}" stroke-width="2" stroke-dasharray="7 4"/><path d="${wline(xRB)}" fill="none" stroke="${WC.rhob}" stroke-width="2"/>`,
+  dt:`<path d="${wline(xDT)}" fill="none" stroke="${WC.dt}" stroke-width="2"/>`};
+const CV={
+  gr:CUT+`<path d="${warea(WLg.gr.map(v=>xa('gr',fGR(Math.min(v,75)))),WLg.gr.map(()=>xCut))}" fill="${WC.sand}"/><path d="${wline(xGR)}" fill="none" stroke="${WC.gr}" stroke-width="2"/>`,
+  res:`<path d="${warea(xRD.map((x,i)=>sandM[i]&&x>xRS[i]?x:xRS[i]),xRS)}" fill="#e53935" fill-opacity=".22"/><path d="${warea(xRS.map((x,i)=>sandM[i]&&x>xRD[i]?x:xRD[i]),xRD)}" fill="#1e88e5" fill-opacity=".22"/>`+
+    `<path d="${wline(xRS)}" fill="none" stroke="${WC.rs}" stroke-width="1.8"/><path d="${wline(xRD)}" fill="none" stroke="${WC.rd}" stroke-width="2.8" stroke-linecap="round" stroke-dasharray="0.1 4.5"/>`,
+  nd:`<path d="${warea(xRB.map((a,i)=>xNP[i]-a>2?a:xNP[i]),xNP)}" fill="#e8776b" fill-opacity=".6"/><path d="${warea(xRB.map((a,i)=>a-xNP[i]>2?a:xNP[i]),xNP)}" fill="#b9bcae" fill-opacity=".6"/>`+
+    `<path d="${wline(xNP)}" fill="none" stroke="${WC.nphi}" stroke-width="2" stroke-dasharray="7 4"/><path d="${wline(xRB)}" fill="none" stroke="${WC.rhob}" stroke-width="2"/>`,
+  dt:`<path d="${wline(xDT)}" fill="none" stroke="${WC.dt}" stroke-width="2"/>`};
+/* ce scrie pe fiecare carotaj: [text, adâncime, partea] */
+const AN={gr:[['Nisip A',1544,'r'],['Nisip B',1620,'r'],['Nisip C',1683,'r'],['marnă',1577,'l']],
+  res:[['Rt ≈ 26',1543,'l'],['Rt ≈ 1',1559,'r'],['Rt ≈ 14–22',1612,'l'],['Rt ≈ 0,9',1641,'r'],['Ro ≈ 1 → Rw',1683,'r']],
+  nd:[['crossover',1540,'r'],['→ gaz',1546,'r'],['crossover',1596,'r'],['→ gaz',1602,'r'],['suprapuse',1616,'r'],['→ lichid',1622,'r'],['separare',1574,'r'],['→ marnă',1580,'r']],
+  dt:[['DT ↑ gaz',1543,'r'],['φS ≈ 26 %',1620,'r']]};
+const ann=k=>AN[k].map(([t,d,sd])=>{const tr=TR[k],R=sd==='r';return T(R?tr.x+tr.w-6:tr.x+6,wy(d)+5,t,`text-anchor="${R?'end':'start'}" font-size="14" font-weight="600" fill="#222" class="hl"`)}).join('');
+const ph=k=>{const c=TR[k].x+TR[k].w/2,yy=wy(1600);return T(c,yy,'Bifează','text-anchor="middle" font-size="15" fill="#9a9a9a"')+T(c,yy+22,NM[k],'text-anchor="middle" font-size="15" font-weight="600" fill="#9a9a9a"')};
+let W0='';
+for(const k of['dep','gr','res','nd','dt','int'])W0+=`<rect x="${TR[k].x}" y="${f1(yT)}" width="${TR[k].w}" height="${f1(yB-yT)}" fill="#fff" stroke="#8d8d8d" stroke-width="1"/>`;
+for(let d=V.D0;d<=V.D1;d+=10){const yy=f1(wy(d));W0+=`<path d="M${TR.gr.x} ${yy}H${TR.int.x+TR.int.w}" stroke="#ececec" stroke-width="1"/><path d="M${TR.dep.x+TR.dep.w-8} ${yy}H${TR.dep.x+TR.dep.w}" stroke="#555" stroke-width="1.2"/>`+T(TR.dep.x+5,wy(d)+5,String(d),'font-size="14" fill="#333"')}
+const WDEF=`<style>.hl{paint-order:stroke;stroke:#fbfaf6;stroke-width:5px;stroke-linejoin:round}</style><defs><pattern id="wdots" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1.3" fill="#4a3516" fill-opacity=".45"/><circle cx="7.5" cy="7.5" r="1.3" fill="#4a3516" fill-opacity=".45"/></pattern><pattern id="wsh" width="14" height="8" patternUnits="userSpaceOnUse"><rect width="14" height="8" fill="#d6d6cb"/><path d="M1 4H9" stroke="#8b8b7c" stroke-width="1.2"/></pattern></defs>`;
+function hdr(s){
+  const o=k=>s[k]?'':' opacity=".3"';let h='';
+  for(const k of['dep','gr','res','nd','dt','int'])h+=`<rect x="${TR[k].x}" y="74" width="${TR[k].w}" height="90" fill="#fff" stroke="#777" stroke-width="1"/>`;
+  const dc=TR.dep.x+TR.dep.w/2;h+=T(dc,54,'S4','text-anchor="middle" font-size="34" font-weight="700" fill="#1a237e"')+T(dc,114,'Adânc.','text-anchor="middle" font-size="14"')+T(dc,134,'(m)','text-anchor="middle" font-size="14"');
+  const g=TR.gr,gc=g.x+g.w/2;
+  h+=`<g${o('gr')}>`+T(gc,94,'GR',`text-anchor="middle" font-size="17" font-weight="700" fill="${WC.gr}"`)+`<path d="M${g.x+8} 103H${g.x+g.w-8}" stroke="${WC.gr}" stroke-width="2.4"/>`+T(g.x+5,123,'0','font-size="14"')+T(gc,123,'API','text-anchor="middle" font-size="14" fill="#555"')+T(g.x+g.w-5,123,'150','text-anchor="end" font-size="14"')+T(g.x+5,152,'← nisip','font-size="13" fill="#8a6500"')+T(g.x+g.w-5,152,'marnă →','text-anchor="end" font-size="13" fill="#555"')+'</g>';
+  const r=TR.res,rc=r.x+r.w/2;
+  h+=`<g${o('res')}>`+T(rc,92,'RD – deep',`text-anchor="middle" font-size="15" font-weight="700" fill="${WC.rd}"`)+`<path d="M${r.x+8} 100H${r.x+r.w-8}" stroke="${WC.rd}" stroke-width="2.8" stroke-linecap="round" stroke-dasharray="0.1 4.5"/>`+T(rc,120,'RS – shallow',`text-anchor="middle" font-size="15" font-weight="700" fill="${WC.rs}"`)+`<path d="M${r.x+8} 127H${r.x+r.w-8}" stroke="${WC.rs}" stroke-width="2"/>`+T(r.x+5,152,'0.2','font-size="14"')+T(rc,152,'Ω·m (log)','text-anchor="middle" font-size="14" fill="#555"')+T(r.x+r.w-5,152,'200','text-anchor="end" font-size="14"')+'</g>';
+  const nd=TR.nd,nc=nd.x+nd.w/2;
+  h+=`<g${o('nd')}>`+T(nc,90,'RHOB',`text-anchor="middle" font-size="15" font-weight="700" fill="${WC.rhob}"`)+`<path d="M${nd.x+8} 97H${nd.x+nd.w-8}" stroke="${WC.rhob}" stroke-width="2"/>`+T(nd.x+5,112,'1.90','font-size="13"')+T(nc,112,'g/cm³','text-anchor="middle" font-size="13" fill="#555"')+T(nd.x+nd.w-5,112,'2.90','text-anchor="end" font-size="13"')+
+    T(nc,132,'NPHI',`text-anchor="middle" font-size="15" font-weight="700" fill="${WC.nphi}"`)+`<path d="M${nd.x+8} 139H${nd.x+nd.w-8}" stroke="${WC.nphi}" stroke-width="2" stroke-dasharray="7 4"/>`+T(nd.x+5,155,'0.45','font-size="13"')+T(nc,155,'v/v','text-anchor="middle" font-size="13" fill="#555"')+T(nd.x+nd.w-5,155,'−0.15','text-anchor="end" font-size="13"')+'</g>';
+  const t=TR.dt,tc=t.x+t.w/2;
+  h+=`<g${o('dt')}>`+T(tc,94,'DT – sonic',`text-anchor="middle" font-size="15" font-weight="700" fill="${WC.dt}"`)+`<path d="M${t.x+8} 103H${t.x+t.w-8}" stroke="${WC.dt}" stroke-width="2"/>`+T(t.x+5,123,'140','font-size="14"')+T(tc,123,'µs/ft','text-anchor="middle" font-size="14" fill="#555"')+T(t.x+t.w-5,123,'40','text-anchor="end" font-size="14"')+'</g>';
+  const I=TR.int;h+=T(I.x+I.w/2,100,'Interpretare','text-anchor="middle" font-size="15" font-weight="700"')+T(I.x+21,140,'Lit.','text-anchor="middle" font-size="13" fill="#555"')+T(I.x+44+(I.w-46)/2,140,'Fluid','text-anchor="middle" font-size="13" fill="#555"');
+  return h;
+}
+const merge=a=>a.reduce((o,z)=>{const p=o[o.length-1];if(p&&p.z===z.z&&p.l===z.l&&p.b===z.t)p.b=z.b;else o.push({...z});return o},[]);
+function interp(s){
+  const lith=s.gr||s.nd,I=TR.int,lx=I.x+2,lw=38,fx=I.x+44,fw=I.w-46;let h='';
+  if(lith){h+=`<rect x="${lx}" y="${f1(yT)}" width="${lw}" height="${f1(yB-yT)}" fill="url(#wsh)"/>`;
+    for(const z of ZN){const y1=wy(z.t),y2=wy(z.b);h+=`<rect x="${lx}" y="${f1(y1)}" width="${lw}" height="${f1(y2-y1)}" fill="${WC.sandB}" stroke="#a87b0c"/><rect x="${lx}" y="${f1(y1)}" width="${lw}" height="${f1(y2-y1)}" fill="url(#wdots)"/>`+T(lx+lw/2,(y1+y2)/2+6,z.n,'text-anchor="middle" font-size="17" font-weight="700" fill="#3d2f0c" class="hl"')}}
+  else h+=T(lx+lw/2,wy(1610),'?','text-anchor="middle" font-size="22" fill="#9a9a9a"');
+  let list=[];const FL={g:'gaz',o:'țiței',w:'apă'};
+  if(lith&&s.res)list=s.nd?FZ.map(z=>({...z,c:WC[z.f],l:FL[z.f]})):merge(FZ.map(z=>({...z,c:z.f==='w'?WC.w:WC.hc,l:z.f==='w'?'apă':'HC'})));
+  else if(lith&&s.nd)list=merge(FZ.map(z=>z.f==='g'?{...z,c:WC.g,l:'gaz'}:{...z,c:'#d9d9d2',l:'lichid?'}));
+  for(const z of list){const y1=wy(z.t),y2=wy(z.b);h+=`<rect x="${fx}" y="${f1(y1)}" width="${fw}" height="${f1(y2-y1)}" fill="${z.c}" stroke="#555" stroke-width=".8"/>`;
+    if(y2-y1>18)h+=T(fx+fw/2,(y1+y2)/2+5,z.l,'text-anchor="middle" font-size="15" font-weight="700" fill="#14181c"')}
+  if(!list.length)h+=T(fx+fw/2,wy(1604),'fluid','text-anchor="middle" font-size="14" fill="#9a9a9a"')+T(fx+fw/2,wy(1604)+20,'necunoscut','text-anchor="middle" font-size="14" fill="#9a9a9a"');
+  return h;
+}
+function contacts(s){const lith=s.gr||s.nd,c=[];
+  if(lith&&s.res){c.push([GW,s.nd?'CGA':'HC / apă','#1f4e79'],[OW,s.nd?'CȚA':'HC / apă','#1f4e79']);if(s.nd)c.push([GO,'CGȚ','#7a1f1f'])}
+  else if(s.nd)c.push([GW,'bază gaz','#7a1f1f'],[GO,'bază gaz','#7a1f1f']);
+  return c.map(([d,l,col])=>`<path d="M${TR.gr.x} ${f1(wy(d))}H${TR.int.x+TR.int.w}" stroke="${col}" stroke-width="2" stroke-dasharray="9 5"/>`+T(XL,wy(d)+5,`${l} ${d} m`,`font-size="15" font-weight="700" fill="${col}" class="hl"`)).join('')}
+function perfs(){let h='';const xr=TR.dep.x+TR.dep.w;
+  for(const p of PERF){const y1=wy(p.t),y2=wy(p.b);h+=`<rect x="${xr-12}" y="${f1(y1)}" width="12" height="${f1(y2-y1)}" fill="#111"/>`;
+    for(let d=p.t+0.75;d<p.b;d+=1.5){const yy=wy(d);h+=`<path d="M${xr} ${f1(yy-3)}L${xr+10} ${f1(yy)}L${xr} ${f1(yy+3)}Z" fill="#111"/>`}
+    h+=T(XL,(y1+y2)/2+5,`perf. ${p.t}–${p.b} m`,'font-size="15" font-weight="700" fill="#111" class="hl"')}
+  return h}
+
+/* textele din panou */
+const CARD={
+gr:`<div class="card"><h3>1 · GR: litologia</h3><p>Măsoară radioactivitatea naturală a rocii (K, Th, U), concentrată în argile și marne.</p><p class="k2">Ce obții</p><ul><li>unde sunt nisipurile și marnele, grosimea și limitele stratelor;</li><li>volumul de argilă: I<sub>GR</sub> = (GR − GR<sub>min</sub>) / (GR<sub>max</sub> − GR<sub>min</sub>);</li><li>reperele pentru corelarea între sonde.</li></ul><p class="k2">Ce nu obții</p><p>Fluidul: un nisip cu gaze, țiței sau apă arată la fel pe GR.</p><p class="small">În S4: trei nisipuri curate (≈ 36 API) între marne (≈ 110 API).</p></div>`,
+res:`<div class="card"><h3>2 · Rezistivitate: hidrocarburi sau apă</h3><p>Apa de zăcământ sărată conduce curentul, gazele și țițeiul nu. RD citește zona virgină (Rt), RS zona spălată de filtrat (Rxo).</p><p class="k2">Ce obții</p><ul><li>nisip cu hidrocarburi (Rt mare) față de nisip cu apă (Rt mic);</li><li>contactul hidrocarburi–apă;</li><li>Rw dintr-un acvifer: Rw = Ro·φ²;</li><li>saturația în apă cu Archie, dacă ai porozitatea;</li><li>invazia, deci un strat permeabil: cu noroi dulce, RS &gt; RD în apă și RD &gt; RS în hidrocarburi.</li></ul><p class="k2">Ce nu obții</p><p>Diferența dintre gaze și țiței: ambele sunt rezistive.</p><p class="small">În S4: A are Rt ≈ 26 Ω·m până la 1552 m și ≈ 1 Ω·m dedesubt; B are Rt ≈ 14–22 Ω·m până la 1632 m și ≈ 0,9 Ω·m dedesubt; C are Ro ≈ 1 Ω·m.</p></div>`,
+nd:`<div class="card"><h3>3 · Neutron–densitate: porozitate și gaz</h3><p>Densitatea dă φ<sub>D</sub> = (2,65 − ρ<sub>b</sub>) / (2,65 − 1). Neutronul măsoară hidrogenul din pori și dă φ<sub>N</sub>. Pe scări compatibile cu nisipul, curbele se suprapun într-un nisip cu apă sau țiței.</p><p class="k2">Ce obții</p><ul><li>porozitatea; în gaz, φ ≈ √((φ<sub>N</sub>² + φ<sub>D</sub>²) / 2);</li><li>gazul: puțin hidrogen și densitate mică, deci φ<sub>N</sub> scade, φ<sub>D</sub> crește și curbele se încrucișează (crossover);</li><li>contactele gaze–țiței și gaze–apă;</li><li>marnele: φ<sub>N</sub> mult peste φ<sub>D</sub>;</li><li>litologia, din diagrama neutron–densitate.</li></ul><p class="k2">Ce nu obții</p><p>Diferența dintre țiței și apă: pentru asta ai rezistivitatea.</p><p class="small">În S4: crossover în A până la 1552 m și în B până la 1608 m, deci gaz. Între 1608 și 1632 m curbele se suprapun deși Rt e mare, deci țiței. φ ≈ 24 % în A, 26 % în B, 25 % în C.</p></div>`,
+dt:`<div class="card"><h3>4 · Sonic: confirmare și legătura cu seismica</h3><p>Măsoară timpul de parcurs al undei P (DT, µs/ft): roca mai poroasă are DT mai mare.</p><p class="k2">Ce obții</p><ul><li>porozitatea sonică (Wyllie): φ<sub>S</sub> = (DT − 55,5) / (189 − 55,5);</li><li>porozitatea secundară (fisuri, goluri): φ<sub>ND</sub> − φ<sub>S</sub>;</li><li>legătura cu seismica: cu densitatea dă impedanța acustică și seismograma sintetică;</li><li>cu undele S (sonic dipol): proprietăți mecanice, stabilitatea găurii, proiectarea fisurării;</li><li>compactarea și suprapresiunile, din tendința DT în marne.</li></ul><p class="k2">Atenție</p><p>În gaz DT crește și φ<sub>S</sub> iese supraestimată.</p><p class="small">În S4: φ<sub>S</sub> ≈ 25 % în apă și țiței, la fel ca neutron–densitatea, deci fără porozitate secundară. În gaz DT urcă la ≈ 100 µs/ft, încă un indiciu de gaz.</p></div>`,
+pf:`<div class="card"><h3>5 · Ce perforăm</h3><ul><li><b>A, gaz pe apă: 1537–1546 m.</b> Partea de sus a gazului, la ≈ 6 m deasupra CGA (1552 m), ca apa să nu ajungă la perforaturi (conul de apă).</li><li><b>B, țiței cu cap de gaze: 1612–1624 m.</b> La ≈ 4 m sub CGȚ (1608 m) și ≈ 8 m deasupra CȚA (1632 m), ca să ținem la distanță gazul (conul de gaze, rație gaze–țiței mare) și apa.</li><li><b>Capul de gaze din B nu se perforează acum.</b> Expansiunea lui împinge țițeiul spre sondă; se poate produce mai târziu.</li><li><b>C nu se perforează:</b> e acvifer.</li><li><b>Ordinea:</b> completare selectivă cu packer între A și B, de regulă de jos în sus (întâi B, apoi A), sau completare dublă.</li></ul><p class="small">Propunere didactică. În practică mai contează cimentarea (CBL/VDL), permeabilitatea, grosimea netă, presiunile și strategia de exploatare a zăcământului.</p></div>`};
+function summary(s){const lith=s.gr||s.nd,out=[];
+  if(!s.gr&&!s.res&&!s.nd&&!s.dt){const raw=['gr','res','nd','dt'].filter(k=>st[k]);return'<h3>Ce știi acum</h3><p>'+(raw.length?'Vezi doar curbe brute, fără nicio interpretare. Apasă <b>Interpretează</b> lângă '+raw.map(k=>NM[k]).join(' / ')+' ca să afli ce îți spune.':'Nimic încă. Bifează GR ca să începi.')+'</p>'}
+  out.push(lith?'<b>Litologie:</b> trei nisipuri, A 1535–1565 m, B 1590–1650 m și C 1675–1690 m, separate de marne.':'Fără GR (sau neutron–densitate) nu știi sigur unde sunt nisipurile.');
+  if(lith&&s.res&&!s.nd)out.push('<b>Fluide:</b> A are hidrocarburi până la 1552 m și apă dedesubt; B are hidrocarburi până la 1632 m și apă dedesubt; C e acvifer. Încă nu știi dacă hidrocarburile sunt gaze sau țiței.');
+  if(lith&&s.res&&s.nd)out.push('<b>Fluide:</b> A – gaz pe apă (CGA 1552 m). B – cap de gaze 1590–1608 m, țiței 1608–1632 m, apă dedesubt (CGȚ 1608 m, CȚA 1632 m). C – acvifer.');
+  if(s.nd&&!s.res)out.push('<b>Gaz:</b> crossover în A până la 1552 m și în B până la 1608 m. Fără rezistivitate nu deosebești țițeiul de apă sub aceste adâncimi.');
+  if(s.res&&!lith)out.push('Vezi intervalele rezistive, dar fără GR nu știi sigur care sunt nisipuri.');
+  if(s.nd)out.push('<b>Porozitate:</b> ≈ 24 % în A, 26 % în B, 25 % în C.');
+  if(s.dt)out.push('<b>Sonic:</b> confirmă porozitatea (≈ 25 %) și arată efectul de gaze (DT ↑) în A și în capul de gaze din B.');
+  const nxt=['gr','res','nd','dt'].find(k=>!s[k]),nshown=nxt&&st[nxt];
+  const why={gr:'afli unde sunt nisipurile',res:'afli care nisipuri au hidrocarburi și care au apă',nd:'deosebești gazul de țiței și citești porozitatea',dt:'confirmi porozitatea și legi sonda de seismică'};
+  let h='<h3>Ce știi acum</h3><ul>'+out.map(x=>'<li>'+x+'</li>').join('')+'</ul>';
+  if(nxt)h+=nshown?`<p class="small">${NM[nxt]} e afișat brut. Apasă <b>Interpretează</b> ca să ${why[nxt]}.</p>`:`<p class="small">Pasul următor: bifează <b>${NM[nxt]}</b> ca să ${why[nxt]}.</p>`;
+  else if(!s.pf)h+='<p class="small">Ai interpretat toate carotajele. Bifează <b>Perforare</b> ca să vezi ce perforezi.</p>';
+  return h}
+function archie(){const FL={g:'gaz',o:'țiței',w:'apă'};
+  const rows=[['A',1535,GW,'g',.24],['A',GW,1565,'w',.24],['B',1590,GO,'g',.26],['B',GO,OW,'o',.26],['B',OW,1650,'w',.26],['C',1675,1690,'w',.25]];
+  const tr=rows.map(([z,t,b,f,p])=>{const rt=RW/((p**2)*(SWD[f]**2)),sw=Math.sqrt(RW/((p**2)*rt));
+    return`<tr><td>${z} ${t}–${b}</td><td class="num">${fmt(p*100,0)} %</td><td class="num">${fmt(rt,rt<2?2:0)}</td><td class="num">${fmt(sw*100,0)} %</td><td>${FL[f]}</td></tr>`}).join('');
+  return`<div class="card"><h3>Saturația în apă (Archie)</h3><p class="small">Rw din acviferul C: Rw = Ro·φ² = 0,96 × 0,25² ≈ 0,06 Ω·m. Apoi Sw = √(Rw / (φ²·Rt)), cu a = 1, m = n = 2.</p><div class="scroll"><table><thead><tr><th>Interval (m)</th><th class="num">φ</th><th class="num">Rt (Ω·m)</th><th class="num">Sw</th><th>Fluid</th></tr></thead><tbody>${tr}</tbody></table></div></div>`}
+
+const st={gr:true,res:false,nd:false,dt:false,pf:false},it={gr:false,res:false,nd:false,dt:false};
+const IB={gr:'iGR',res:'iRES',nd:'iND',dt:'iDT'};
+const KB={gr:'lGR',res:'lRES',nd:'lND',dt:'lDT',pf:'lPF'};
+const wplate=document.getElementById('wplate'),wpanel=document.getElementById('wpanel'),wzl=document.getElementById('wzl'),WZ=[1,1.5,2,3];let wzi=0;
+function renderWell(){
+  const sh=st,q={gr:sh.gr&&it.gr,res:sh.res&&it.res,nd:sh.nd&&it.nd,dt:sh.dt&&it.dt,pf:sh.pf};
+  const body=['gr','res','nd','dt'].map(k=>sh[k]?GG[k]+(q[k]?CV[k]+ann(k):RAW[k]):ph(k)).join('');
+  const pf=(q.pf&&q.gr&&q.res&&q.nd)?perfs():'';
+  wplate.innerHTML=`<svg id="wsv" viewBox="0 0 ${V.W} ${V.H}" style="width:${WZ[wzi]*100}%" role="img" aria-label="Sonda S4: carotaje GR, rezistivitate, neutron–densitate și sonic, cu interpretarea fluidelor" font-family="IBM Plex Sans, system-ui, sans-serif">${WDEF}${W0}${body}${interp(q)}${contacts(q)}${pf}${hdr(sh)}</svg>`;
+  let h=`<div class="card now">${summary(q)}</div>`;
+  if(q.pf)h+=(q.gr&&q.res&&q.nd)?CARD.pf:'<div class="card"><h3>5 · Ce perforăm</h3><p>Ca să alegi intervalele ai nevoie de GR, rezistivitate și neutron–densitate, toate interpretate. Apasă <b>Interpretează</b> la fiecare.</p></div>';
+  if(q.res&&q.nd)h+=archie();
+  for(const k of['gr','res','nd','dt'])if(q[k])h+=CARD[k];
+  wpanel.innerHTML=h;
+  for(const k in KB)document.getElementById(KB[k]).checked=sh[k];
+  for(const k in IB){const b=document.getElementById(IB[k]);b.setAttribute('aria-pressed',String(q[k]));b.textContent=q[k]?'Ascunde interpretarea':'Interpretează'}
+}
+for(const k in KB)document.getElementById(KB[k]).addEventListener('change',e=>{st[k]=e.target.checked;if(!st[k]&&k in it)it[k]=false;renderWell()});
+for(const k in IB)document.getElementById(IB[k]).addEventListener('click',()=>{it[k]=!it[k];if(it[k])st[k]=true;renderWell()});
+document.getElementById('wNext').addEventListener('click',()=>{for(const k of['gr','res','nd','dt']){if(!st[k]){st[k]=true;return renderWell()}if(!it[k]){it[k]=true;return renderWell()}}if(!st.pf){st.pf=true;renderWell()}});
+document.getElementById('wReset').addEventListener('click',()=>{for(const k in KB)st[k]=k==='gr';for(const k in it)it[k]=false;renderWell()});
+const setWZ=i=>{wzi=cl(i,0,WZ.length-1);const s=document.getElementById('wsv');if(s)s.style.width=(WZ[wzi]*100)+'%';wzl.textContent=Math.round(WZ[wzi]*100)+'%'};
+document.getElementById('wzm').addEventListener('click',()=>setWZ(wzi-1));
+document.getElementById('wzp').addEventListener('click',()=>setWZ(wzi+1));
+document.getElementById('wzf').addEventListener('click',()=>setWZ(0));
+renderWell();
+
+/* legenda sondei */
+const WLEG=[
+[sw(`<path d="M2 8H36" stroke="${WC.gr}" stroke-width="2.4"/>`),'GR (API)'],
+[sw(`<path d="M3 8H36" stroke="${WC.rd}" stroke-width="2.8" stroke-linecap="round" stroke-dasharray="0.1 4.5"/>`),'RD – rezistivitate deep'],
+[sw(`<path d="M2 8H36" stroke="${WC.rs}" stroke-width="2"/>`),'RS – rezistivitate shallow'],
+[sw(`<path d="M2 8H36" stroke="${WC.rhob}" stroke-width="2"/>`),'RHOB – densitate'],
+[sw(`<path d="M2 8H36" stroke="${WC.nphi}" stroke-width="2" stroke-dasharray="7 4"/>`),'NPHI – neutron'],
+[sw(`<path d="M2 8H36" stroke="${WC.dt}" stroke-width="2"/>`),'DT – sonic'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${WC.sand}"/>`),'Nisip pe GR (sub 75 API)'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="#e53935" fill-opacity=".3"/>`),'RD > RS: hidrocarburi'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="#1e88e5" fill-opacity=".3"/>`),'RS > RD: apă'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="#e8776b" fill-opacity=".6"/>`),'Crossover N–D: gaz'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="#b9bcae" fill-opacity=".6"/>`),'Separare N–D: marnă'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${WC.g}" stroke="#555"/>`),'Gaz'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${WC.o}" stroke="#555"/>`),'Țiței'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${WC.w}" stroke="#555"/>`),'Apă'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${WC.hc}" stroke="#555"/>`),'HC: gaz sau țiței, încă nedeosebite'],
+[sw(`<path d="M2 8H36" stroke="#1f4e79" stroke-width="2" stroke-dasharray="9 5"/>`),'Contact de fluide'],
+[sw(`<rect x="22" y="1" width="8" height="14" fill="#111"/><path d="M30 4L37 8L30 12Z" fill="#111"/>`),'Perforație']];
+document.getElementById('wlg').innerHTML=WLEG.map(([s,t])=>`<div>${s}<span>${t}</span></div>`).join('');
+
+/* export sonda */
+const wexs=document.getElementById('wexs'),wsay=t=>{wexs.textContent=t};
+function exportWell(){const c=document.getElementById('wsv').cloneNode(true);
+  const on=['gr','res','nd','dt'].filter(k=>st[k]).map(k=>NM[k]+(it[k]?'':' (brut)')).join(', ')||'niciunul';
+  return frame(c,V.W,V.H,'Sonda S4: evaluare din carotaj','Carotaje: '+on+((st.pf&&st.gr&&it.gr&&st.res&&it.res&&st.nd&&it.nd)?' · cu perforaturi':'')+' · date didactice',WLEG,3)}
+const wep=document.getElementById('wep'),wes=document.getElementById('wes');
+wep.addEventListener('click',async()=>{busy(wep,true);wsay('Se generează imaginea…');
+  try{const r=exportWell();const b=await toPng(r.xml,r.w,r.h);await deliver('sonda_S4_carotaj.png',b,wsay)}catch(e){wsay('Nu am putut genera imaginea.')}finally{busy(wep,false)}});
+wes.addEventListener('click',async()=>{busy(wes,true);
+  try{const r=exportWell();await deliver('sonda_S4_carotaj.svg',new Blob([r.xml],{type:'image/svg+xml'}),wsay)}catch(e){wsay('Nu am putut genera fișierul.')}finally{busy(wes,false)}});
+
+
+/* ================= Sonda verticală vs. dirijată ================= */
+const TJ={W:1040,H:740,Y0:100,ELT:300,K:0.2,X1:150,X2:380,GL:250,RTH:6,KOP:500,BR:0.1,IMAX:60,AZ:40,MDMAX:3000};
+TJ.RTE=TJ.GL+TJ.RTH;TJ.R=180/(Math.PI*TJ.BR);TJ.EOB=TJ.KOP+TJ.IMAX/TJ.BR;
+const rad=g=>g*Math.PI/180;
+const dev=md=>{const{KOP,BR,IMAX,R,EOB}=TJ;
+  if(md<=KOP)return{md,tvd:md,hd:0,inc:0,dls:0};
+  if(md<=EOB){const I=BR*(md-KOP);return{md,tvd:KOP+R*Math.sin(rad(I)),hd:R*(1-Math.cos(rad(I))),inc:I,dls:BR*30}}
+  return{md,tvd:KOP+R*Math.sin(rad(IMAX))+(md-EOB)*Math.cos(rad(IMAX)),hd:R*(1-Math.cos(rad(IMAX)))+(md-EOB)*Math.sin(rad(IMAX)),inc:IMAX,dls:0}};
+const ver=md=>({md,tvd:md,hd:0,inc:0,dls:0});
+const ty=tvd=>TJ.Y0+(TJ.ELT-(TJ.RTE-tvd))*TJ.K;            /* TVD de la RT -> y */
+const tyE=e=>TJ.Y0+(TJ.ELT-e)*TJ.K;                         /* cota față de MSL -> y */
+const TC={md:'#111111',tvd:'#1565c0',tvdss:'#00838f',hd:'#e65100',inc:'#6a1b9a',kop:'#b3261e'};
+const TTERM=[
+ ['md','MD / AH','Adâncime măsurată (pe traiectorie)','Measured Depth (along hole)','Lungimea sondei de la masa rotativă (RT) până la punct, măsurată pe traiectorie. Cât a intrat din garnitură.','Length of the wellbore from the rotary table (RT) to the point, measured along the path.'],
+ ['tvd','TVD','Adâncime verticală adevărată (de la RT)','True Vertical Depth (below RT)','Distanța pe verticală de la masa rotativă (RT) până la punct. Se citește pe verticală, indiferent de drumul sondei.','Straight vertical distance from the rotary table (RT) down to the point, whatever the path.'],
+ ['tvdss','TVDSS','Adâncime verticală sub nivelul mării','True Vertical Depth Sub-Sea','TVD minus cota RT. Referința comună între sonde, indiferent de cota terenului.','TVD minus the RT elevation. A common reference between wells, whatever the ground elevation.'],
+ ['tvdgl','TVDBGL','Adâncime verticală de la teren','TVD Below Ground Level','TVD minus înălțimea RT deasupra terenului (aici 6 m).','TVD minus the RT height above ground (here 6 m).'],
+ ['hd','HD','Deplasare orizontală (departure)','Horizontal displacement (departure)','Distanța pe orizontală dintre axa verticală a gurii de sondă și punct.','Horizontal distance between the vertical axis of the wellhead and the point.'],
+ ['ne','ΔN, ΔE','Coordonate relative Nord / Est','Northing / Easting offsets','Componentele deplasării pe direcțiile Nord și Est: ΔN = HD·cos(azimut), ΔE = HD·sin(azimut).','Components of the displacement toward North and East: ΔN = HD·cos(azimuth), ΔE = HD·sin(azimuth).'],
+ ['inc','INC','Înclinare (față de verticală)','Inclination (drift from vertical)','Unghiul dintre axa sondei și verticală: 0° vertical, 90° orizontal.','Angle between the wellbore axis and the vertical: 0° vertical, 90° horizontal.'],
+ ['azi','AZI','Azimut (față de Nord)','Azimuth (from North)','Direcția spre care merge sonda în plan, măsurată de la Nord în sensul acelor de ceasornic.','Direction of the well in plan view, measured clockwise from North.'],
+ ['dls','DLS','Intensitatea devierii (dogleg severity)','Dogleg severity','Cât de repede se schimbă direcția, în °/30 m. Aici e rata de construcție a unghiului (build rate).','How fast the direction changes, in °/30 m. Here it is the build rate.'],
+ ['dmt','MD − TVD','Surplus de traiectorie','Along-hole excess','Cu cât e traiectoria mai lungă decât adâncimea verticală. La sonda verticală e 0.','How much longer the path is than the vertical depth. Zero for a vertical well.']];
+const TDAT=[
+ ['MSL','Nivelul mării','Mean Sea Level','0 m (referința TVDSS / TVDSS datum)'],
+ ['GL','Cota terenului','Ground Level','+'+TJ.GL+' m'],
+ ['RT','Masa rotativă (KB, DF)','Rotary Table (Kelly Bushing, Drill Floor)','+'+TJ.RTE+' m (GL + '+TJ.RTH+' m): originea MD și TVD / origin of MD and TVD'],
+ ['KOP','Punct de deviere','Kick-Off Point','MD '+TJ.KOP+' m'],
+ ['EOB','Sfârșit de construcție (înclinare constantă)','End Of Build (hold section)','MD '+TJ.EOB+' m, înclinare / inclination '+TJ.IMAX+'°'],
+ ['TD','Adâncime finală','Total Depth','MD '+TJ.MDMAX+' m (în exemplu / in this example)']];
+const tst={md:true,tvd:false,tvdss:false,hd:false,inc:false,kop:false,cote:false};
+const tkb={md:'cMD',tvd:'cTVD',tvdss:'cTVDSS',hd:'cHD',inc:'cINC',kop:'cKOP',cote:'cCOTE'};
+const TORD=['md','tvd','tvdss','hd','inc','kop','cote'];
+let tmd=2000;
+const tsl=document.getElementById('tmd'),tout=document.getElementById('tmdo'),tplate=document.getElementById('tplate'),tpanel=document.getElementById('tpanel');
+const ttxt=(x,yy,ro,en,o,c)=>T(x,yy,ro,`${o||''} font-weight="700" fill="${c||'#222'}" class="hl"`)+(en?T(x,yy+16,en,`${o||''} font-size="13" font-style="italic" fill="${c||'#444'}" class="hl"`):'');
+const tpts=(f,m)=>{const a=[];for(let k=0;k<=m;k+=10)a.push(f(k));if(m%10)a.push(f(m));return a};
+function trajSvg(){
+  const dv=dev(tmd),X1=TJ.X1,X2=TJ.X2,P=[X2+dv.hd*TJ.K,ty(dv.tvd)],V=[X1,ty(tmd)],yRT=ty(0),yMSL=tyE(0),yGL=tyE(TJ.GL);
+  let s=`<style>.hl{paint-order:stroke;stroke:#fbfaf6;stroke-width:5px;stroke-linejoin:round}</style>`;
+  s+=`<rect x="14" y="${f1(yGL)}" width="761" height="${f1(TJ.H-yGL-8)}" fill="#efe8d8" fill-opacity=".7"/><path d="M14 ${f1(yGL)}H775" stroke="#7a5c2e" stroke-width="2"/>`;
+  s+=`<rect x="14" y="14" width="256" height="${TJ.H-22}" fill="none" stroke="#bbb" rx="8"/><rect x="282" y="14" width="493" height="${TJ.H-22}" fill="none" stroke="#bbb" rx="8"/>`;
+  for(let d=500;d<=3000;d+=500){const yy=f1(ty(d));s+=`<path d="M14 ${yy}H775" stroke="#cfc6b2" stroke-width="1"/>`+T(20,+yy-5,'TVD '+d+' m','font-size="13" fill="#7a6f58"')+T(288,+yy-5,'TVD '+d+' m','font-size="13" fill="#7a6f58"')}
+  s+=`<path d="M14 ${f1(yMSL)}H775" stroke="#1e88e5" stroke-width="1.6" stroke-dasharray="8 5"/>`+T(770,yMSL-6,'MSL = 0 · nivelul mării / mean sea level','text-anchor="end" font-size="13" font-weight="700" fill="#1565c0"');
+  s+=T(142,38,'SONDĂ VERTICALĂ','text-anchor="middle" font-size="18" font-weight="700" fill="#16191d"')+T(142,58,'Vertical well','text-anchor="middle" font-size="15" font-style="italic" fill="#444"');
+  s+=T(528,38,'SONDĂ DIRIJATĂ','text-anchor="middle" font-size="18" font-weight="700" fill="#16191d"')+T(528,58,'Deviated (directional) well','text-anchor="middle" font-size="15" font-style="italic" fill="#444"');
+  const vp=tpts(k=>[X1,ty(k)],TJ.MDMAX),dp=tpts(k=>{const q=dev(k);return[X2+q.hd*TJ.K,ty(q.tvd)]},TJ.MDMAX);
+  s+=`<path d="${path(vp)}" fill="none" stroke="#b4b4b4" stroke-width="3"/><path d="${path(dp)}" fill="none" stroke="#b4b4b4" stroke-width="3"/>`;
+  s+=`<path d="${path(tpts(k=>[X1,ty(k)],tmd))}" fill="none" stroke="#37474f" stroke-width="5" stroke-linecap="round"/><path d="${path(tpts(k=>{const q=dev(k);return[X2+q.hd*TJ.K,ty(q.tvd)]},tmd))}" fill="none" stroke="#37474f" stroke-width="5" stroke-linecap="round"/>`;
+  for(const x of[X1,X2])s+=`<path d="M${x-9} ${f1(yRT)}L${x+9} ${f1(yRT)}L${x} ${f1(yRT-26)}Z" fill="#fff" stroke="#333" stroke-width="2"/>`;
+  s+=`<path d="M${X2} ${f1(yRT)}V${f1(ty(TJ.MDMAX))}" stroke="#888" stroke-width="1" stroke-dasharray="4 5"/>`;
+  s+=`<circle cx="${f1(V[0])}" cy="${f1(V[1])}" r="8" fill="#fff" stroke="#111" stroke-width="3"/><circle cx="${f1(P[0])}" cy="${f1(P[1])}" r="8" fill="#fff" stroke="#111" stroke-width="3"/>`;
+  s+=T(V[0]+14,V[1]+5,'burghiu / bit','font-size="13" fill="#333" class="hl"');
+  const on=tst;
+  if(on.cote){
+    s+=T(X1+14,yRT-30,'RT +'+TJ.RTE+' m · GL +'+TJ.GL+' m','font-size="14" font-weight="700" fill="#5d4220" class="hl"')+T(X1+14,yRT-14,'(RT peste teren: nu e la scară / not to scale)','font-size="12" fill="#5d4220" class="hl"');
+    s+=T(X2+14,yRT-30,'RT +'+TJ.RTE+' m · GL +'+TJ.GL+' m','font-size="14" font-weight="700" fill="#5d4220" class="hl"');
+    s+=`<path d="M${X1+34} ${f1(yGL)}V${f1(yMSL)}M${X1+28} ${f1(yGL)}h12M${X1+28} ${f1(yMSL)}h12" stroke="#7a5c2e" stroke-width="1.6" fill="none"/>`+T(X1+44,(yGL+yMSL)/2+5,'+'+TJ.GL+' m','font-size="13" font-weight="700" fill="#5d4220" class="hl"')}
+  if(on.kop){const a=dev(TJ.KOP),b=dev(TJ.EOB);
+    for(const[q,l1,l2,xx]of[[a,'KOP · punct de deviere','Kick-off point',X2],[b,'EOB · sfârșit de construcție','End of build',X2+b.hd*TJ.K]]){if(tmd<q.md)continue;const px=xx,py=ty(q.tvd);
+      s+=`<circle cx="${f1(px)}" cy="${f1(py)}" r="6" fill="${TC.kop}"/>`+ttxt(px+16,py-(q.md===TJ.EOB?22:6),l1,l2+' · MD '+q.md+' m','text-anchor="start" font-size="14"',TC.kop)}}
+  const dimv=(xd,y1,y2,c,lab,xe)=>{const m=(y1+y2)/2;return`<path d="M${xd} ${f1(y1)}V${f1(y2)}M${xd-6} ${f1(y1)}h12M${xd-6} ${f1(y2)}h12" stroke="${c}" stroke-width="2.4" fill="none"/>`+
+     `<path d="M${xd} ${f1(y2)}H${f1(xe)}" stroke="${c}" stroke-width="1" stroke-dasharray="3 4" fill="none"/>`+(Math.abs(y2-y1)<110?`<text transform="translate(${xd+5} ${f1(y2+8)}) rotate(90)" text-anchor="start" font-size="14" font-weight="700" fill="${c}" class="hl">${lab}</text>`:`<text transform="translate(${xd-8} ${f1(m)}) rotate(-90)" text-anchor="middle" font-size="14" font-weight="700" fill="${c}" class="hl">${lab}</text>`)};
+  for(const[Xw,q,ptx]of[[X1,{tvd:tmd,hd:0,inc:0},V],[X2,dv,P]]){
+    if(on.tvd)s+=dimv(Xw-28,yRT,ptx[1],TC.tvd,'TVD '+fmt(q.tvd,0)+' m',ptx[0]);
+    if(on.tvdss)s+=dimv(Xw-56,yMSL,ptx[1],TC.tvdss,'TVDSS '+fmt(q.tvd-TJ.RTE,0)+' m',ptx[0]);
+    if(on.hd&&q.hd>1){const c=TC.hd,yy=ptx[1]+26;s+=`<path d="M${Xw} ${f1(ptx[1])}V${f1(yy)}M${ptx[0]} ${f1(ptx[1])}V${f1(yy)}" stroke="${c}" stroke-width="1" stroke-dasharray="3 4"/><path d="M${Xw} ${f1(yy)}H${f1(ptx[0])}M${Xw} ${f1(yy-6)}v12M${f1(ptx[0])} ${f1(yy-6)}v12" stroke="${c}" stroke-width="2.4"/>`+ttxt((Xw+ptx[0])/2,yy+19,'HD '+fmt(q.hd,0)+' m · deplasare','departure',`text-anchor="middle" font-size="14"`,c)}
+    if(on.hd&&q.hd<=1&&Xw===X1)s+=ttxt(Xw+16,ty(tmd)-26,'HD = 0','fără deplasare','font-size="14"',TC.hd);
+    if(on.md){const mm=tmd>TJ.EOB+300?(TJ.EOB+tmd)/2:tmd/2,mid=Xw===X1?[X1,ty(tmd/2)]:(()=>{const m=dev(mm);return[X2+m.hd*TJ.K,ty(m.tvd)]})(),I=Xw===X1?0:dev(mm).inc,nx=Math.cos(rad(I)),ny=-Math.sin(rad(I));
+      s+=(Xw===X1?ttxt(mid[0]+12,mid[1],'MD '+fmt(tmd,0)+' m','pe traiectorie','font-size="15"',TC.md)+T(mid[0]+12,mid[1]+32,'along hole','font-size="13" font-style="italic" fill="#111" class="hl"'):ttxt(mid[0]+nx*18+6,mid[1]+ny*18-4,'MD '+fmt(tmd,0)+' m','pe traiectorie / along hole','font-size="15"',TC.md))}
+    if(on.inc){const c=TC.inc,I=q.inc,px=ptx[0],py=ptx[1],r=40;
+      s+=`<path d="M${f1(px)} ${f1(py)}v${r+22}" stroke="${c}" stroke-width="1.6" stroke-dasharray="4 4"/>`;
+      if(I>0.5){s+=`<path d="M${f1(px)} ${f1(py)}l${f1((r+22)*Math.sin(rad(I)))} ${f1((r+22)*Math.cos(rad(I)))}" stroke="${c}" stroke-width="1.6" stroke-dasharray="1 4"/><path d="M${f1(px)} ${f1(py+r)}A${r} ${r} 0 0 0 ${f1(px+r*Math.sin(rad(I)))} ${f1(py+r*Math.cos(rad(I)))}" fill="none" stroke="${c}" stroke-width="2.4"/>`}
+      s+=(Xw===X1?ttxt(px+10,py+r+34,'INC '+fmt(I,0)+'°','înclinare','font-size="14"',c)+T(px+10,py+r+66,'inclination','font-size="13" font-style="italic" fill="#6a1b9a" class="hl"'):(px>650?ttxt(px-10,py+r+34,'INC '+fmt(I,0)+'°','înclinare / inclination','text-anchor="end" font-size="14"',c):ttxt(px+10+(I>0.5?r*0.45:0),py+r+34,'INC '+fmt(I,0)+'°','înclinare / inclination','font-size="14"',c)))}}
+  /* vedere în plan */
+  const cx=915,cy=212,rr=70,sc=rr/2000,az=rad(TJ.AZ),vx=cx+dv.hd*sc*Math.sin(az),vy=cy-dv.hd*sc*Math.cos(az);
+  s+=`<rect x="796" y="14" width="228" height="312" fill="none" stroke="#bbb" rx="8"/>`+T(910,38,'VEDERE ÎN PLAN','text-anchor="middle" font-size="16" font-weight="700" fill="#16191d"')+T(910,56,'Plan view','text-anchor="middle" font-size="14" font-style="italic" fill="#444"');
+  for(const m of[1000,2000])s+=`<circle cx="${cx}" cy="${cy}" r="${m*sc}" fill="none" stroke="#c9c9c9" stroke-dasharray="4 4"/>`+T(cx+4,cy+m*sc-3,m+' m','font-size="11" fill="#777"');
+  s+=`<path d="M${cx} ${cy+rr+4}V${cy-rr-4}M${cx-rr-4} ${cy}H${cx+rr+4}" stroke="#aaa"/>`+T(cx,cy-rr-10,'N','text-anchor="middle" font-size="14" font-weight="700"')+T(cx+rr+8,cy+5,'E','font-size="14" font-weight="700"');
+  s+=`<circle cx="${cx}" cy="${cy}" r="5" fill="#111"/><circle cx="${f1(vx)}" cy="${f1(vy)}" r="6" fill="#fff" stroke="#111" stroke-width="3"/>`;
+  if(dv.hd>1){s+=`<path d="M${cx} ${cy}L${f1(vx)} ${f1(vy)}" stroke="#37474f" stroke-width="3.4"/>`;
+    if(on.hd)s+=`<path d="M${cx} ${cy}L${f1(vx)} ${f1(vy)}" stroke="${TC.hd}" stroke-width="3.4"/><path d="M${cx} ${cy}V${f1(vy)}H${f1(vx)}" fill="none" stroke="#888" stroke-width="1.4" stroke-dasharray="4 4"/>`}
+  s+=`<path d="M${cx} ${cy-30}A30 30 0 0 1 ${f1(cx+30*Math.sin(az))} ${f1(cy-30*Math.cos(az))}" fill="none" stroke="#6a1b9a" stroke-width="2.2"/>`+T(cx-8,cy-36,'AZI '+TJ.AZ+'°','text-anchor="end" font-size="12" font-weight="700" fill="#6a1b9a" class="hl"');
+  s+=T(810,296,'ΔN '+fmt(dv.hd*Math.cos(az),0)+' m · ΔE '+fmt(dv.hd*Math.sin(az),0)+' m','font-size="14" font-weight="700" fill="#222"')+T(810,312,'Nord / North · Est / East · vertical: 0','font-size="11" font-style="italic" fill="#444"');
+  return s}
+function trajPanel(){
+  const dv=dev(tmd),vv=ver(tmd),az=TJ.AZ,N=dv.hd*Math.cos(rad(az)),E=dv.hd*Math.sin(rad(az));
+  const val={
+   md:[fmt(vv.md,0)+' m',fmt(dv.md,0)+' m'],tvd:[fmt(vv.tvd,0)+' m',fmt(dv.tvd,0)+' m'],
+   tvdss:[fmt(vv.tvd-TJ.RTE,0)+' m',fmt(dv.tvd-TJ.RTE,0)+' m'],tvdgl:[fmt(vv.tvd-TJ.RTH,0)+' m',fmt(dv.tvd-TJ.RTH,0)+' m'],
+   hd:['0 m',fmt(dv.hd,0)+' m'],ne:['0 · 0','N '+fmt(N,0)+' · E '+fmt(E,0)],inc:['0°',fmt(dv.inc,0)+'°'],azi:['–',TJ.AZ+'°'],
+   dls:['0°/30 m',fmt(dv.dls,1)+'°/30 m'],dmt:['0 m',fmt(dv.md-dv.tvd,0)+' m']};
+  const rows=TTERM.map(([k,ab,ro,en,dr,de])=>{const c=TC[k]?`<span class="chip" style="background:${TC[k]}"></span>`:'';
+    return`<tr><td data-l="Termen / Term">${c}<b>${ab}</b> · ${ro}<br><span class="small"><i>${en}</i></span><br><span class="small">${dr}<br><i>${de}</i></span></td><td class="num" data-l="Verticală / Vertical">${val[k][0]}</td><td class="num" data-l="Dirijată / Deviated">${val[k][1]}</td></tr>`}).join('');
+  const dat=TDAT.map(([a,ro,en,v])=>`<tr><td><b>${a}</b></td><td>${ro}<br><span class="small"><i>${en}</i></span></td><td>${v}</td></tr>`).join('');
+  return`<div class="card now"><h3>La MD = ${fmt(tmd,0)} m · At MD = ${fmt(tmd,0)} m</h3><div class="scroll"><table class="stack"><thead><tr><th>Termen · Term</th><th class="num">Verticală<br><span class="small">Vertical</span></th><th class="num">Dirijată<br><span class="small">Deviated</span></th></tr></thead><tbody>${rows}</tbody></table></div></div>`+
+  `<div class="card"><h3>Repere de referință · Reference datums</h3><div class="scroll"><table><thead><tr><th>Cod</th><th>Denumire · Name</th><th>Valoare · Value</th></tr></thead><tbody>${dat}</tbody></table></div></div>`+
+  `<div class="card"><h3>Cum se leagă · How they relate</h3><ul>`+
+   `<li><b>TVDSS = TVD − RT</b> (cota mesei rotative / RT elevation, aici +${TJ.RTE} m).</li>`+
+   `<li><b>Sonda verticală · vertical well:</b> MD = TVD, HD = 0, INC = 0°.</li>`+
+   `<li><b>Sonda dirijată · deviated well:</b> MD ≥ √(TVD² + HD²) ≥ TVD. Pe o porțiune dreaptă / on a straight section: ΔTVD = ΔMD·cos(INC), ΔHD = ΔMD·sin(INC).</li>`+
+   `<li><b>Curbă de construcție · build section:</b> raza / radius R = 180 / (π·BR) = ${fmt(TJ.R,0)} m pentru / for ${fmt(TJ.BR*30,0)}°/30 m. Pe sondele reale TVD și HD se calculează din măsurători (MD, INC, AZI) cu metoda curburii minime / on real wells from surveys (MD, INC, AZI) using the minimum curvature method.</li></ul></div>`+
+  `<div class="card"><h3>De ce contează · Why it matters</h3><ul>`+
+   `<li><b>Carotajele și perforarea</b> se dau în MD; <b>corelarea, contactele și hărțile</b> se fac în TVDSS. / Logs and perforations are in MD; correlation, contacts and maps are in TVDSS.</li>`+
+   `<li><b>Contactele de fluide</b> (CGA, CGȚ, CȚA) se compară între sonde în TVDSS, nu în MD. / Fluid contacts (GWC, GOC, OWC) are compared between wells in TVDSS, not MD.</li>`+
+   `<li><b>Grosimi · thickness:</b> grosimea în MD (aparentă / apparent) ≠ TVT (grosime verticală adevărată / true vertical thickness) ≠ TST (grosime stratigrafică adevărată, perpendiculară pe strat / true stratigraphic thickness). Un strat orizontal de 10 m TVT apare de ${fmt(10/Math.cos(rad(TJ.IMAX)),0)} m în MD la INC = ${TJ.IMAX}°. / A flat 10 m TVT bed reads ${fmt(10/Math.cos(rad(TJ.IMAX)),0)} m in MD at INC = ${TJ.IMAX}°.</li></ul></div>`}
+function renderTraj(){
+  tplate.innerHTML=`<svg id="tsv" viewBox="0 0 ${TJ.W} ${TJ.H}" role="img" aria-label="Sondă verticală și sondă dirijată: MD, TVD, TVDSS, deplasare orizontală și înclinare / vertical and deviated well: MD, TVD, TVDSS, displacement and inclination" font-family="IBM Plex Sans, system-ui, sans-serif">${trajSvg()}</svg>`;
+  tpanel.innerHTML=trajPanel();tout.textContent=fmt(tmd,0)+' m';tsl.value=tmd;
+  for(const k in tkb)document.getElementById(tkb[k]).checked=tst[k];
+}
+for(const k in tkb)document.getElementById(tkb[k]).addEventListener('change',e=>{tst[k]=e.target.checked;renderTraj()});
+tsl.addEventListener('input',()=>{tmd=+tsl.value;renderTraj()});
+for(const[id,v]of[['jKOP',TJ.KOP],['jEOB',TJ.EOB],['jMID',2000],['jTD',TJ.MDMAX]])document.getElementById(id).addEventListener('click',()=>{tmd=v;renderTraj()});
+document.getElementById('tNext').addEventListener('click',()=>{const k=TORD.find(k=>!tst[k]);if(k){tst[k]=true;renderTraj()}});
+document.getElementById('tReset').addEventListener('click',()=>{for(const k in tst)tst[k]=k==='md';tmd=2000;renderTraj()});
+const TLEG=[
+ [sw(`<path d="M2 8H36" stroke="#37474f" stroke-width="5"/>`),'Traiectoria parcursă · path drilled'],
+ [sw(`<path d="M2 8H36" stroke="#b4b4b4" stroke-width="3"/>`),'Traiectoria rămasă · path ahead'],
+ [sw(`<path d="M2 8H36" stroke="${TC.tvd}" stroke-width="2.4"/>`),'TVD'],
+ [sw(`<path d="M2 8H36" stroke="${TC.tvdss}" stroke-width="2.4"/>`),'TVDSS'],
+ [sw(`<path d="M2 8H36" stroke="${TC.hd}" stroke-width="2.4"/>`),'HD · deplasare / displacement'],
+ [sw(`<path d="M2 8H36" stroke="${TC.inc}" stroke-width="2.4"/>`),'INC · înclinare / inclination'],
+ [sw(`<path d="M2 8H36" stroke="#1e88e5" stroke-width="1.6" stroke-dasharray="8 5"/>`),'MSL · nivelul mării / sea level'],
+ [sw(`<rect x="2" y="2" width="34" height="12" fill="#efe8d8"/>`),'Subsol · subsurface']];
+function exportTraj(){const c=document.getElementById('tsv').cloneNode(true);
+  const on=TORD.filter(k=>tst[k]).join(', ');
+  return frame(c,TJ.W,TJ.H,'Sonda verticală vs. sonda dirijată · Vertical vs. deviated well','MD = '+fmt(tmd,0)+' m · afișat / shown: '+on+' · date didactice / teaching data',TLEG,2)}
+const tsay=t=>{document.getElementById('texs').textContent=t};
+const tep=document.getElementById('tep'),tes=document.getElementById('tes');
+tep.addEventListener('click',async()=>{busy(tep,true);tsay('Se generează imaginea…');
+  try{const r=exportTraj();const b=await toPng(r.xml,r.w,r.h);await deliver('sonda_vertical_vs_dirijata.png',b,tsay)}catch(e){tsay('Nu am putut genera imaginea.')}finally{busy(tep,false)}});
+tes.addEventListener('click',async()=>{busy(tes,true);
+  try{const r=exportTraj();await deliver('sonda_vertical_vs_dirijata.svg',new Blob([r.xml],{type:'image/svg+xml'}),tsay)}catch(e){tsay('Nu am putut genera fișierul.')}finally{busy(tes,false)}});
+renderTraj();
+
+/* secțiuni */
+const vCor=document.getElementById('vCor'),vWell=document.getElementById('vWell'),vTraj=document.getElementById('vTraj'),tCor=document.getElementById('tCor'),tWell=document.getElementById('tWell'),tTraj=document.getElementById('tTraj');
+const viewOf=()=>location.hash==='#sonda'?'well':location.hash==='#traiectorie'?'traj':'cor';
+function showView(v,push){vCor.hidden=v!=='cor';vWell.hidden=v!=='well';vTraj.hidden=v!=='traj';
+  for(const[b,k]of[[tCor,'cor'],[tWell,'well'],[tTraj,'traj']])b.setAttribute('aria-pressed',String(v===k));
+  if(push){try{history.replaceState(null,'','#'+(v==='well'?'sonda':v==='traj'?'traiectorie':SC[cur].id))}catch(e){}}}
+tCor.addEventListener('click',()=>showView('cor',true));
+tWell.addEventListener('click',()=>showView('well',true));
+tTraj.addEventListener('click',()=>showView('traj',true));
+window.addEventListener('hashchange',()=>showView(viewOf(),false));
+showView(viewOf(),false);
 }
 </script>
 </body>
