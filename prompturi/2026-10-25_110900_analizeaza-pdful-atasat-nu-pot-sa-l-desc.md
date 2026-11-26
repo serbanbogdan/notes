@@ -1,9 +1,10 @@
-Vreau sa ma ajuti ca intr-o echipa mixta ingener de zacamdn geolog si ingienr petrolist sa stabilit un cecklist pentru doar geolog ce sa aiba de bifant la analzia unui zacamdnt coemrcial in ceotextul indetificar sondelor candidat pt worckover.
-Cauta publicatii din literatura de speclialitate si vi intr-un fisier .md cu sugestii vreau sa fie minim 20 de ceckpinturi deoar din perspectiva geologului.
-Puncte pe care vreau neaparta sa le atingi:
-- tipul de rezerva
-- oportunitait de reveniree la un oabitiv mai jos sau de adancire su sidetrack
-- un tabel cu factorii de recuperare pt fiecare obiectiv si factorul de recuperare in conformitate cu rezerva rezultat din analizere Serviciului TEIZ
-- oportunitate penteru fiecare obiectiproductiv productiva ala zacamantului vrea ca la final intr-un excel fiecare sonda este trecurape verticala pe u nrand iar pe colonare obietivel productive intersectata
-
-hai cu  lista si vedem ce alegem
+Vreau sa imi faci o aplicatie care sa rule ze si pe ecranul masinii prin android auto (design in poza atasata) sa pot deshide pt a testa si pe telefon dar o data conetat la masians vreaus a ruelze de pe ecranul masinii.
+Vrua sa fie un joc de tip quiz de aprximativ 1000 de intrebari scrise pe ecran si cu 4 optiunii de raspuns in limna romana
+vreua sa facica intrebarile sa poate fi citi de aplciati in limba romna si un buton langa text de repeta si 4 optinude raspuns 
+duficultea sa varianze inntre 5 si 7 ani 
+compatibilitate android auto
+se alege raspuns corent si se trece la uramtorul
+sa fie optiue de nelimitai adica toate cele 1000 intrebari random
+dau test cu 10 intreabari si fa fian lcu scor total 
+dupa fiecare raspun se face cu rosu raspuns gresi si scu rosu cel corect
+pune tot in depozit sa pot face donload de acolo
