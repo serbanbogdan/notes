@@ -1,3 +1,9 @@
-vreau pe Langa corelare S1 S2 S3 vreau si o sonda care care are urmatoarele investigarii: GR, rezistivitai. neutron density si sonic
-pream optiune de a le bifa pe rand si a imi arta ce pot sa optin din fiecare si tot asa aprope in mode didactic sa m o zona cu apa una cu titei sicapde gaze si in ca o zona doar apa si gaz
-in ordinea GR, rezistivitai. neutron density si sonic cnd bine zi imi faci sio interpretare de inforamatii imi ofera fiecare si la fian ce perforez in sonda
+Vreau sa ma ajuti ca intr-o echipa mixta ingener de zacamdn geolog si ingienr petrolist sa stabilit un cecklist pentru doar geolog ce sa aiba de bifant la analzia unui zacamdnt coemrcial in ceotextul indetificar sondelor candidat pt worckover.
+Cauta publicatii din literatura de speclialitate si vi intr-un fisier .md cu sugestii vreau sa fie minim 20 de ceckpinturi deoar din perspectiva geologului.
+Puncte pe care vreau neaparta sa le atingi:
+- tipul de rezerva
+- oportunitait de reveniree la un oabitiv mai jos sau de adancire su sidetrack
+- un tabel cu factorii de recuperare pt fiecare obiectiv si factorul de recuperare in conformitate cu rezerva rezultat din analizere Serviciului TEIZ
+- oportunitate penteru fiecare obiectiproductiv productiva ala zacamantului vrea ca la final intr-un excel fiecare sonda este trecurape verticala pe u nrand iar pe colonare obietivel productive intersectata
+
+hai cu  lista si vedem ce alegem
