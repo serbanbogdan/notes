@@ -1,4 +1,2 @@
-Aplciatai de organizare a echipeo acceseaza in principal 2 foldere:
-- "\\10.11.1.13\bkpdate\Geologic\Serviciul Geologic\Organizare"
-- "\\10.11.1.13\bkpdate\Geologic\Serviciul Geologic\Avize si Acorduri  ANRM"
-vrau ca la deschidere browserul sa ceasa acces ca pe parcusr totu ls afunctioenze automat sa nu mai fiu nevoi ta sa to cer permisiunie.
+ai o imagine cu 3 sonde dintr-un zăcământ ai în stânga cu verde un log didactic de GR, iar în stânga rezistivitatea cu  albastru Deep portocaliu (desene și cu roșu punctat) și cu albastru shalow.vreau sa îmi faci și zonele traversat Sarmațian și Badenian. Vreau o schiță cât mai didactică cu cele 3 sonde facdistat mai mare între sonde decât cea desenată.
+și vreau să îmi faci o corelare pe straturi de nisip în cadrul zonelor mai mari 
