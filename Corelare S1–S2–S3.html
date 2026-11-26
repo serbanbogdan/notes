@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Corelare S1–S2–S3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* VOICE work: a correlation panel for a geology team, exact and calm
+   IDEA a printed well-section plate from a field report: log headers, formation tints, fluid colours
+   PICTURE the S1–S2–S3 section itself, redrawn per scenario (tops only, classic, pinch-outs)
+   COLOUR paper-white plate, ink, formation tints; gas red, water blue, sand ochre do the talking
+   TYPE IBM Plex Sans throughout
+   LAYOUT title and scenario switch on top, the plate full width, scenario notes beside the well table and legend; one column on a phone */
+:root{color-scheme:light dark;--bg:light-dark(#ffffff,#121518);--ink:light-dark(#16191d,#e7eaee);--mute:light-dark(#555c64,#a7aeb6);--line:light-dark(#d7dadd,#30363c);--panel:light-dark(#f4f4f1,#1b1f23);--act:light-dark(#16191d,#e7eaee);--actink:light-dark(#ffffff,#121518);--focus:#c58a10;--gas:#d9483b;--wat:#2a78c2}
+:root[data-theme=light]{color-scheme:light}
+:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans",system-ui,sans-serif;overflow-x:clip}
+.wrap{max-width:1420px;margin:0 auto;padding:clamp(18px,3vw,40px) max(16px,4vw,env(safe-area-inset-left,0px))}
+h1{font-size:clamp(28px,4vw,42px);line-height:1.05;letter-spacing:-.02em;margin:0 0 8px;text-wrap:balance}
+h2{font-size:22px;line-height:1.2;margin:0 0 10px;letter-spacing:-.01em}
+h3{font-size:16px;margin:0 0 8px}
+.sub{color:var(--mute);margin:0 0 18px;max-width:75ch}
+.sub b{color:var(--ink);font-weight:600}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+button{font:inherit;font-size:15px;min-height:44px;padding:8px 14px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;cursor:pointer}
+button:hover{border-color:var(--mute)}
+button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.seg button .k{display:inline-block;min-width:1.6em;font-weight:700;color:var(--mute)}
+.seg button[aria-pressed=true]{background:var(--act);color:var(--actink);border-color:var(--act)}
+.seg button[aria-pressed=true] .k{color:var(--actink)}
+.zoom{display:flex;gap:6px;align-items:center}
+.zoom button{min-width:44px;padding:8px 10px}
+.zoom output{font-size:14px;color:var(--mute);min-width:3.5em;text-align:center;font-variant-numeric:tabular-nums}
+.zoom{flex-wrap:wrap}
+.sep{width:1px;height:28px;background:var(--line);margin:0 4px}
+button:disabled{opacity:.55;cursor:progress}
+#exs{margin:0 0 10px;min-height:1.4em}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.ov[hidden]{display:none}
+.ovb{background:var(--bg);color:var(--ink);border-radius:10px;padding:16px;width:min(96vw,1200px);max-height:92vh;overflow:auto;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.ovb p{margin:0}
+.ovb img{max-width:100%;height:auto;border:1px solid var(--line);background:#fbfaf6}
+.plate{background:#fbfaf6;border:1px solid var(--line);border-radius:10px;overflow:auto;-webkit-overflow-scrolling:touch}
+.plate svg{display:block;width:100%;height:auto}
+.lay{opacity:0;transition:opacity .35s ease}
+.lay.on{opacity:1}
+.below{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(20px,3vw,40px);margin-top:22px}
+.note{border-left:0;padding:18px 20px;background:var(--panel);border-radius:10px}
+.note p{margin:0 0 10px}
+.note ul{margin:0 0 10px;padding-left:20px}
+.note li{margin-bottom:6px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:7px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;color:var(--mute);font-size:14px}
+td:first-child{font-weight:700;white-space:nowrap}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:baseline}
+.g{background:var(--gas)}.w{background:var(--wat)}
+.fl{white-space:nowrap}
+.side>*+*{margin-top:22px}
+.small{font-size:14px;color:var(--mute)}
+.lg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px 16px;font-size:14px}
+.lg div{display:flex;align-items:center;gap:8px}
+.lg svg{flex:none}
+@media(max-width:860px){.below{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:600px){table{font-size:13px}th,td{padding:6px 4px}.stack thead{display:none}.stack tr{display:grid;padding-block:8px;border-bottom:1px solid var(--line)}.stack td{display:flex;justify-content:space-between;gap:12px;border:0;padding:2px 0}.stack td::before{content:attr(data-l);color:var(--mute);font-weight:400}.seg button{font-size:14px;padding:8px 10px}}
+@media(prefers-reduced-motion:reduce){.lay{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Corelare S1 – S2 – S3</h1>
+<p class="sub">Sarmațian și Badenian, trei scenarii de corelare pe aceleași loguri. <b>Inundate:</b> N1 în S2 și S3, N3 în S1, N4 în S3; celelalte nisipuri sunt saturate cu gaze. Schiță didactică, scări orientative.</p>
+
+<div class="bar">
+<div class="seg" role="group" aria-label="Scenariu de corelare">
+<button id="b0" type="button" data-i="0" aria-pressed="false"><span class="k">0</span>Fără corelare</button>
+<button id="b1" type="button" data-i="1" aria-pressed="true"><span class="k">1</span>Corelare clasică</button>
+<button id="b2" type="button" data-i="2" aria-pressed="false"><span class="k">2</span>Corelare cu efilări</button>
+</div>
+<div class="zoom">
+<button id="zm" type="button" aria-label="Micșorează">−</button>
+<output id="zl">100%</output>
+<button id="zp" type="button" aria-label="Mărește">+</button>
+<button id="zf" type="button">Tot</button>
+<span class="sep" aria-hidden="true"></span>
+<button id="ep" type="button">Exportă PNG</button>
+<button id="es" type="button">SVG</button>
+</div>
+</div>
+<p id="exs" class="small" aria-live="polite"></p>
+
+<div class="plate" id="plate"></div>
+
+<div class="ov" id="ov" hidden>
+<div class="ovb" role="dialog" aria-modal="true" aria-labelledby="ovt">
+<p id="ovt"></p>
+<img id="ovi" alt="Secțiunea exportată">
+<button id="ovc" type="button">Închide</button>
+</div>
+</div>
+
+<div class="below">
+<section class="note" id="note" aria-live="polite"></section>
+<div class="side">
+<section>
+<h3>Date la sonde: forma GR și fluidul</h3>
+<table class="stack" id="tw"><thead><tr><th>Strat</th><th>S1</th><th>S2</th><th>S3</th></tr></thead><tbody></tbody></table>
+<p class="small">Nisipurile legate în scenariul 2 au aceeași formă GR. Cele care se efilează au altă formă, dar stau la aceeași poziție stratigrafică, așa că și corelarea clasică rămâne posibilă.</p>
+</section>
+<section>
+<h3>Legendă</h3>
+<div class="lg" id="lg"></div>
+</section>
+</div>
+</div>
+</div>
+
+<script>
+{
+const W=1740,H=1200,TW=130,BGP=16,GAP=300,X0=130,D0=100,D1=1640,Y0=158,K=0.66;
+const y=d=>Y0+(d-D0)*K;
+const GRMAX=150,GRCUT=75,RMIN=0.5,RMAX=50,RCUT=2;
+const C={pli:'#eeeae1',sar:'#e1ecd8',bad:'#e9e3f1',pliT:'#6f6655',sarT:'#46663a',badT:'#5f4687',tSar:'#2f6a22',tBad:'#57388c',gr:'#2e7d32',rd:'#c62828',rs:'#1565c0',sand:'#f2c33d',gas:'#f19a8f',gasS:'#b8443a',wat:'#86bde9',watS:'#2a6fae',bore:'#1a237e',lab:'#4a3a12'};
+/* [acoperiș, bază, formă GR, GR minim, fluid g/w, RD maxim] în unități relative de adâncime */
+const WELLS={
+S1:{start:130,td:1590,sar:470,bad:1185,s:{'N1':[490,522,'bell',50,'g',9],'N2.1':[625,653,'funnel',46,'g',7],'N2.2':[668,698,'thin',56,'g',6],'N2.3':[722,760,'bell',44,'g',8],'N3':[895,935,'funnel',38,'w',0],'N4':[1200,1250,'cyl',35,'g',13]}},
+S2:{start:115,td:1540,sar:420,bad:1095,s:{'N1':[435,477,'cyl',38,'w',0],'N2.1':[575,603,'funnel',46,'g',8],'N2.2':[622,652,'bell',43,'g',9],'N2.3':[690,744,'serr',42,'g',10],'N3':[838,878,'funnel',37,'g',12],'N4':[1110,1160,'cyl',34,'g',15]}},
+S3:{start:200,td:1605,sar:575,bad:1260,s:{'N1':[590,632,'cyl',39,'w',0],'N2.1':[718,746,'funnel',47,'g',7],'N2.2':[774,798,'thin',58,'g',5],'N2.3':[836,892,'serr',43,'g',9],'N3':[1008,1036,'bell',52,'g',6],'N4':[1275,1316,'cyl',36,'w',0]}}};
+const N=['S1','S2','S3'];
+const SN=['N1','N2.1','N2.2','N2.3','N3','N4'];
+const WL=N.map((n,i)=>{const w=WELLS[n];w.n=n;w.gr0=X0+i*(2*TW+BGP+GAP);w.bore=w.gr0+TW+BGP/2;w.rs0=w.gr0+TW+BGP;w.L=w.gr0;w.R=w.rs0+TW;return w});
+const MOTN={cyl:'cilindru',funnel:'pâlnie',bell:'clopot',serr:'dințat',thin:'subțire, dințat'};
+
+/* zgomot determinist pentru curbe */
+const mul=seed=>()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+const gauss=r=>{const u=r()||1e-9,v=r();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};
+const sn=(n,r,c,a)=>{const v=Array.from({length:n+6*c},()=>gauss(r));const k=[];let ks=0;for(let j=-3*c;j<=3*c;j++){const e=Math.exp(-0.5*((j/c)**2));k.push(e);ks+=e}const o=new Array(n);let s2=0;for(let i=0;i<n;i++){let s=0;for(let j=0;j<k.length;j++)s+=v[i+j]*k[j];o[i]=s/ks;s2+=o[i]*o[i]}const sd=Math.sqrt(s2/n)||1;return o.map(x=>a*x/sd)};
+const sig=x=>1/(1+Math.exp(-x));
+const cl=(v,a,b)=>Math.min(Math.max(v,a),b);
+const MOT={cyl:t=>0.97-0.08*Math.abs(t-0.5),funnel:t=>1-0.85*(t**1.8),bell:t=>1-0.85*((1-t)**1.8),serr:t=>1-0.62*Math.exp(-(((t-0.5)/0.09)**2)),thin:t=>0.84-0.3*Math.abs(Math.sin(3*Math.PI*t))};
+
+function logs(w,seed){
+  const r=mul(seed),z=[];for(let d=w.start;d<=w.td;d++)z.push(d);const n=z.length;
+  const a=sn(n,r,6,5),b=sn(n,r,1,2.2),c=sn(n,r,2,3),e=sn(n,r,1,1.6),f=sn(n,r,4,0.05),g=sn(n,r,2,0.035),h=sn(n,r,2,0.03);
+  const gr=[],rd=[],rs=[];
+  for(let i=0;i<n;i++){
+    const d=z[i];const sh=(d<w.sar?96:d<w.bad?104:110)+a[i]+b[i]+(d<w.sar?1:0.45)*c[i];
+    const Rsh=1.8*(10**f[i]);let G=sh,RD=Rsh,RS=Rsh,wm=0;
+    for(const k of SN){const[t,bb,mo,gm,fl,rx]=w.s[k];const m=sig((d-t)/1.5)*sig((bb-d)/1.5);if(m<1e-4)continue;
+      const ws=m*MOT[mo](cl((d-t)/(bb-t),0,1));G-=ws*(sh-gm);wm=Math.max(wm,ws);
+      if(fl==='g'){RD*=(rx/Rsh)**ws;RS*=(rx*1.4/Rsh)**ws}else{RD*=(0.7/Rsh)**ws;RS*=(2.8/Rsh)**ws}}
+    gr.push(G+e[i]*(0.4+0.6*wm));rd.push(RD*(10**g[i]));rs.push(RS*(10**h[i]));
+  }
+  return{z,gr,rd,rs};
+}
+const xg=(w,v)=>w.gr0+TW*cl(v,0,GRMAX)/GRMAX;
+const lg=Math.log10;
+const xr=(w,v)=>w.rs0+TW*(lg(cl(v,RMIN,RMAX))-lg(RMIN))/(lg(RMAX)-lg(RMIN));
+const f1=v=>Math.round(v*10)/10;
+const path=p=>'M'+p.map(q=>f1(q[0])+' '+f1(q[1])).join('L');
+const poly=p=>path(p)+'Z';
+const hz=key=>[[0,WL[0][key]],...WL.flatMap(w=>[[w.L,w[key]],[w.R,w[key]]]),[W,WL[2][key]]].map(p=>[p[0],y(p[1])]);
+const T=(x,yy,s,o)=>`<text x="${f1(x)}" y="${f1(yy)}" ${o||''}>${s}</text>`;
+
+/* corpuri nisipoase: părți [sondă, strat] legate, efilate spre sondele vecine nelegate */
+const all=s=>[[0,s],[1,s],[2,s]];
+function body(parts){
+  const top=[],bot=[];
+  const wedge=(i,s,j,dir)=>{const A=WL[i],B=WL[j],ref=s==='N4'?'bad':'sar';const[t,b]=A.s[s];const c0=(t+b)/2,h0=b-t,ce=c0+(B[ref]-A[ref]);const xe=dir>0?A.R:A.L,gw=dir>0?B.L-A.R:A.L-B.R;const TT=[],BB=[];
+    for(let k=0;k<=16;k++){const u=k/16,q=u*0.42,x=xe+dir*q*gw,c=c0+q*(ce-c0),hh=h0*(1-(u**1.6))/2;TT.push([x,c-hh]);BB.push([x,c+hh])}return[TT,BB]};
+  const[fi,fs]=parts[0],[li,ls]=parts[parts.length-1];
+  if(fi>0){const[TT,BB]=wedge(fi,fs,fi-1,-1);top.push(...TT.reverse());bot.push(...BB.reverse())}
+  for(const[i,s]of parts){const w=WL[i],[t,b]=w.s[s];top.push([w.L,t],[w.R,t]);bot.push([w.L,b],[w.R,b])}
+  if(li<2){const[TT,BB]=wedge(li,ls,li+1,1);top.push(...TT);bot.push(...BB)}
+  return poly([...top,...bot.reverse()].map(p=>[p[0],y(p[1])]));
+}
+let uid=0;
+function draw(o){
+  const d=body(o.p),dots=`<path d="${d}" fill="url(#dots)"/>`;
+  if(o.f==='w')return`<path d="${d}" fill="${C.wat}" stroke="${C.watS}" stroke-width="1.3"/>`+dots;
+  if(o.f==='x')return`<path d="${d}" fill="url(#gx)" stroke="#6b4f7a" stroke-width="1.4" stroke-dasharray="6 4"/>`+dots;
+  const out=`<path d="${d}" fill="${C.gas}" stroke="${C.gasS}" stroke-width="1.3"/>`;
+  if(!o.cga)return out+dots;
+  /* gaz deasupra CGA, apă dedesubt (până la xmax) */
+  const k=++uid,yy=f1(y(o.cga.d)),xm=f1(o.cga.xmax??W);
+  return out+`<clipPath id="cw${k}"><rect x="0" y="${yy}" width="${xm}" height="${H}"/></clipPath><clipPath id="cb${k}"><path d="${d}"/></clipPath>`+
+    `<path d="${d}" fill="${C.wat}" clip-path="url(#cw${k})"/>`+dots+
+    `<line x1="0" x2="${xm}" y1="${yy}" y2="${yy}" stroke="${C.watS}" stroke-width="2.6" stroke-dasharray="8 4" clip-path="url(#cb${k})"/>`;
+}
+/* eticheta CGA: la intrarea contactului în corpul dintre sondele i și i+1 */
+function cgaLabel(i,s,d){const A=WL[i],B=WL[i+1],[ta,ba]=A.s[s],[tb,bb]=B.s[s];let q=0;
+  for(let k=0;k<=400;k++){const u=k/400,t=ta+u*(tb-ta),b=ba+u*(bb-ba);if(t<=d&&b>=d){q=u;break}}
+  return T(A.R+q*(B.L-A.R)-10,y(d)+6,'CGA',`text-anchor="end" font-size="18" font-weight="700" fill="${C.watS}" class="hl"`)}
+function conflict(i,s){const A=WL[i],B=WL[i+1];const cx=(A.R+B.L)/2,ty=y((A.s[s][0]+B.s[s][0])/2)-30;
+  return`<path d="M${f1(cx-70)} ${f1(ty-15)}L${f1(cx-55)} ${f1(ty+10)}L${f1(cx-85)} ${f1(ty+10)}Z" fill="#c62828"/>`+T(cx-70,ty+7,'!','text-anchor="middle" font-size="16" font-weight="700" fill="#fff"')+
+  T(cx-46,ty+6,'gaz sub apă?','font-size="18" font-weight="700" fill="#8e1f1f" class="hl"')}
+
+const CGA3=886,CGA4=1262;
+const CL=[{p:all('N1'),f:'x'},{p:all('N2.1'),f:'g'},{p:all('N2.2'),f:'g'},{p:all('N2.3'),f:'g'},{p:all('N3'),f:'g',cga:{d:CGA3,xmax:WL[1].R}},{p:all('N4'),f:'g',cga:{d:CGA4}}];
+const EF=[{p:[[0,'N1']],f:'g'},{p:[[1,'N1'],[2,'N1']],f:'w'},{p:all('N2.1'),f:'g'},{p:[[0,'N2.2']],f:'g'},{p:[[0,'N2.3'],[1,'N2.2']],f:'g'},{p:[[2,'N2.2']],f:'g'},{p:[[1,'N2.3'],[2,'N2.3']],f:'g'},{p:[[0,'N3'],[1,'N3']],f:'g',cga:{d:CGA3}},{p:[[2,'N3']],f:'g'},{p:all('N4'),f:'g',cga:{d:CGA4}}];
+
+let g='';
+/* fundal formațiuni */
+const sar=hz('sar'),bad=hz('bad');
+g+=`<path d="${poly([[0,y(D0)],[W,y(D0)],...sar.slice().reverse()])}" fill="${C.pli}"/>`;
+g+=`<path d="${poly([...sar,...bad.slice().reverse()])}" fill="${C.sar}"/>`;
+g+=`<path d="${poly([...bad,[W,y(D1)],[0,y(D1)]])}" fill="${C.bad}"/>`;
+/* denumiri în spațiile dintre sonde */
+for(let i=0;i<2;i++){const A=WL[i],B=WL[i+1],cx=(A.R+B.L)/2,o=`text-anchor="middle" font-size="30" font-weight="700" letter-spacing="1" opacity=".6"`;
+  g+=T(cx,y((A.sar+B.sar)/2-170),'PLIOCEN',o+` fill="${C.pliT}"`);
+  g+=T(cx,y(((A.s.N3[1]+A.bad)/2+(B.s.N3[1]+B.bad)/2)/2)+10,'SARMAȚIAN',o+` fill="${C.sarT}"`);
+  g+=T(cx,y((A.bad+B.bad)/2+225),'BADENIAN',o+` fill="${C.badT}"`);}
+/* bara stratigrafică */
+const s1=WL[0];
+[[D0,s1.sar,C.pli,'PLIOCEN',C.pliT],[s1.sar,s1.bad,C.sar,'SARMAȚIAN',C.sarT],[s1.bad,D1,C.bad,'BADENIAN',C.badT]].forEach(([a,b,fc,t,tc])=>{
+  g+=`<rect x="12" y="${f1(y(a))}" width="40" height="${f1(y(b)-y(a))}" fill="${fc}" stroke="#666" stroke-width="1.2"/>`;
+  const m=(y(a)+y(b))/2;g+=T(32,m,t,`text-anchor="middle" dominant-baseline="central" font-size="20" font-weight="700" fill="${tc}" transform="rotate(-90 32 ${f1(m)})"`)});
+g+=T(32,128,'Etaj','text-anchor="middle" font-size="16" font-weight="700" fill="#333"');
+g+=`<path d="M32 136V150" stroke="#333" stroke-width="2"/><path d="M26 146L32 156L38 146Z" fill="#333"/>`;
+/* scenarii */
+const cgaL=cgaLabel(0,'N3',CGA3)+cgaLabel(1,'N4',CGA4);
+g+=`<g class="lay" data-s="0"></g><g class="lay" data-s="1">${CL.map(draw).join('')}${conflict(0,'N1')}${conflict(1,'N3')}${cgaL}</g><g class="lay" data-s="2">${EF.map(draw).join('')}${cgaL}</g>`;
+
+let tr='',cv='',hd='';
+WL.forEach((w,k)=>{
+  const L=logs(w,11+7*k),yb=y(w.td)+8,yt=y(D0)-6;
+  for(const x0 of[w.gr0,w.rs0])tr+=`<rect x="${x0}" y="${f1(yt)}" width="${TW}" height="${f1(yb-yt)}" fill="#fff" fill-opacity=".64" stroke="#9a9a9a" stroke-width="1"/>`;
+  for(const v of[30,60,90,120])tr+=`<path d="M${f1(xg(w,v))} ${f1(yt)}V${f1(yb)}" stroke="#cfcfcf" stroke-width=".8"/>`;
+  tr+=`<path d="M${f1(xg(w,GRCUT))} ${f1(yt)}V${f1(yb)}" stroke="#777" stroke-width="1.1" stroke-dasharray="5 5"/>`;
+  for(const v of[1,2,3,5,10,20,30])tr+=`<path d="M${f1(xr(w,v))} ${f1(yt)}V${f1(yb)}" stroke="${v===2?'#999':'#d2d2d2'}" stroke-width="${v===2?1.1:.8}" ${v===2?'stroke-dasharray="5 5"':''}/>`;
+  /* nisip pe GR */
+  const fw=L.z.map((d,i)=>[xg(w,Math.min(L.gr[i],GRCUT)),y(d)]),bk=L.z.map(d=>[xg(w,GRCUT),y(d)]).reverse();
+  cv+=`<path d="${poly([...fw,...bk])}" fill="${C.sand}"/>`;
+  /* fluid pe rezistivitate */
+  for(const s of SN){const[t,b,,,fl]=w.s[s];const ii=L.z.map((d,i)=>i).filter(i=>L.z[i]>=t-4&&L.z[i]<=b+4);
+    const p=ii.map(i=>[xr(w,fl==='g'?Math.max(L.rd[i],RCUT):Math.min(L.rd[i],RCUT)),y(L.z[i])]);const q=ii.map(i=>[xr(w,RCUT),y(L.z[i])]).reverse();
+    cv+=`<path d="${poly([...p,...q])}" fill="${fl==='g'?'#e53935':'#1e88e5'}" fill-opacity=".38"/>`}
+  cv+=`<path d="${path(L.z.map((d,i)=>[xg(w,L.gr[i]),y(d)]))}" fill="none" stroke="${C.gr}" stroke-width="2.2"/>`;
+  cv+=`<path d="${path(L.z.map((d,i)=>[xr(w,L.rs[i]),y(d)]))}" fill="none" stroke="${C.rs}" stroke-width="1.9"/>`;
+  cv+=`<path d="${path(L.z.map((d,i)=>[xr(w,L.rd[i]),y(d)]))}" fill="none" stroke="${C.rd}" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 5"/>`;
+  /* axa sondei și fluidul */
+  cv+=`<path d="M${w.bore} ${f1(y(w.start)-18)}V${f1(y(w.td)+10)}" stroke="${C.bore}" stroke-width="3.5"/>`;
+  for(const s of SN){const[t,b,,,fl]=w.s[s];cv+=`<rect x="${w.bore-6}" y="${f1(y(t))}" width="12" height="${f1(y(b)-y(t))}" fill="${fl==='g'?'#e53935':'#1e88e5'}" stroke="#333" stroke-width=".8"/>`}
+  cv+=T(w.bore,y(w.td)+30,'TD',`text-anchor="middle" font-size="15" font-weight="700" fill="${C.bore}"`);
+  for(const s of SN){const[t,b]=w.s[s];cv+=T(w.L-8,y((t+b)/2)+6,s,`text-anchor="end" font-size="19" font-weight="700" fill="${C.lab}" class="hl"`)}
+  /* antet */
+  hd+=`<g transform="translate(${w.bore-58} 38)"><circle r="10" fill="#fff" stroke="${C.rd}" stroke-width="3"/>${[0,1,2,3,4,5,6,7].map(j=>{const a=j*Math.PI/4;return`<path d="M${f1(13*Math.cos(a))} ${f1(13*Math.sin(a))}L${f1(20*Math.cos(a))} ${f1(20*Math.sin(a))}" stroke="${C.rd}" stroke-width="3"/>`}).join('')}</g>`;
+  hd+=T(w.bore-30,52,w.n,`font-size="42" font-weight="700" fill="${C.bore}"`);
+  for(const x0 of[w.gr0,w.rs0])hd+=`<rect x="${x0}" y="66" width="${TW}" height="80" fill="#fff" stroke="#777" stroke-width="1.1"/>`;
+  const gc=w.gr0+TW/2,rc=w.rs0+TW/2;
+  hd+=T(gc,86,'GR',`text-anchor="middle" font-size="17" font-weight="700" fill="${C.gr}"`)+`<path d="M${w.gr0+8} 96H${w.gr0+TW-8}" stroke="${C.gr}" stroke-width="2.6"/>`;
+  hd+=T(w.gr0+6,116,'0','font-size="15"')+T(gc,116,'API','text-anchor="middle" font-size="15" fill="#555"')+T(w.gr0+TW-6,116,'150','text-anchor="end" font-size="15"');
+  hd+=T(w.gr0+6,138,'← nisip','font-size="14" fill="#8a6500"')+T(w.gr0+TW-6,138,'marnă →','text-anchor="end" font-size="14" fill="#555"');
+  hd+=T(rc,84,'RD – deep',`text-anchor="middle" font-size="16" font-weight="700" fill="${C.rd}"`)+`<path d="M${w.rs0+8} 92H${w.rs0+TW-8}" stroke="${C.rd}" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 5"/>`;
+  hd+=T(rc,112,'RS – shallow',`text-anchor="middle" font-size="16" font-weight="700" fill="${C.rs}"`)+`<path d="M${w.rs0+8} 119H${w.rs0+TW-8}" stroke="${C.rs}" stroke-width="2.4"/>`;
+  hd+=T(w.rs0+6,139,'0.5','font-size="15"')+T(rc,139,'Ω·m (log)','text-anchor="middle" font-size="15" fill="#555"')+T(w.rs0+TW-6,139,'50','text-anchor="end" font-size="15"');
+});
+/* limite de formațiune peste trackuri */
+const tops=`<path d="${path(sar)}" fill="none" stroke="${C.tSar}" stroke-width="3.4"/><path d="${path(bad)}" fill="none" stroke="${C.tBad}" stroke-width="3.4"/>`+
+  T(WL[2].R+12,y(WL[2].sar)-10,'TOP SARMAȚIAN',`font-size="18" font-weight="700" fill="${C.tSar}"`)+T(WL[2].R+12,y(WL[2].bad)-10,'TOP BADENIAN',`font-size="18" font-weight="700" fill="${C.tBad}"`);
+
+const defs=`<defs><pattern id="dots" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="2.5" cy="2.5" r="1.3" fill="#4a3516" fill-opacity=".42"/><circle cx="7.5" cy="7.5" r="1.3" fill="#4a3516" fill-opacity=".42"/></pattern>
+<linearGradient id="gx" gradientUnits="userSpaceOnUse" x1="${WL[0].R}" y1="0" x2="${WL[1].L}" y2="0"><stop offset=".2" stop-color="${C.gas}"/><stop offset=".8" stop-color="${C.wat}"/></linearGradient>
+</defs>`;
+const css=`<style>.hl{paint-order:stroke;stroke:#fbfaf6;stroke-width:5px;stroke-linejoin:round}</style>`;
+const plate=document.getElementById('plate');
+plate.innerHTML=`<svg id="sv" viewBox="0 0 ${W} ${H}" role="img" aria-label="Secțiune de corelare între sondele S1, S2 și S3 cu loguri GR și rezistivitate, intervale Pliocen, Sarmațian și Badenian" font-family="IBM Plex Sans, system-ui, sans-serif">${css}${defs}${g}${tr}${tops}${cv}${hd}</svg>`;
+
+/* note pe scenariu */
+const SC=[
+{id:'fara-corelare',h:'0 · Fără corelare',html:`<p>Între sonde se urmăresc doar reperele <b>Top Sarmațian</b> și <b>Top Badenian</b>. Nisipurile N1–N4 sunt interpretate numai în dreptul fiecărei sonde, din GR și rezistivitate.</p><p>S2 interceptează reperele cel mai sus, deci e în boltă; S1 și S3 sunt pe flancuri, S3 cel mai jos.</p><p>Fluidele se citesc la sondă: RD mare (umplere roșie) înseamnă gaz, RD sub marne cu RS mai mare decât RD (umplere albastră) înseamnă nisip inundat.</p>`},
+{id:'clasica',h:'1 · Corelare clasică',html:`<p>Fiecare nisip N1–N4 este un corp continuu de la S1 la S3 („layer-cake”).</p><ul><li><b>N1</b>: gaz în S1, pe flanc, dar apă în S2, în boltă, și în S3. Un corp continuu nu poate ține gaz sub apă, deci varianta clasică nu explică N1.</li><li><b>N3</b>: gaz în S2, apă în S1, deci un CGA între baza N3 din S2 și acoperișul N3 din S1. Dar S3 are gaz în N3 mai jos decât apa din S1, deci nici N3 nu se explică printr-un corp continuu.</li><li><b>N4</b>: gaz în S1 și S2, apă în S3. Contactul gaze–apă (CGA) stă între baza N4 din S1 (ultimul gaz cunoscut) și acoperișul N4 din S3 (prima apă).</li></ul>`},
+{id:'efilari',h:'2 · Corelare cu efilări',html:`<p>Unele nisipuri sunt lentile care se efilează între sonde, iar N2.3 din S1 se leagă de N2.2 din S2.</p><table><thead><tr><th>Corp</th><th>Legătură</th><th>Fluid</th></tr></thead><tbody>
+<tr><td>N1</td><td>S1 se efilează</td><td>gaz</td></tr><tr><td>N1</td><td>S2 ↔ S3</td><td>inundat</td></tr>
+<tr><td>N2.1</td><td>S1 ↔ S2 ↔ S3</td><td>gaz</td></tr>
+<tr><td>N2.2</td><td>S1 se efilează</td><td>gaz</td></tr><tr><td>N2.3 / N2.2</td><td>N2.3(S1) ↔ N2.2(S2)</td><td>gaz</td></tr><tr><td>N2.2</td><td>S3 se efilează</td><td>gaz</td></tr>
+<tr><td>N2.3</td><td>S2 ↔ S3</td><td>gaz</td></tr>
+<tr><td>N3</td><td>S1 ↔ S2</td><td>gaz în S2, apă în S1, CGA</td></tr><tr><td>N3</td><td>S3 se efilează</td><td>gaz</td></tr>
+<tr><td>N4</td><td>S1 ↔ S2 ↔ S3</td><td>gaz, apă în S3, CGA</td></tr></tbody></table>
+<p style="margin-top:12px"><b>N1(S1)</b> și <b>N3(S3)</b> devin lentile izolate cu gaz, deci contradicțiile de fluid din corelarea clasică dispar. Corpul N3 din S1–S2 și N4 au fiecare câte un CGA.</p>`}];
+const note=document.getElementById('note');
+const btns=[0,1,2].map(i=>document.getElementById('b'+i));
+const lays=[...plate.querySelectorAll('.lay')];
+let cur=-1;
+function show(i,push){if(i===cur)return;cur=i;
+  btns.forEach((b,j)=>b.setAttribute('aria-pressed',j===i?'true':'false'));
+  lays.forEach(l=>l.classList.toggle('on',+l.dataset.s===i));
+  note.innerHTML=`<h2>${SC[i].h}</h2>${SC[i].html}`;
+  if(push){try{history.replaceState(null,'','#'+SC[i].id)}catch(e){try{location.hash=SC[i].id}catch(e2){}}}}
+const fromHash=()=>{const i=SC.findIndex(s=>'#'+s.id===location.hash);return i<0?1:i};
+btns.forEach((b,i)=>b.addEventListener('click',()=>show(i,true)));
+window.addEventListener('hashchange',()=>show(fromHash(),false));
+show(fromHash(),false);
+
+/* zoom */
+const sv=document.getElementById('sv'),zl=document.getElementById('zl'),Z=[1,1.5,2,3];let zi=0;
+const setZ=i=>{zi=cl(i,0,Z.length-1);sv.style.width=(Z[zi]*100)+'%';zl.textContent=Math.round(Z[zi]*100)+'%'};
+document.getElementById('zm').addEventListener('click',()=>setZ(zi-1));
+document.getElementById('zp').addEventListener('click',()=>setZ(zi+1));
+document.getElementById('zf').addEventListener('click',()=>setZ(0));
+
+/* tabel date la sonde */
+const fluidTxt=f=>f==='g'?'<span class="fl"><span class="dot g"></span>gaz</span>':'<span class="fl"><span class="dot w"></span>inundat</span>';
+document.querySelector('#tw tbody').innerHTML=SN.map(s=>`<tr><td data-l="Strat">${s}</td>${WL.map(w=>{const[, ,mo,,fl]=w.s[s];return`<td data-l="${w.n}"><span>${MOTN[mo]} · ${fluidTxt(fl)}</span></td>`}).join('')}</tr>`).join('');
+
+/* legendă */
+const sw=(inner)=>`<svg width="38" height="16" viewBox="0 0 38 16" aria-hidden="true">${inner}</svg>`;
+const LG=[
+[sw(`<path d="M2 8H36" stroke="${C.gr}" stroke-width="2.6"/>`),'GR (API)'],
+[sw(`<path d="M3 8H36" stroke="${C.rd}" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.1 5"/>`),'RD – rezistivitate deep'],
+[sw(`<path d="M2 8H36" stroke="${C.rs}" stroke-width="2.4"/>`),'RS – rezistivitate shallow'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${C.sand}"/>`),'Nisip pe GR (sub 75 API)'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${C.gas}" stroke="${C.gasS}"/><rect x="2" y="2" width="34" height="12" fill="url(#dots)"/>`),'Corp nisipos cu gaze'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${C.wat}" stroke="${C.watS}"/>`),'Corp nisipos inundat'],
+[sw(`<defs><linearGradient id="lgx"><stop offset="0" stop-color="${C.gas}"/><stop offset="1" stop-color="${C.wat}"/></linearGradient></defs><rect x="2" y="2" width="34" height="12" fill="url(#lgx)" stroke="#6b4f7a" stroke-dasharray="4 3"/>`),'Contradicție de fluid'],
+[sw(`<path d="M2 8H36" stroke="${C.watS}" stroke-width="2.6" stroke-dasharray="7 4"/>`),'CGA – contact gaze–apă'],
+[sw(`<path d="M2 8H36" stroke="${C.tSar}" stroke-width="3.4"/>`),'Top Sarmațian'],
+[sw(`<path d="M2 8H36" stroke="${C.tBad}" stroke-width="3.4"/>`),'Top Badenian'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${C.pli}" stroke="#888"/>`),'Pliocen'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${C.sar}" stroke="#888"/>`),'Sarmațian'],
+[sw(`<rect x="2" y="2" width="34" height="12" fill="${C.bad}" stroke="#888"/>`),'Badenian'],
+[sw(`<rect x="13" y="1" width="12" height="14" fill="#e53935" stroke="#333"/>`),'Fluid la sondă: gaz'],
+[sw(`<rect x="13" y="1" width="12" height="14" fill="#1e88e5" stroke="#333"/>`),'Fluid la sondă: apă']];
+document.getElementById('lg').innerHTML=LG.map(([s,t])=>`<div>${s}<span>${t}</span></div>`).join('');
+
+/* export: secțiunea scenariului curent, cu titlu și legendă */
+const exs=document.getElementById('exs'),ov=document.getElementById('ov'),ovi=document.getElementById('ovi'),ovt=document.getElementById('ovt');
+const say=t=>{exs.textContent=t};
+let dl=null,lastUrl=null;
+(async()=>{try{dl=window.claude&&window.claude.use?await window.claude.use('downloads'):null}catch(e){dl=null}})();
+function exportSvg(){
+  const c=document.getElementById('sv').cloneNode(true);
+  c.querySelectorAll('.lay').forEach(l=>{if(+l.dataset.s!==cur)l.remove();else l.removeAttribute('class')});
+  c.removeAttribute('style');c.removeAttribute('id');
+  const TOP=100,BOT=170,h=H+TOP+BOT,cols=5,cw=(W-80)/cols;
+  c.setAttribute('viewBox',`0 ${-TOP} ${W} ${h}`);c.setAttribute('width',W);c.setAttribute('height',h);
+  c.setAttribute('font-family','IBM Plex Sans, Arial, Helvetica, sans-serif');
+  const head=`<rect x="0" y="${-TOP}" width="${W}" height="${h}" fill="#fbfaf6"/>`+
+    T(40,-52,'Corelare S1 – S2 – S3','font-size="36" font-weight="700" fill="#16191d"')+
+    T(40,-16,'Scenariul '+SC[cur].h+'  ·  Inundate: N1 (S2, S3), N3 (S1), N4 (S3)  ·  schiță didactică, scări orientative','font-size="21" fill="#555"');
+  const leg=`<path d="M40 ${H+12}H${W-40}" stroke="#ccc" stroke-width="1"/>`+LG.map(([s,t],i)=>{const x=f1(40+(i%cols)*cw),yy=H+32+Math.floor(i/cols)*42;
+    return s.replace('<svg ',`<svg x="${x}" y="${yy}" `)+T(+x+48,yy+14,t,'font-size="19" fill="#222"')}).join('');
+  c.insertAdjacentHTML('afterbegin',head);c.insertAdjacentHTML('beforeend',leg);
+  return{xml:new XMLSerializer().serializeToString(c),w:W,h};
+}
+async function toPng(xml,w,h){
+  const img=new Image();
+  const ok=new Promise((res,rej)=>{img.onload=res;img.onerror=()=>rej(new Error('img'))});
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
+  await ok;
+  const cv=document.createElement('canvas');cv.width=w*2;cv.height=h*2;
+  const cx=cv.getContext('2d');cx.fillStyle='#fbfaf6';cx.fillRect(0,0,cv.width,cv.height);cx.drawImage(img,0,0,cv.width,cv.height);
+  return await new Promise((res,rej)=>cv.toBlob(b=>b?res(b):rej(new Error('blob')),'image/png'));
+}
+async function deliver(name,blob){
+  if(lastUrl){URL.revokeObjectURL(lastUrl);lastUrl=null}
+  if(dl){try{await dl.save({filename:name,data:blob});say('Salvat: '+name);return}catch(e){const k=e&&e.code;
+    if(k==='declined'){say('Salvarea a fost anulată.');return}
+    if(k==='rate_limited'){say('Așteaptă câteva secunde și încearcă din nou.');return}}}
+  /* rezervă: imaginea afișată, de salvat manual */
+  lastUrl=URL.createObjectURL(blob);ovi.src=lastUrl;
+  ovt.textContent='Salvarea directă nu e disponibilă aici. Ține apăsat pe imagine (telefon) sau clic dreapta → Salvează imaginea ca.';
+  ov.hidden=false;say('');document.getElementById('ovc').focus();
+}
+const busy=(b,on)=>{b.disabled=on};
+const ep=document.getElementById('ep'),es=document.getElementById('es');
+ep.addEventListener('click',async()=>{busy(ep,true);say('Se generează imaginea…');
+  try{const r=exportSvg();const b=await toPng(r.xml,r.w,r.h);await deliver(`corelare_S1-S2-S3_${SC[cur].id}.png`,b)}catch(e){say('Nu am putut genera imaginea.')}finally{busy(ep,false)}});
+es.addEventListener('click',async()=>{busy(es,true);
+  try{const r=exportSvg();await deliver(`corelare_S1-S2-S3_${SC[cur].id}.svg`,new Blob([r.xml],{type:'image/svg+xml'}))}catch(e){say('Nu am putut genera fișierul.')}finally{busy(es,false)}});
+document.getElementById('ovc').addEventListener('click',()=>{ov.hidden=true});
+ov.addEventListener('click',e=>{if(e.target===ov)ov.hidden=true});
+}
+</script>
+</body>
+</html>
