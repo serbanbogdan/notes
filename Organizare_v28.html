@@ -6731,7 +6731,8 @@ div.pc { cursor: default; }
   }
   async function pdfAlegeRadacina() {
     await copiazaCaleAvize();
-    var h = await window.showDirectoryPicker({ id: 'avize-anrmpsg', mode: 'readwrite' });
+    var opt = { id: 'avize-anrmpsg', mode: 'readwrite' }; if (S.folderAles || S.folder) opt.startIn = S.folder || S.folderAles; // pornește lângă folderul Organizare: un nivel mai sus e „Avize si Acorduri ANRM”
+    var h; try { h = await window.showDirectoryPicker(opt); } catch (e) { if (e && e.name === 'TypeError') { delete opt.startIn; h = await window.showDirectoryPicker(opt); } else throw e; }
     await IO.salveazaHandleCheie('avize', h);
     S.pdf.root = h; return h;
   }
@@ -7019,7 +7020,8 @@ div.pc { cursor: default; }
     return m;
   }
   // ---------- Adăugare rapidă în evidență (conservare, prelungire, abandonare, tarif nou, exploatare experimentală) ----------
-  var TIPURI_EVIDENTA = [['sonda_toate', 'Sondă — completez tot ce știu (se înregistrează în toate evidențele potrivite)'], ['cons_noua', 'Sondă nouă în conservare'], ['prel_cons', 'Prelungire conservare'], ['abandonare', 'Abandonare (acord / aviz)'], ['tarif_nou', 'Tarif nou (alt tip de aviz)'], ['exp_noua', 'Exploatare experimentală nouă'], ['situatie', 'Situație nouă (abandonare / conservare) — documentație de făcut']];
+  var TIPURI_EVIDENTA = [['sonda_toate', 'Sondă — completez tot ce știu (o înscriu acum în evidențe, datele le completez pe parcurs)'], ['cons_noua', 'Sondă nouă în conservare'], ['prel_cons', 'Prelungire conservare'], ['abandonare', 'Abandonare (acord / aviz)'], ['tarif_nou', 'Tarif nou (alt tip de aviz)'], ['exp_noua', 'Exploatare experimentală nouă'], ['situatie', 'Situație nouă (abandonare / conservare) — documentație de făcut']];
+  var TIP_TARIF_SIT = { abandonare: ['Acord abandonare', 'Aviz abandonare'], conservare: ['Aviz conservare'], experimentala: ['Aviz exploatare experimentală'] };
   function responsabilPentruSonda(sonda) {
     var p = S.potrivitor ? S.potrivitor(sonda) : null;
     if (!p || !p.sectia || p.nivel === 'aproximativ' || p.nivel === 'partial') return '';
@@ -7041,16 +7043,7 @@ div.pc { cursor: default; }
     var azi = B.isoData(S.azi), sectii = [['', 'Automat, după zăcământ']].concat(Object.keys(SECTII_NUME).map(function (k) { return [k, SECTII_NUME[k]]; }));
     var resp = esteSef() ? campEv('resp', 'Cine se ocupă (sarcina)', 'select', { optiuni: [['', 'Automat, după secție (altfel eu)']].concat(membri().map(function (m) { return [m.id, m.nume]; })) }) : '';
     var h = '';
-    if (tip === 'sonda_toate') {
-      var sec = function (t, aj) { return '<h4 style="grid-column:1/-1;margin:.8rem 0 .1rem;border-bottom:1px solid var(--linie,#ccc)">' + t + '</h4>' + (aj ? '<p class="nota" style="grid-column:1/-1;margin:0">' + aj + '</p>' : ''); };
-      var tipT = tipuriCunoscute().filter(function (t) { return !/abandon|experimental/i.test(M.norm(t).toLowerCase()) && !/ABANDON|EXPERIMENTAL/.test(M.norm(t)); });
-      h = sec('Sonda', 'Toate câmpurile de mai jos sunt opționale, în afară de sondă. Programul scrie sonda în fiecare evidență pentru care ai completat date.') + campEv('sonda', 'Sonda', 'text', { ph: 'ex. 12 Paltinoasa' }) + campEv('sectia', 'Secția', 'select', { optiuni: sectii }) +
-        sec('Conservare', 'Cu „Valabil până la” completat → conservare.csv; fără aviz, bifează doar dacă sonda intră în conservare.') + '<label style="display:flex;gap:.5rem;align-items:center;grid-column:1/-1"><input type="checkbox" name="c_on" value="1"> Sonda intră în conservare (aviz încă neprimit)</label>' + campEv('c_nr', 'Număr aviz de conservare', 'text', { ph: 'ex. 338-C' }) + campEv('c_emis', 'Data emiterii avizului', 'date') + campEv('c_valabil', 'Valabil până la', 'date') + campEv('c_inf', 'Informări ANRMPSG din … luni', 'text', { ph: '6 sau -' }) + campEv('c_debit', 'Debit inițial (mii m³/zi)', 'text') +
-        sec('Abandonare', 'Orice câmp completat → abandonare.csv. Cu valoare estimată → și rând în Tarife (Acord abandonare / Aviz abandonare).') + '<label style="display:flex;gap:.5rem;align-items:center;grid-column:1/-1"><input type="checkbox" name="a_on" value="1"> Sonda intră în abandonare</label>' + campEv('a_anrm', 'Data înaintării la ANRMPSG', 'date') + campEv('a_acord', 'Acord abandonare (nr./dată)', 'text', { ph: 'ex. 79-Ab/07.03.2024' }) + campEv('a_mediu', 'Raport de mediu (dată)', 'date') + campEv('a_aviz', 'Aviz abandonare (nr./dată)', 'text', { ph: 'ex. 19-Ab/20.01.2025' }) + campEv('a_tip', 'Tarif pentru', 'select', { optiuni: [['Acord abandonare', 'Acord abandonare'], ['Aviz abandonare', 'Aviz abandonare']] }) + campEv('a_reg', 'Data înregistrării la Serviciul Perimetre (tarif)', 'date') + campEv('a_est', 'Valoare estimată (lei)', 'text') +
-        sec('Exploatare experimentală', 'Cu datele avizului → experimentale.csv. Cu valoare estimată → și rând în Tarife (Aviz exploatare experimentală).') + campEv('e_nrav', 'Număr aviz', 'text', { ph: 'ex. 570-C' }) + campEv('e_primire', 'Data primirii avizului', 'date') + campEv('e_expira', 'Data expirării avizului', 'date') + campEv('e_est', 'Valoare estimată (lei)', 'text') +
-        sec('Alt tarif ANRMPSG', 'Cu tipul ales → rând în Tarife.') + campEv('t_tip', 'Tipul actului', 'select', { optiuni: [['', '— niciunul —']].concat(tipT.map(function (t) { return [t, t]; })) }) + campEv('t_reg', 'Data înregistrării la Serviciul Perimetre', 'date', { valoare: azi }) + campEv('t_est', 'Valoare estimată (lei)', 'text') +
-        sec('Sarcină de documentație (opțional)') + campEv('d_termen', 'Termen documentație', 'date') + campEv('d_ce', 'Pentru', 'select', { optiuni: [['abandonare', 'Abandonare'], ['conservare', 'Conservare'], ['experimentala', 'Exploatare experimentală']] });
-    }
+    if (tip === 'sonda_toate') h = formularToate();
     else if (tip === 'cons_noua') h = campEv('sonda', 'Sonda', 'text', { ph: 'ex. 9 Paltinoasa' }) + campEv('sectia', 'Secția', 'select', { optiuni: sectii }) + campEv('nr', 'Număr aviz de conservare', 'text', { ph: 'ex. 338-C' }) + campEv('emis', 'Data emiterii avizului', 'date') + campEv('valabil', 'Valabil până la', 'date') + campEv('inf', 'Informări ANRMPSG din … luni', 'text', { ph: '6 sau - (fără)', ajutor: 'Gol = fără informări.' }) + campEv('debit', 'Debit inițial (mii m³/zi, opțional)', 'text');
     else if (tip === 'prel_cons') h = campEv('cheie', 'Sonda în conservare', 'select', { sel: (S.prefillEv || {}).cheie, optiuni: S.cons.analize.map(function (a) { return [a.cheie, a.sonda + ' (expiră ' + B.fmtData(a.valabil) + ')']; }) }) + '<p class="nota" style="margin:.2rem 0">Completează mai jos doar dacă ai primit deja avizul prelungit; altfel se creează sarcina cu termenul de trimitere a documentației.</p>' + campEv('nr', 'Număr aviz nou', 'text', { valoare: (S.prefillEv || {}).nr }) + campEv('emis', 'Data emiterii avizului nou', 'date') + campEv('valabil', 'Noua valabilitate (până la)', 'date');
     else if (tip === 'abandonare' || tip === 'tarif_nou') {
@@ -7059,7 +7052,11 @@ div.pc { cursor: default; }
     } else if (tip === 'exp_noua') h = campEv('sonda', 'Sonda', 'text', { ph: 'ex. 20 Cristur Nord' }) + campEv('nrav', 'Număr aviz', 'text', { ph: 'ex. 570-C' }) + campEv('primire', 'Data primirii avizului', 'date', { valoare: azi }) + campEv('expira', 'Data expirării avizului', 'date', { ajutor: 'Este și termenul de trimitere a documentației pentru exploatare definitivă.' }) + campEv('est', 'Valoare estimată pentru tarif (lei, opțional)', 'text') + '<label style="display:flex;gap:.5rem;align-items:center;grid-column:1/-1"><input type="checkbox" name="leg_tar" value="1"> Adaugă și un rând în tarife.csv (doar dacă ai data înregistrării la Serviciul Perimetre; altfel rămâne nebifat)</label>';
     if (tip === 'situatie') {
       h = campEv('sonda', 'Sonda', 'text', { ph: 'ex. 12 Paltinoasa' }) + campEv('ce', 'Ce urmează pentru sondă', 'select', { optiuni: [['abandonare', 'Abandonare'], ['conservare', 'Conservare'], ['experimentala', 'Exploatare experimentală']] }) +
-        campEv('termen', 'Termen pentru documentație', 'date') + '<p class="nota" style="grid-column:1/-1">Sonda se înscrie în fișierul CSV corespunzător (rând nou, fără date) și se creează sarcina documentației.</p>';    }
+        campEv('termen', 'Termen pentru documentație', 'date') + '<p class="nota" style="grid-column:1/-1">Sonda se înscrie în fișierul CSV corespunzător (rând nou, fără date) și se creează sarcina documentației.</p>' +
+        // v2.10: tarif opțional — cu valoare estimată (sau data înregistrării) sonda intră și în Tarife
+        '<h4 style="grid-column:1/-1;margin:.6rem 0 .1rem;border-bottom:1px solid var(--linie,#ccc)">Tarif ANRMPSG (opțional)</h4>' +
+        campEv('s_tip', 'Tarif pentru', 'select', { optiuni: TIP_TARIF_SIT.abandonare.map(function (t) { return [t, t]; }) }) + campEv('s_est', 'Valoare estimată (lei)', 'text') + campD('s_reg', 'Data înregistrării la Serviciul Perimetre', false, 'Se poate completa și mai târziu.') +
+        '<p class="nota" style="grid-column:1/-1;margin:.3rem 0 0">Datele care apar pe parcurs (acord, aviz, rapoarte, valoare finală etc.) le completezi din <b>„Sondă — completez tot ce știu”</b>: scrii sonda și câmpurile se umplu cu ce este deja înregistrat, iar ce adaugi se scrie în evidențele corespunzătoare. <button type="button" class="btn mic" data-ev-comuta>Completează acum datele sondei</button></p>';    }
     h += '<div class="camp"><label for="ev-categ">Categoria sarcinii</label><input id="ev-categ" name="categ" type="text" list="ev-categ-l" autocomplete="off" value="' + esc(numeCateg('anrmpsg')) + '"><datalist id="ev-categ-l">' + listaCateg().map(function (c) { return '<option value="' + esc(c.t) + '">'; }).join('') + '</datalist><span class="ajutor">Alege din listă sau scrie una nouă.</span></div>';
     return '<div class="grila" style="grid-template-columns:1fr 1fr">' + h.replace(/<div class="camp">/g, '<div class="camp">') + '</div>' + resp;
   }
@@ -7067,17 +7064,33 @@ div.pc { cursor: default; }
     S.prefillEv = prefill || null;
     var tip = tip0 || 'sonda_toate';
     var m = modal({
-      titlu: 'Adaugă în evidență', lat: true,
+      titlu: 'Adaugă în evidență', lat: true, fix: true,
       corp: '<div class="camp"><label for="ev-tip">Ce adaugi</label><select id="ev-tip">' + TIPURI_EVIDENTA.map(function (t) { return '<option value="' + t[0] + '"' + (t[0] === tip ? ' selected' : '') + '>' + esc(t[1]) + '</option>'; }).join('') + '</select></div><form id="ev-form" onsubmit="return false">' + formularEvidenta(tip) + '</form><p class="nota">Completezi doar datele de mai sus: programul le scrie în fișierul potrivit și creează o sarcină cu termenele calculate.</p>',
-      subsol: '<button class="btn" data-inchide>Anulează</button><button class="btn principal" data-ev-ok>Adaugă</button>'
+      subsol: '<button class="btn" data-inchide>Anulează</button><button class="btn principal" data-ev-ok>Salvează</button>'
     });
     var form = m.el.querySelector('#ev-form');
-    m.el.querySelector('#ev-tip').onchange = function () { tip = this.value; form.innerHTML = formularEvidenta(tip); };
+    m.el.querySelector('#ev-tip').onchange = function () { tip = this.value; S.evPre = null; form.innerHTML = formularEvidenta(tip); arataSectiuniEv(form); };
+    // v2.10: bifele de evidență arată secțiunile; la o sondă existentă câmpurile se umplu cu ce este deja înregistrat
+    S.evPre = null; var tmrEv = null;
+    form.addEventListener('click', function (e) { // calendarul mic și „E” în fereastră (clicurile din ferestre nu ajung la handlerul general)
+      var cm = e.target.closest('[data-ev-comuta]');
+      if (cm) { var so = (form.querySelector('#ev-sonda') || {}).value || '', sel = m.el.querySelector('#ev-tip'); sel.value = 'sonda_toate'; sel.onchange(); var i1 = form.querySelector('#ev-sonda'); if (i1 && so) { i1.value = so.trim(); aplicaExistent(form, so.trim()); } return; }
+      var b = e.target.closest('[data-a="cal"],[data-a="cal-e"]'); if (!b) return;
+      e.preventDefault(); if (b.dataset.a === 'cal') deschideMiniCal(b); else scrieInCasuta(b, 'E');
+    });
+    form.addEventListener('change', function (e) {
+      var t = e.target;
+      if (t.dataset && t.dataset.evCat) { delete t.dataset.auto; arataSectiuniEv(form); }
+      if (t.name === 'a_tip' || t.name === 't_tip') { t.dataset.atins = '1'; reumpleTarifEv(form, t.name.charAt(0)); }
+      if (tip === 'situatie' && t.name === 'ce') { var st = form.querySelector('[name="s_tip"]'); if (st) st.innerHTML = (TIP_TARIF_SIT[t.value] || []).map(function (x) { return '<option value="' + esc(x) + '">' + esc(x) + '</option>'; }).join(''); }
+    });
+    if (tip === 'sonda_toate' && prefill && prefill.sonda) { var i0 = form.querySelector('#ev-sonda'); if (i0) { i0.value = prefill.sonda; aplicaExistent(form, prefill.sonda); } }
     // v2.8: sub câmpul „Sonda” se vede imediat cum o recunoaște programul (aceeași identitate ca în toate fișierele)
     var sondeEv = null;
     form.addEventListener('input', function (e) {
       if (e.target.id !== 'ev-sonda') return;
       var v = e.target.value.trim(), el = form.querySelector('#ev-hint');
+      if (tip === 'sonda_toate') { clearTimeout(tmrEv); tmrEv = setTimeout(function () { aplicaExistent(form, v); }, 450); }
       if (!el) { el = document.createElement('span'); el.id = 'ev-hint'; el.className = 'ajutor'; e.target.parentNode.appendChild(el); }
       if (!v) { el.textContent = ''; return; }
       sondeEv = sondeEv || sondeUnice();
@@ -7105,6 +7118,8 @@ div.pc { cursor: default; }
     if (tip === 'situatie') {
       if (!fd.sonda) return { eroare: 'Scrie sonda.' };
       if ((er = data('termen', 'Termenul documentației', true))) return er; var termS = z;
+      if (fd.s_est && B.citesteNumarIntrodus(fd.s_est).v == null) return { eroare: 'Valoarea estimată „' + fd.s_est + '” nu este un număr.' };
+      if (fd.s_reg && B.citesteData(fd.s_reg).z == null) return { eroare: 'Data înregistrării „' + fd.s_reg + '” nu este o dată validă (zz.ll.aaaa).' };
       var pot = S.potrivitor ? S.potrivitor(fd.sonda) : null, secS = pot && pot.sectia && pot.nivel !== 'aproximativ' && pot.nivel !== 'partial' ? pot.sectia : '';
       var numeCe = { abandonare: 'abandonarea', conservare: 'conservarea', experimentala: 'exploatarea experimentală' }[fd.ce] || fd.ce;
       // situația nouă se înscrie și în fișierul corespunzător (rând cu sonda; restul se completează pe parcurs)
@@ -7124,7 +7139,16 @@ div.pc { cursor: default; }
       }
       analizeazaTarife();
       creeazaSarcinaEvidenta('Documentația pentru ' + numeCe + ' — ' + fd.sonda, termS, fd.sonda, resp || responsabilPentruSonda(fd.sonda) || S.eu, 'Situație nouă: sonda urmează ' + numeCe + '.');
-      return { ok: 'S-a creat sarcina.' + inCsv };
+      var txtTar = '';
+      if (fd.s_est || fd.s_reg) { // tarif opțional → în Tarife (același mecanism ca „Sondă — completez tot ce știu”: rândul deschis de același tip se actualizează)
+        var fdT = { sonda: fd.sonda, resp: fd.resp, categ: fd.categ, sectia: secS };
+        if (fd.ce === 'abandonare') { fdT.k_aband = '1'; fdT.a_tip = fd.s_tip || 'Acord abandonare'; fdT.a_est = fd.s_est; fdT.a_reg = fd.s_reg; }
+        else if (fd.ce === 'experimentala') { fdT.k_exp = '1'; fdT.e_est = fd.s_est; fdT.e_reg = fd.s_reg; }
+        else { fdT.k_tar = '1'; fdT.t_tip = fd.s_tip || 'Aviz conservare'; fdT.t_est = fd.s_est; fdT.t_reg = fd.s_reg; }
+        var rzT = await salveazaEvidentaToate(fdT, resp);
+        txtTar = rzT.eroare ? ' Tariful NU a fost scris: ' + rzT.eroare : ' Tariful a fost înscris în ' + FIS.tarife + '.';
+      }
+      return { ok: 'S-a creat sarcina.' + inCsv + txtTar };
     }
     if (tip === 'cons_noua') {
       if (!fd.sonda) return { eroare: 'Scrie sonda.' };
@@ -7204,56 +7228,247 @@ div.pc { cursor: default; }
     }
     return { eroare: 'Alege ce adaugi.' };
   }
-  // v2.9: o singură introducere → sonda se scrie în toate evidențele pentru care s-au completat date
+  // v2.10 (27.11.2026): „Sondă — completez tot ce știu”. Se bifează evidențele în care intră sonda (se înscrie și fără nicio dată);
+  // la o sondă deja înregistrată câmpurile se completează cu ce este în fișiere, iar la „Salvează” se actualizează rândurile existente
+  // (nu se dublează). Valoare introdusă la tarif → rând (nou sau actualizat) și în tarife.csv.
+  var EV_CAT = [['cons', 'Conservare'], ['aband', 'Abandonare'], ['exp', 'Exploatare experimentală'], ['tar', 'Alt tarif ANRMPSG']];
+  function campD(nume, eticheta, cuE, ajutor) { // dată zz.ll.aaaa cu calendar (și „E” unde se poate)
+    return '<div class="camp"><label for="ev-' + nume + '">' + eticheta + '</label><span class="rand-flex"><input id="ev-' + nume + '" name="' + nume + '" type="text" inputmode="numeric" autocomplete="off" placeholder="zz.ll.aaaa' + (cuE ? ' sau E' : '') + '"' + (cuE ? ' data-e="1"' : '') + '>' + BTN_CAL + (cuE ? BTN_E : '') + '</span>' + (ajutor ? '<span class="ajutor">' + ajutor + '</span>' : '') + '</div>';
+  }
+  function formularToate() {
+    var sectii = [['', 'Automat, după zăcământ']].concat(Object.keys(SECTII_NUME).map(function (k) { return [k, SECTII_NUME[k]]; }));
+    var tipT = tipuriCunoscute().filter(function (t) { return !/ABANDON|EXPERIMENTAL/.test(M.norm(t)); });
+    function sec(cat, titlu, aj, corp) { return '<div data-ev-sec="' + cat + '" style="grid-column:1/-1;display:none"><h4 style="margin:.8rem 0 .1rem;border-bottom:1px solid var(--linie,#ccc)">' + titlu + '</h4>' + (aj ? '<p class="nota" style="margin:0 0 .3rem">' + aj + '</p>' : '') + '<div class="grila" style="grid-template-columns:1fr 1fr">' + corp + '</div></div>'; }
+    function sub(t) { return '<p class="nota" style="grid-column:1/-1;margin:.5rem 0 0"><b>' + t + '</b></p>'; }
+    return campEv('sonda', 'Sonda', 'text', { ph: 'ex. 12 Paltinoasa' }) + campEv('sectia', 'Secția', 'select', { optiuni: sectii }) +
+      '<div id="ev-existent" class="nota" style="grid-column:1/-1;display:none;margin:0"></div>' +
+      '<div style="grid-column:1/-1"><label style="font-weight:600">În ce evidență intră sonda</label><div class="rand-flex" style="gap:1.1rem;flex-wrap:wrap;margin-top:.25rem">' +
+      EV_CAT.map(function (c) { return '<label style="display:flex;gap:.35rem;align-items:center"><input type="checkbox" name="k_' + c[0] + '" value="1" data-ev-cat="' + c[0] + '"> ' + c[1] + '</label>'; }).join('') +
+      '</div><span class="ajutor">Poți bifa doar evidența, fără nicio dată: sonda se înscrie acum, iar datele le completezi pe parcurs, pe măsură ce trimiți sau primești (deschizi din nou „+ Evidență”, scrii sonda și câmpurile se umplu cu ce este deja înregistrat).</span></div>' +
+      sec('cons', 'Conservare', 'Se scrie în ' + FIS.cons + '. Toate câmpurile sunt opționale (pentru o sondă nouă trebuie doar secția).',
+        campEv('c_nr', 'Număr aviz de conservare', 'text', { ph: 'ex. 338-C' }) + campD('c_emis', 'Data emiterii avizului') + campD('c_valabil', 'Valabil până la', false, 'La o sondă deja în conservare, o valabilitate mai mare = prelungire primită.') + campD('c_doc', 'Documentație de prelungire înaintată', true) +
+        campEv('c_inf', 'Informări ANRMPSG din … luni', 'text', { ph: '6 sau -' }) + campEv('c_debit', 'Debit inițial (mii m³/zi)', 'text')) +
+      sec('aband', 'Abandonare', 'Se scrie în ' + FIS.aband + '. „E” = primit, dar nu se știe data.',
+        campD('a_anrm', 'Data înaintării la ANRMPSG') + campEv('a_acord', 'Acord abandonare (nr./dată)', 'text', { ph: 'ex. 79-Ab/07.03.2024' }) + campD('a_blinda', 'Blindă', true) + campD('a_iat', 'Raport expert (IAT)', true) + campD('a_mediu', 'Raport de mediu', true) + campD('a_pv', 'PV Terenuri', true) + campD('a_proiect', 'Data înaintării proiectului final') + campEv('a_aviz', 'Aviz abandonare (nr./dată)', 'text', { ph: 'ex. 19-Ab/20.01.2025' }) +
+        sub('Tarif — intră și în Tarife dacă completezi oricare dintre câmpurile de mai jos') + campEv('a_tip', 'Tarif pentru', 'select', { optiuni: [['Acord abandonare', 'Acord abandonare'], ['Aviz abandonare', 'Aviz abandonare']] }) + campD('a_reg', 'Data înregistrării la Serviciul Perimetre') + campEv('a_est', 'Valoare estimată (lei)', 'text') + campEv('a_vf', 'Valoare finală (lei)', 'text')) +
+      sec('exp', 'Exploatare experimentală', 'Se scrie în ' + FIS.exp + '.',
+        campEv('e_nrav', 'Număr aviz experimental', 'text', { ph: 'ex. 570-C' }) + campD('e_primire', 'Data primirii avizului') + campD('e_expira', 'Data expirării avizului', false, 'Este și termenul documentației pentru exploatare definitivă.') + campD('e_doc', 'Documentația pentru exploatare definitivă înaintată la') + campEv('e_def', 'Aviz exploatare definitivă (nr./dată)', 'text', { ph: 'ex. 662-C/12.10.2026' }) +
+        sub('Tarif „Aviz exploatare experimentală” — intră și în Tarife dacă completezi oricare dintre câmpurile de mai jos') + campD('e_reg', 'Data înregistrării la Serviciul Perimetre') + campEv('e_est', 'Valoare estimată (lei)', 'text') + campEv('e_vf', 'Valoare finală (lei)', 'text')) +
+      sec('tar', 'Alt tarif ANRMPSG', 'Cu tipul ales, sonda intră în ' + FIS.tarife + ' (chiar fără date); restul se completează pe parcurs.',
+        campEv('t_tip', 'Tipul actului', 'select', { optiuni: [['', '— alege —']].concat(tipT.map(function (t) { return [t, t]; })) }) + campD('t_reg', 'Data înregistrării la Serviciul Perimetre') + campEv('t_est', 'Valoare estimată (lei)', 'text') + campEv('t_vf', 'Valoare finală (lei)', 'text')) +
+      '<h4 style="grid-column:1/-1;margin:.8rem 0 .1rem;border-bottom:1px solid var(--linie,#ccc)">Sarcină de documentație (opțional)</h4>' + campD('d_termen', 'Termen documentație') + campEv('d_ce', 'Pentru', 'select', { optiuni: [['abandonare', 'Abandonare'], ['conservare', 'Conservare'], ['experimentala', 'Exploatare experimentală']] });
+  }
+  function grupSonda(v) {
+    v = String(v || '').trim(); if (!v) return null;
+    return sondeUnice().filter(function (x) { return x.variante.some(function (va) { return M.aceeasiSonda(va.text, v).leaga; }); })[0] || null;
+  }
+  function randDupaCheie(model, cheie) { return model ? model.randuri.filter(function (r) { return r.cheie === cheie; })[0] || null : null; }
+  function grupTarif(tip) { var n = M.norm(tip || ''); return /ABANDON/.test(n) ? 'a' : /EXPERIMENTAL/.test(n) ? 'e' : 't'; }
+  // ce este deja înregistrat pentru sondă, în numele câmpurilor din formular
+  function existentEvidenta(g) {
+    var o = { val: {}, cat: {}, chei: {}, tarif: { a: {}, e: {}, t: {} }, unde: [] };
+    if (!g) return o;
+    function pune(k, v) { v = v == null ? '' : String(v).trim(); if (v) o.val[k] = v; }
+    var c = (g.cons || []).slice().sort(function (x, y) { return (y.valabil || 0) - (x.valabil || 0); })[0], r;
+    if (c && (r = randDupaCheie(S.cons.model, c.cheie))) {
+      var mo = S.cons.model, pa = C.parseAviz(C.val(mo, r, 'aviz'));
+      o.cat.cons = 1; o.chei.cons = c.cheie; o.unde.push('Conservare');
+      pune('c_nr', pa.nr); pune('c_emis', pa.emis != null ? B.fmtData(pa.emis) : ''); pune('c_valabil', C.val(mo, r, 'valabil')); pune('c_doc', C.val(mo, r, 'doc'));
+      var inf = C.val(mo, r, 'inf').trim(); if (inf && inf !== '-') pune('c_inf', inf);
+      var deb = C.val(mo, r, 'debit').trim(); if (deb && deb !== '-') pune('c_debit', deb);
+    }
+    var a = (g.aband || [])[0];
+    if (a && (r = randDupaCheie(S.aband.model, a.cheie))) {
+      o.cat.aband = 1; o.chei.aband = a.cheie; o.unde.push('Abandonare');
+      ['anrm', 'acord', 'blinda', 'iat', 'mediu', 'pv', 'proiect', 'aviz'].forEach(function (k) { pune('a_' + k, AB.val(S.aband.model, r, k)); });
+    }
+    var e = (g.exp || []).slice().sort(function (x, y) { return (y.primire || 0) - (x.primire || 0); })[0];
+    if (e && (r = randDupaCheie(S.exp.model, e.cheie))) {
+      var me = S.exp.model, pe = E.parseAviz(E.val(me, r, 'primire'));
+      o.cat.exp = 1; o.chei.exp = e.cheie; o.unde.push('Experimentale');
+      pune('e_nrav', pe.nr); pune('e_primire', pe.z != null ? B.fmtData(pe.z) : ''); pune('e_expira', E.val(me, r, 'expira')); pune('e_doc', E.val(me, r, 'doc')); pune('e_def', E.val(me, r, 'def'));
+    }
+    var alese = {};
+    (g.tar || []).forEach(function (t) {
+      var rt = randDupaCheie(S.tar.model, t.cheie); if (!rt || t.vf != null) return; // doar rândurile deschise (fără valoare finală); cele închise nu se reiau
+      var tip = tipCanonic(T.val(S.tar.model, rt, 'tip')), gr = grupTarif(tip), cand = { cheie: t.cheie, tip: tip, deschis: t.vf == null, reg: t.reg || 0, v: { reg: T.val(S.tar.model, rt, 'reg').trim(), est: T.val(S.tar.model, rt, 'est').trim(), vf: T.val(S.tar.model, rt, 'vf').trim() } };
+      function maiBun(x, y) { return !y || x.reg > y.reg; }
+      if (maiBun(cand, o.tarif[gr][M.norm(tip)])) o.tarif[gr][M.norm(tip)] = cand;
+      if (maiBun(cand, alese[gr])) alese[gr] = cand;
+    });
+    if (alese.a || alese.e || alese.t) o.unde.push('Tarife');
+    if (alese.a) { o.cat.aband = 1; pune('a_tip', alese.a.tip); ['reg', 'est', 'vf'].forEach(function (k) { pune('a_' + k, alese.a.v[k]); }); }
+    if (alese.e) { o.cat.exp = 1; ['reg', 'est', 'vf'].forEach(function (k) { pune('e_' + k, alese.e.v[k]); }); }
+    if (alese.t) { o.cat.tar = 1; pune('t_tip', alese.t.tip); ['reg', 'est', 'vf'].forEach(function (k) { pune('t_' + k, alese.t.v[k]); }); }
+    return o;
+  }
+  function arataSectiuniEv(form) {
+    $$('[data-ev-sec]', form).forEach(function (s) { var cb = form.querySelector('[name="k_' + s.dataset.evSec + '"]'); s.style.display = cb && cb.checked ? '' : 'none'; });
+  }
+  function aplicaExistent(form, v) {
+    var pre = S.evPre || { val: {} }, ex = existentEvidenta(grupSonda(v)), info = form.querySelector('#ev-existent');
+    // ce fusese completat automat pentru altă sondă (și nu a fost modificat) se golește
+    Object.keys(pre.val).forEach(function (k) { var el = form.querySelector('[name="' + k + '"]'); if (el && el.tagName !== 'SELECT' && el.value.trim() === pre.val[k]) el.value = ''; });
+    $$('[data-ev-cat]', form).forEach(function (cb) { if (cb.dataset.auto) { cb.checked = false; delete cb.dataset.auto; } });
+    Object.keys(ex.val).forEach(function (k) {
+      var el = form.querySelector('[name="' + k + '"]'); if (!el) return;
+      if (el.tagName === 'SELECT') { if (!el.dataset.atins) el.value = ex.val[k]; } else if (!el.value.trim()) el.value = ex.val[k];
+    });
+    Object.keys(ex.cat).forEach(function (k) { var cb = form.querySelector('[name="k_' + k + '"]'); if (cb && !cb.checked) { cb.checked = true; cb.dataset.auto = '1'; } });
+    S.evPre = { sonda: v, val: ex.val, tarif: ex.tarif };
+    arataSectiuniEv(form);
+    if (info) {
+      info.style.display = ex.unde.length ? '' : 'none';
+      info.innerHTML = ex.unde.length ? '<b>Sonda este deja în: ' + esc(ex.unde.join(', ')) + '.</b> Câmpurile au fost completate cu ce este înregistrat — schimbi sau adaugi ce s-a trimis / primit și apeși „Salvează”; rândurile existente se actualizează (nu se dublează). Golirea unui câmp nu șterge valoarea din fișier.' : '';
+    }
+  }
+  // la schimbarea tipului de tarif se aduc valorile rândului de acel tip (sau se golesc), ca să nu se mute datele de la alt act
+  function reumpleTarifEv(form, gr) {
+    var sel = form.querySelector('[name="' + gr + '_tip"]'), pre = S.evPre && S.evPre.tarif ? S.evPre.tarif[gr] : {}, c = sel ? (pre || {})[M.norm(sel.value)] : null;
+    ['reg', 'est', 'vf'].forEach(function (k) { var el = form.querySelector('[name="' + gr + '_' + k + '"]'); if (el) el.value = c ? c.v[k] : ''; });
+  }
   async function salveazaEvidentaToate(fd, resp) {
     if (!fd.sonda) return { eroare: 'Scrie sonda.' };
-    var faca = [], ok = [], er, z;
-    function dt(k, nume) { if (!fd[k]) return null; z = B.dinIso(fd[k]); return z == null ? { eroare: nume + ' nu este o dată validă.' } : null; }
-    function num(k) { if (!fd[k]) return { v: null }; var v = B.citesteNumarIntrodus(fd[k]).v; return v == null ? { eroare: 'Valoarea estimată „' + fd[k] + '” nu este un număr.' } : { v: v }; }
-    var cons = !!(fd.c_valabil || fd.c_emis || fd.c_nr), consSit = !cons && fd.c_on;
-    var aband = !!(fd.a_on || fd.a_anrm || fd.a_acord || fd.a_mediu || fd.a_aviz || fd.a_est || fd.a_reg);
-    var exp = !!(fd.e_primire || fd.e_expira || fd.e_nrav), expTar = !!fd.e_est;
-    var tar = !!fd.t_tip;
-    // validări înainte de orice scriere
-    if (cons && (!fd.c_emis || !fd.c_valabil)) return { eroare: 'La conservare completează data emiterii și valabilitatea (sau lasă secția goală).' };
-    if (exp && (!fd.e_primire || !fd.e_expira)) return { eroare: 'La exploatare experimentală completează data primirii și a expirării avizului.' };
-    if (expTar && !exp) return { eroare: 'Valoarea estimată la exploatare experimentală are nevoie de datele avizului.' };
-    var aEst = num('a_est'); if (aEst.eroare) return aEst; var tEst = num('t_est'); if (tEst.eroare) return tEst; var eEst = num('e_est'); if (eEst.eroare) return eEst;
-    if ((er = dt('a_anrm', 'Data înaintării'))) return er; var aAnrm = z; z = null;
-    if ((er = dt('a_mediu', 'Raportul de mediu'))) return er; var aMediu = fd.a_mediu ? z : null;
-    if ((er = dt('a_reg', 'Data înregistrării (abandonare)'))) return er; var aReg = fd.a_reg ? z : null;
-    if (aEst.v != null && aReg == null) return { eroare: 'Pentru tariful de abandonare completează data înregistrării la Serviciul Perimetre.' };
-    if (tar && !fd.t_reg) return { eroare: 'Pentru tarif completează data înregistrării la Serviciul Perimetre.' };
-    if (!cons && !consSit && !aband && !exp && !tar && !fd.d_termen) return { eroare: 'Completează cel puțin o secție (conservare, abandonare, exploatare experimentală, tarif sau sarcină).' };
-    var comun = { sonda: fd.sonda, sectia: fd.sectia, resp: fd.resp, categ: fd.categ };
-    function cu(o) { var r = {}; Object.keys(comun).forEach(function (k) { r[k] = comun[k]; }); Object.keys(o).forEach(function (k) { r[k] = o[k]; }); return r; }
-    var rez;
-    if (cons) { rez = await salveazaEvidenta('cons_noua', cu({ nr: fd.c_nr, emis: fd.c_emis, valabil: fd.c_valabil, inf: fd.c_inf, debit: fd.c_debit })); if (rez.eroare) return { eroare: 'Conservare: ' + rez.eroare + (ok.length ? ' (deja scris: ' + ok.join('; ') + ')' : '') }; ok.push('conservare'); }
-    if (consSit) {
-      var pot = S.potrivitor ? S.potrivitor(fd.sonda) : null, secS = fd.sectia || (pot && pot.sectia && pot.nivel !== 'aproximativ' && pot.nivel !== 'partial' ? pot.sectia : '');
-      if (!secS) return { eroare: 'Conservare: alege secția sondei.' + (ok.length ? ' (deja scris: ' + ok.join('; ') + ')' : '') };
-      rez = await modificaCSV(FIS.cons, C, 'conservare', function (mo) { if (mo.randuri.some(function (r) { return M.norm(C.val(mo, r, 'sonda')) === M.norm(fd.sonda); })) return { exista: true }; mo.randuri.push(C.randNou(mo, { sectia: secS, sonda: fd.sonda, debit: fd.c_debit || '-', inf: fd.c_inf || '-' })); }, function (m2) { return m2.randuri.some(function (r) { return M.norm(C.val(m2, r, 'sonda')) === M.norm(fd.sonda); }); }, 'sondă în conservare: ' + fd.sonda);
-      if (rez && rez.eroare) return rez; await incarcaConservare(true); ok.push('conservare (fără aviz)');
+    var g = grupSonda(fd.sonda), ex = existentEvidenta(g), nume = g && g.nume ? g.nume : fd.sonda, er = null, ok = [], rez;
+    function nrm(s) { return M.norm(String(s == null ? '' : s)).replace(/\s+/g, ''); }
+    function dt(k, et, cuE) { var v = String(fd[k] || '').trim(); if (!v) return ''; if (cuE && /^e$/i.test(v)) return 'E'; var z = B.citesteData(v).z; if (z == null) { er = er || (et + ': „' + v + '” nu este o dată validă (zz.ll.aaaa' + (cuE ? ' sau E' : '') + ').'); return ''; } return B.fmtData(z); }
+    function num(k, et) { var v = String(fd[k] || '').trim(); if (!v) return null; var x = B.citesteNumarIntrodus(v).v; if (x == null) er = er || (et + ': „' + v + '” nu este un număr.'); return x; }
+    function zi(s) { return s && s !== 'E' ? B.citesteData(s).z : null; }
+    function nou(k, v) { return !!v && nrm(v) !== nrm(ex.val[k]); }   // valoare introdusă și diferită de ce e înregistrat
+    function esec(cat, mesaj) { return { eroare: cat + ': ' + mesaj + (ok.length ? ' (deja scris: ' + ok.join('; ') + ')' : '') }; }
+    var kC = !!fd.k_cons, kA = !!fd.k_aband, kE = !!fd.k_exp, kT = !!fd.k_tar;
+    var c = { nr: (fd.c_nr || '').trim(), emis: dt('c_emis', 'Data emiterii avizului de conservare'), valabil: dt('c_valabil', 'Valabilitatea conservării'), doc: dt('c_doc', 'Documentația de prelungire', true), inf: (fd.c_inf || '').trim(), debit: (fd.c_debit || '').trim() };
+    var a = { anrm: dt('a_anrm', 'Data înaintării la ANRMPSG'), acord: (fd.a_acord || '').trim(), blinda: dt('a_blinda', 'Blindă', true), iat: dt('a_iat', 'Raport expert', true), mediu: dt('a_mediu', 'Raport de mediu', true), pv: dt('a_pv', 'PV Terenuri', true), proiect: dt('a_proiect', 'Data înaintării proiectului final'), aviz: (fd.a_aviz || '').trim() };
+    var aT = { tip: fd.a_tip || 'Acord abandonare', reg: dt('a_reg', 'Data înregistrării (tarif abandonare)'), est: num('a_est', 'Valoarea estimată (abandonare)'), vf: num('a_vf', 'Valoarea finală (abandonare)') };
+    var e = { nrav: (fd.e_nrav || '').trim(), primire: dt('e_primire', 'Data primirii avizului experimental'), expira: dt('e_expira', 'Data expirării avizului experimental'), doc: dt('e_doc', 'Data înaintării documentației definitive'), def: (fd.e_def || '').trim() };
+    var eT = { tip: 'Aviz exploatare experimentală', reg: dt('e_reg', 'Data înregistrării (tarif experimental)'), est: num('e_est', 'Valoarea estimată (experimentală)'), vf: num('e_vf', 'Valoarea finală (experimentală)') };
+    var tT = { tip: fd.t_tip || '', reg: dt('t_reg', 'Data înregistrării (tarif)'), est: num('t_est', 'Valoarea estimată (tarif)'), vf: num('t_vf', 'Valoarea finală (tarif)') };
+    var dTermen = dt('d_termen', 'Termenul documentației');
+    if (er) return { eroare: er };
+    if (!kC && !kA && !kE && !kT && !dTermen) return { eroare: 'Bifează cel puțin o evidență (conservare, abandonare, exploatare experimentală, alt tarif) sau completează termenul unei sarcini.' };
+    if (kT && !tT.tip) return { eroare: 'La „Alt tarif ANRMPSG” alege tipul actului.' };
+    if (kC && c.inf && C.luniInformari(c.inf).problema) return { eroare: 'La informări scrie numărul de luni (ex. 6) sau „-”.' };
+    var cEmisEf = c.emis || ex.val.c_emis, cValEf = c.valabil || ex.val.c_valabil;
+    if (kC && cEmisEf && cValEf && zi(cValEf) != null && zi(cValEf) <= zi(cEmisEf)) return { eroare: 'Conservare: valabilitatea trebuie să fie după data emiterii avizului.' };
+    if (kE && e.nrav && !e.primire && !ex.val.e_primire) return { eroare: 'Exploatare experimentală: la numărul avizului completează și data primirii.' };
+    var ePrimEf = e.primire || ex.val.e_primire, eExpEf = e.expira || ex.val.e_expira;
+    if (kE && ePrimEf && eExpEf && zi(eExpEf) != null && zi(eExpEf) <= zi(ePrimEf)) return { eroare: 'Exploatare experimentală: avizul trebuie să expire după data primirii.' };
+    if (kE && e.doc && ePrimEf && zi(e.doc) < zi(ePrimEf)) return { eroare: 'Exploatare experimentală: documentația definitivă nu poate fi înaintată înaintea primirii avizului.' };
+    function scrieCSV(fis, X, sub, cheie, potrivit, upd, campNou, eticheta) { // actualizează rândul existent sau adaugă unul nou
+      return modificaCSV(fis, X, sub, function (mo) {
+        var r = cheie ? (mo.randuri.filter(function (x) { return x.cheie === cheie; })[0] || mo.randuri.filter(function (x) { return potrivit(mo, x); }).pop()) : null;
+        if (!r && cheie) return { eroare: 'rândul sondei nu mai este în ' + fis + ' (reîncarcă programul).' };
+        if (!r) { mo.randuri.push(X.randNou(mo, campNou)); return; }
+        Object.keys(upd).forEach(function (k) { X.setVal(mo, r, k, upd[k]); });
+      }, function (m2) {
+        var t = cheie ? upd : campNou;
+        return m2.randuri.some(function (x) { return potrivit(m2, x) && Object.keys(t).every(function (k) { return !(m2.map[k] >= 0) || k === 'doc' || X.val(m2, x, k) === String(t[k]); }); });
+      }, eticheta);
     }
-    if (aband) {
-      var camp = {}; if (aAnrm != null) camp.anrm = B.fmtData(aAnrm); if (fd.a_acord) camp.acord = fd.a_acord; if (aMediu != null) camp.mediu = B.fmtData(aMediu); if (fd.a_aviz) camp.aviz = fd.a_aviz;
-      rez = await modificaCSV(FIS.aband, AB, 'abandonare', function (mo) {
-        var r = mo.randuri.filter(function (x) { return M.norm(AB.val(mo, x, 'sonda')) === M.norm(fd.sonda); })[0];
-        if (r) { Object.keys(camp).forEach(function (k) { if (!AB.val(mo, r, k).trim()) AB.setVal(mo, r, k, camp[k]); }); return; }
-        var c2 = { sonda: fd.sonda }; Object.keys(camp).forEach(function (k) { c2[k] = camp[k]; }); mo.randuri.push(AB.randNou(mo, c2));
-      }, function (m2) { return m2.randuri.some(function (r) { return M.norm(AB.val(m2, r, 'sonda')) === M.norm(fd.sonda); }); }, 'abandonare: ' + fd.sonda);
-      if (rez && rez.eroare) return { eroare: 'Abandonare: ' + rez.eroare + (ok.length ? ' (deja scris: ' + ok.join('; ') + ')' : '') };
-      await incarcaAbandonare(true); ok.push('abandonare');
-      if (aEst.v != null || aReg != null) {
-        if (!S.tar.model) return { eroare: 'Fișierul ' + FIS.tarife + ' nu este încărcat (deja scris: ' + ok.join('; ') + ').' };
-        adaugaRand('tar', { sonda: fd.sonda, tip: tipCanonic(fd.a_tip || 'Acord abandonare'), reg: B.fmtData(aReg), est: aEst.v == null ? '' : B.numarCSV(aEst.v) }); ok.push('tarife (' + tipCanonic(fd.a_tip || 'Acord abandonare') + ')');
+    function aceeasi(X) { return function (mo, x) { return M.aceeasiSonda(X.val(mo, x, 'sonda'), nume).leaga; }; }
+    function migreaza(pre, analize, vechi, pred) { if (!vechi) return; var n = analize.filter(pred)[0]; if (n && n.cheie !== vechi) pre.forEach(function (p) { migreazaStare(p, vechi, n.cheie); }); }
+    // --- Conservare ---
+    if (kC) {
+      var cheieC = ex.chei.cons, aC = cheieC ? S.cons.analize.filter(function (x) { return x.cheie === cheieC; })[0] : null, facutC = false;
+      if (aC && nou('c_valabil', c.valabil) && aC.valabil != null && zi(c.valabil) > aC.valabil) { // prelungire primită
+        rez = await salveazaEvidenta('prel_cons', { cheie: cheieC, nr: c.nr, emis: c.emis ? B.isoData(zi(c.emis)) : '', valabil: B.isoData(zi(c.valabil)), resp: fd.resp, categ: fd.categ });
+        if (rez.eroare) return esec('Conservare (prelungire)', rez.eroare);
+        ok.push('conservare — prelungire până la ' + c.valabil); facutC = true;
+        await incarcaConservare(true);
+        var dupa = S.cons.analize.filter(function (x) { return M.aceeasiSonda(x.sonda, nume).leaga; }).sort(function (x, y) { return (y.valabil || 0) - (x.valabil || 0); })[0];
+        cheieC = dupa ? dupa.cheie : cheieC; ex.val.c_nr = c.nr || ex.val.c_nr; ex.val.c_emis = c.emis || ex.val.c_emis; ex.val.c_valabil = c.valabil; ex.val.c_doc = '';
+        if (c.doc && nrm(c.doc) === nrm(ex.val.c_doc_vechi)) c.doc = '';
+      }
+      var updC = {};
+      if (cheieC) {
+        if (nou('c_nr', c.nr) || nou('c_emis', c.emis)) { var nrC = c.nr || ex.val.c_nr || '', emC = c.emis || ex.val.c_emis || ''; updC.aviz = nrC && emC ? nrC + '/' + emC : (nrC || emC); }
+        if (nou('c_valabil', c.valabil)) updC.valabil = c.valabil;
+        if (nou('c_doc', c.doc) && !facutC) updC.doc = c.doc;
+        if (nou('c_inf', c.inf)) updC.inf = c.inf;
+        if (nou('c_debit', c.debit)) updC.debit = c.debit;
+        if (Object.keys(updC).length) {
+          rez = await scrieCSV(FIS.cons, C, 'conservare', cheieC, aceeasi(C), updC, null, 'conservare: ' + nume);
+          if (rez && rez.eroare) return esec('Conservare', rez.eroare);
+          await incarcaConservare(true);
+          if (updC.aviz) migreaza(['conserv:', 'prelung:'], S.cons.analize, cheieC, function (x) { var rr = randDupaCheie(S.cons.model, x.cheie); return M.aceeasiSonda(x.sonda, nume).leaga && rr && nrm(C.val(S.cons.model, rr, 'aviz')) === nrm(updC.aviz); });
+          ok.push('conservare (actualizat)');
+        } else if (!facutC) ok.push('conservare (neschimbat)');
+      } else {
+        var pot = S.potrivitor ? S.potrivitor(fd.sonda) : null, secC = fd.sectia || (pot && pot.sectia && pot.nivel !== 'aproximativ' && pot.nivel !== 'partial' ? pot.sectia : '');
+        if (!secC) return esec('Conservare', 'alege secția sondei (zăcământul nu a fost recunoscut).');
+        var avC = c.nr && c.emis ? c.nr + '/' + c.emis : (c.nr || c.emis);
+        var campC = { sectia: secC, sonda: nume, debit: c.debit || '-', inf: c.inf || '-' }; if (avC) campC.aviz = avC; if (c.valabil) campC.valabil = c.valabil; if (c.doc) campC.doc = c.doc;
+        rez = await scrieCSV(FIS.cons, C, 'conservare', null, aceeasi(C), null, campC, 'sondă în conservare: ' + nume);
+        if (rez && rez.eroare) return esec('Conservare', rez.eroare);
+        await incarcaConservare(true); ok.push('conservare' + (avC || c.valabil ? '' : ' (fără aviz încă)'));
       }
     }
-    if (exp) { rez = await salveazaEvidenta('exp_noua', cu({ nrav: fd.e_nrav, primire: fd.e_primire, expira: fd.e_expira, est: fd.e_est, leg_tar: expTar ? '1' : '' })); if (rez.eroare) return { eroare: 'Exploatare experimentală: ' + rez.eroare + (ok.length ? ' (deja scris: ' + ok.join('; ') + ')' : '') }; ok.push('exploatare experimentală' + (expTar ? ' + tarife' : '')); }
-    if (tar) { rez = await salveazaEvidenta('tarif_nou', cu({ tip: tipCanonic(fd.t_tip), reg: fd.t_reg, est: fd.t_est })); if (rez.eroare) return { eroare: 'Tarif: ' + rez.eroare + (ok.length ? ' (deja scris: ' + ok.join('; ') + ')' : '') }; ok.push('tarife (' + tipCanonic(fd.t_tip) + ')'); }
-    if (fd.d_termen) { rez = await salveazaEvidenta('situatie_sarcina', cu({ termen: fd.d_termen, ce: fd.d_ce })); if (rez.eroare) return rez; ok.push('sarcină documentație'); }
-    analizeazaTarife();
-    return { ok: 'Sonda „' + fd.sonda + '” a fost înregistrată în: ' + ok.join(', ') + '.' };
+    // tarife: rândul de același tip al sondei se actualizează; altfel se adaugă unul nou
+    function tarif(gr, d, mereu) {
+      if (!mereu && !d.reg && d.est == null && d.vf == null) return null;
+      if (!S.tar.model) return { eroare: 'Fișierul ' + FIS.tarife + ' nu este încărcat.' };
+      // se actualizează rândul deschis (fără valoare finală) de același tip; un rând închis doar dacă are aceeași dată de înregistrare (corectură); altfel act nou → rând nou
+      var tip = tipCanonic(d.tip), toate = S.tar.analize.filter(function (t) { return t.sonda && M.aceeasiSonda(t.sonda, nume).leaga && M.norm(tipCanonic(t.tip || '')) === M.norm(tip); });
+      var cand = toate.filter(function (t) { return t.vf == null; }).sort(function (x, y) { return (y.reg || 0) - (x.reg || 0); })[0] || (d.reg ? toate.filter(function (t) { return t.reg != null && t.reg === zi(d.reg); })[0] : null);
+      var r = cand ? randDupaCheie(S.tar.model, cand.cheie) : null;
+      if (r) {
+        var n0 = 0, val = { reg: d.reg, est: d.est == null ? '' : B.numarCSV(d.est), vf: d.vf == null ? '' : B.numarCSV(d.vf) };
+        ['reg', 'est', 'vf'].forEach(function (k) {
+          if (!val[k]) return; var v0 = T.val(S.tar.model, r, k).trim();
+          if (k === 'reg' ? nrm(v0) === nrm(val[k]) : B.parseNumar(v0) === B.parseNumar(val[k])) return;
+          editeazaCelula('tar', r.cheie, k, val[k]); n0++;
+        });
+        return { ok: n0 ? 'tarife (' + tip + ', actualizat)' : 'tarife (' + tip + ', neschimbat)' };
+      }
+      var cel = { sonda: nume, tip: tip, reg: d.reg || '', est: d.est == null ? '' : B.numarCSV(d.est), vf: d.vf == null ? '' : B.numarCSV(d.vf) };
+      if (d.est != null && d.vf != null) { var df = T.diferenta(d.est, d.vf); if (df != null) cel.dif = B.numarCSV(df); }
+      adaugaRand('tar', cel);
+      return { ok: 'tarife (' + tip + (d.reg ? '' : ', fără dată de înregistrare încă') + ')' };
+    }
+    // --- Abandonare ---
+    if (kA) {
+      var updA = {}, campA = { sonda: nume };
+      Object.keys(a).forEach(function (k) { if (a[k]) campA[k] = a[k]; if (nou('a_' + k, a[k])) updA[k] = a[k]; });
+      if (ex.chei.aband && !Object.keys(updA).length) ok.push('abandonare (neschimbat)');
+      else {
+        rez = await scrieCSV(FIS.aband, AB, 'abandonare', ex.chei.aband || null, aceeasi(AB), updA, campA, 'abandonare: ' + nume);
+        if (rez && rez.eroare) return esec('Abandonare', rez.eroare);
+        await incarcaAbandonare(true); ok.push('abandonare' + (ex.chei.aband ? ' (actualizat)' : ''));
+      }
+      rez = tarif('a', aT); if (rez && rez.eroare) return esec('Tarif abandonare', rez.eroare); if (rez) ok.push(rez.ok);
+    }
+    // --- Exploatare experimentală ---
+    if (kE) {
+      var cheieE = ex.chei.exp, avizNouE = !!(cheieE && e.primire && ex.val.e_primire && nrm(e.primire) !== nrm(ex.val.e_primire));
+      var primE = function (nr, d) { return d ? (nr ? nr + '/' : '') + d : ''; };
+      if (cheieE && !avizNouE) {
+        var updE = {};
+        if (nou('e_nrav', e.nrav) || nou('e_primire', e.primire)) updE.primire = primE(e.nrav || ex.val.e_nrav, e.primire || ex.val.e_primire);
+        ['expira', 'doc', 'def'].forEach(function (k) { if (nou('e_' + k, e[k])) updE[k] = e[k]; });
+        if (Object.keys(updE).length) {
+          rez = await scrieCSV(FIS.exp, E, 'experimentale', cheieE, aceeasi(E), updE, null, 'exploatare experimentală: ' + nume);
+          if (rez && rez.eroare) return esec('Exploatare experimentală', rez.eroare);
+          await incarcaExperimentale(true);
+          if (updE.primire) migreaza(['exper:'], S.exp.analize, cheieE, function (x) { return M.aceeasiSonda(x.sonda, nume).leaga && x.primire === zi(e.primire || ex.val.e_primire); });
+          ok.push('exploatare experimentală (actualizat)');
+        } else ok.push('exploatare experimentală (neschimbat)');
+      } else {
+        var campE = { sonda: nume, doc: e.doc || '' }; if (e.primire) campE.primire = primE(e.nrav, e.primire); if (e.expira) campE.expira = e.expira; if (e.def) campE.def = e.def;
+        rez = await modificaCSV(FIS.exp, E, 'experimentale', function (mo) {
+          if (e.primire && mo.randuri.some(function (r) { return M.aceeasiSonda(E.val(mo, r, 'sonda'), nume).leaga && E.parseAviz(E.val(mo, r, 'primire')).z === zi(e.primire); })) return { eroare: 'sonda are deja acest aviz în ' + FIS.exp + '.' };
+          mo.randuri.push(E.randNou(mo, campE));
+        }, function (m2) { return m2.randuri.some(function (r) { return M.aceeasiSonda(E.val(m2, r, 'sonda'), nume).leaga && (!e.primire || E.parseAviz(E.val(m2, r, 'primire')).z === zi(e.primire)); }); }, 'exploatare experimentală' + (avizNouE ? ' (aviz nou)' : '') + ': ' + nume);
+        if (rez && rez.eroare) return esec('Exploatare experimentală', rez.eroare);
+        await incarcaExperimentale(true); ok.push('exploatare experimentală' + (avizNouE ? ' (aviz nou)' : e.primire ? '' : ' (fără aviz încă)'));
+      }
+      rez = tarif('e', eT); if (rez && rez.eroare) return esec('Tarif exploatare experimentală', rez.eroare); if (rez) ok.push(rez.ok);
+    }
+    // --- Alt tarif ---
+    if (kT) { rez = tarif('t', tT, true); if (rez.eroare) return esec('Tarif', rez.eroare); ok.push(rez.ok); }
+    if (dTermen) { rez = await salveazaEvidenta('situatie_sarcina', { sonda: nume, termen: B.isoData(zi(dTermen)), ce: fd.d_ce, resp: fd.resp, categ: fd.categ }); if (rez.eroare) return rez; ok.push('sarcină documentație'); }
+    analizeazaTarife(); analizeazaConservare();
+    var schimbat = ok.filter(function (x) { return !/neschimbat\)$/.test(x); });
+    return { ok: schimbat.length ? 'Sonda „' + nume + '”: ' + schimbat.join(', ') + '.' : 'Nimic nou de salvat pentru „' + nume + '” — datele sunt deja înregistrate.' };
   }
   // ---------- Exploatare experimentală ----------
   function textExp(a) {
